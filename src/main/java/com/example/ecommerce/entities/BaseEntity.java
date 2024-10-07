@@ -24,7 +24,7 @@ public class BaseEntity {
 	private String createdBy;
 	
 	@CreatedDate
-	@Column(columnDefinition = "TIMESTAMP")
+	@Column(columnDefinition = "TIMESTAMP",updatable = false)
 	private LocalDateTime createdAt;
 	
 	@LastModifiedBy

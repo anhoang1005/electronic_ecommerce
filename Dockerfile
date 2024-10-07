@@ -8,11 +8,11 @@
 #COPY --from=build /app/target/*.jar app.jar
 #ENTRYPOINT ["java", "-jar", "app.jar"]
 
-#FROM maven:3.9.8-amazoncorretto-21 AS build
-#WORKDIR /app
-#COPY pom.xml .
-#COPY src ./src
-#CMD ["mvn", "spring-boot:run"]
+FROM maven:3.9.8-amazoncorretto-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+CMD ["mvn", "spring-boot:run"]
 
 ## Su dung base image tu openjdk
 #FROM openjdk:17
