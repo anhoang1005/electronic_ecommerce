@@ -16,9 +16,10 @@ public class UsersEntity extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = true, unique = true)
+    @Column(nullable = true, unique = true,updatable = false)
     private String userCode;
 
     @Column(nullable = false)
@@ -36,7 +37,7 @@ public class UsersEntity extends BaseEntity{
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true,updatable = false)
     private String email;
 
     @Column(nullable = true, unique = true)
