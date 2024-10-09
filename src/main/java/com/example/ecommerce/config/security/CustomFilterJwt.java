@@ -1,7 +1,7 @@
 package com.example.ecommerce.config.security;
 
-import com.example.ecommerce.entities.RoleEntity;
-import com.example.ecommerce.entities.UsersEntity;
+import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.utils.JwtTokenUtils;
@@ -53,11 +53,11 @@ public class CustomFilterJwt extends OncePerRequestFilter {
 		if (token != null) {
 			if (jwtUtils.verifyToken(token)) {
 				String username = jwtUtils.extractUsername(token);
-				UsersEntity usersEntity = userRepository.findUsersEntitiesByEmail(username);
+				Users usersEntity = userRepository.findUsersEntitiesByEmail(username);
 				if (usersEntity!=null) {
-					List<RoleEntity> listRoleEntity = usersEntity.getRoles();
+					List<Roles> listRoleEntity = usersEntity.getRoles();
 					List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-					for (RoleEntity roleEntity : listRoleEntity) {
+					for (Roles roleEntity : listRoleEntity) {
 						authorities.add(new SimpleGrantedAuthority("ROLE_" + roleEntity.getRoleName()));
 					}
 					Authentication authentication = new UsernamePasswordAuthenticationToken(

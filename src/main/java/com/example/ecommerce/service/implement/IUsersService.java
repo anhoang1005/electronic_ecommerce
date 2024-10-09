@@ -1,6 +1,6 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.UsersEntity;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.mapper.users.UsersMapper;
@@ -35,7 +35,7 @@ public class IUsersService implements UsersService {
         if(!authenticationUtils.checkUsersAuthentication(email)){
             throw new UnauthorizedException("Unauthorized!");
         }
-        UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmail(email);
+        Users usersEntity = usersRepository.findUsersEntitiesByEmail(email);
         if(usersEntity!=null && passwordEncoder.matches(oldPassword, usersEntity.getPasswordHash())){
             usersEntity.setPasswordHash(passwordEncoder.encode(newPassword));
             usersRepository.save(usersEntity);
@@ -51,11 +51,11 @@ public class IUsersService implements UsersService {
         if(!authenticationUtils.checkUsersAuthentication(info.getEmail())){
             throw new UnauthorizedException("Unauthorized!");
         }
-        UsersEntity checkExistedUsername = usersRepository.findUsersEntitiesByUsername(info.getUsername());
+        Users checkExistedUsername = usersRepository.findUsersEntitiesByUsername(info.getUsername());
         if(checkExistedUsername!=null && !checkExistedUsername.getUsername().equals(info.getUsername())){
             return new ResponseBody("", ResponseBody.Status.SUCCESS, "EXISTED_USERNAME", ResponseBody.Code.SUCCESS);
         }
-        UsersEntity user = usersRepository.findUsersEntitiesByEmail(info.getEmail());
+        Users user = usersRepository.findUsersEntitiesByEmail(info.getEmail());
         user.setUsername(info.getUsername());
         user.setPhoneNumber(info.getPhoneNumber());
         user.setDob(dateMapperUtils.stringToLocalDate(info.getDob()));
@@ -71,7 +71,7 @@ public class IUsersService implements UsersService {
         if(!authenticationUtils.checkUsersAuthentication(email)){
             throw new UnauthorizedException("Unauthorized!");
         }
-        UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmail(email);
+        Users usersEntity = usersRepository.findUsersEntitiesByEmail(email);
         if(usersEntity!=null){
             ResponseBody responseImage = fileService.uploadToCloudinary(file);
             usersEntity.setImageUrl(responseImage.getData().toString());
@@ -87,7 +87,7 @@ public class IUsersService implements UsersService {
         if(!authenticationUtils.checkUsersAuthentication(email)){
             throw new UnauthorizedException("Unauthorized!");
         }
-        UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmail(email);
+        Users usersEntity = usersRepository.findUsersEntitiesByEmail(email);
         if(usersEntity!=null){
             return new ResponseBody(
                     usersMapper.entityToUsersDetailResponse(usersEntity),

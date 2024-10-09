@@ -1,7 +1,7 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.RoleEntity;
-import com.example.ecommerce.entities.UsersEntity;
+import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
@@ -25,28 +25,28 @@ public class IQueryService {
     @Transactional(rollbackFor = {Exception.class})
     public boolean createRootRoles(){
         try{
-            RoleEntity roleEntity = new RoleEntity();
+            Roles roleEntity = new Roles();
             roleEntity.setRoleCode("RT");
             roleEntity.setRoleName("ROOT");
             roleEntity.setActive(true);
             roleEntity.setNote("Tài khoản gốc của hệ thống");
             rolesRepository.save(roleEntity);
 
-            roleEntity = new RoleEntity();
+            roleEntity = new Roles();
             roleEntity.setRoleCode("QL");
             roleEntity.setRoleName("QUANLI");
             roleEntity.setActive(true);
             roleEntity.setNote("Tài khoản của quản lí hệ thống");
             rolesRepository.save(roleEntity);
 
-            roleEntity = new RoleEntity();
+            roleEntity = new Roles();
             roleEntity.setRoleCode("KH");
             roleEntity.setRoleName("KHACHHANG");
             roleEntity.setActive(true);
             roleEntity.setNote("Tài khoản của khách hàng");
             rolesRepository.save(roleEntity);
 
-            roleEntity = new RoleEntity();
+            roleEntity = new Roles();
             roleEntity.setRoleCode("CV");
             roleEntity.setRoleName("CONGTACVIEN");
             roleEntity.setActive(true);
@@ -63,10 +63,10 @@ public class IQueryService {
     @Transactional(rollbackFor = {Exception.class})
     public boolean createRootAccount(){
         try{
-            Optional<RoleEntity> roleEntity = rolesRepository.findByRoleName("ROOT");
-            List<RoleEntity> listRoles = new ArrayList<>();
+            Optional<Roles> roleEntity = rolesRepository.findByRoleName("ROOT");
+            List<Roles> listRoles = new ArrayList<>();
             roleEntity.ifPresent(listRoles::add);
-            UsersEntity usersEntity = new UsersEntity();
+            Users usersEntity = new Users();
             usersEntity.setFirstName("Hoàng");
             usersEntity.setLastName("Văn An");
             usersEntity.setDob(dateMapperUtils.stringToLocalDate("2002-05-10"));

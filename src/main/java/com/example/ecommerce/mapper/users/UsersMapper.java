@@ -1,7 +1,7 @@
 package com.example.ecommerce.mapper.users;
 
-import com.example.ecommerce.entities.RoleEntity;
-import com.example.ecommerce.entities.UsersEntity;
+import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.models.users.UsersDetailResponse;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class UsersMapper {
         this.dateMapperUtils = dateMapperUtils;
     }
 
-    public UsersDetailResponse entityToUsersDetailResponse(UsersEntity entity){
+    public UsersDetailResponse entityToUsersDetailResponse(Users entity){
         return UsersDetailResponse.builder()
                 .userCode(entity.getUserCode())
                 .imageUrl(entity.getImageUrl())
@@ -25,7 +25,7 @@ public class UsersMapper {
                 .phoneNumber(entity.getPhoneNumber())
                 .email(entity.getEmail())
                 .username(entity.getUsername())
-                .role(entity.getRoles().stream().map(RoleEntity::getRoleName).collect(Collectors.toList()))
+                .role(entity.getRoles().stream().map(Roles::getRoleName).collect(Collectors.toList()))
                 .active(entity.getActive())
                 .enable(entity.getEnable())
                 .createdAt(dateMapperUtils.localDateTimeToString(entity.getCreatedAt()))

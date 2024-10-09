@@ -1,12 +1,12 @@
 package com.example.ecommerce.repository;
 
-import com.example.ecommerce.entities.RoleEntity;
+import com.example.ecommerce.entities.Roles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface RolesRepository extends JpaRepository<RoleEntity, Long> {
-    Optional<RoleEntity> findByRoleName(String role);
+public interface RolesRepository extends JpaRepository<Roles, Long> {
+    Optional<Roles> findByRoleName(String role);
 }

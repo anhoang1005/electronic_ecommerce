@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "users")
-public class UsersEntity extends BaseEntity{
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_usercode", columnList = "userCode")
+})
+public class Users extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,10 @@ public class UsersEntity extends BaseEntity{
 
     @Column(nullable = false)
     private LocalDate dob;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Gender gender;
 
     @Column(nullable = false)
     private String phoneNumber;
@@ -63,8 +67,14 @@ public class UsersEntity extends BaseEntity{
     @Column(nullable = false)
     private Boolean enable;
 
-    @OneToMany(mappedBy = "usersEntityInAddress")
-    private List<AddressEntity> addressEntity;
+    @OneToOne(mappedBy = "usersInShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Shop shopOfUsers;
+
+    @OneToMany(mappedBy = "usersEntityInAddress", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Address> addressEntity;
+
+    @OneToMany(mappedBy = "usersOfMessageStory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<MessageChat> messageChatOfUser;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
@@ -72,10 +82,34 @@ public class UsersEntity extends BaseEntity{
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<RoleEntity> roles = new ArrayList<>();
+    private List<Roles> roles = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "shop_follow",
+            joinColumns = @JoinColumn(name = "shop_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<Shop> listShopUserFollow;
+
+    @ManyToMany
+    @JoinTable(
+            name = "review_like",
+            joinColumns = @JoinColumn(name = "review_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<ProductReview> listProductReviewUserLike;
 
     @PostPersist
     public void updateUserCode() {
         this.userCode = "AC" + String.format("%08d", this.id); // cap nhat vơi userCode thuc te
+    }
+
+    public enum Gender{
+        NAM("Nam"),
+        NU("Nữ");
+        private final String valueString;
+        Gender(String valueString) {this.valueString = valueString; }
+        public String getValueString() { return this.valueString; }
     }
 }

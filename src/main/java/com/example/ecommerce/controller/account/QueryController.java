@@ -1,4 +1,4 @@
-package com.example.ecommerce.controller.guest;
+package com.example.ecommerce.controller.account;
 
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.implement.IQueryService;

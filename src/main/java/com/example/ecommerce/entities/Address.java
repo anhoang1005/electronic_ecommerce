@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "address")
-public class AddressEntity extends BaseEntity{
+public class Address extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +38,6 @@ public class AddressEntity extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UsersEntity usersEntityInAddress;
+    private Users usersEntityInAddress;
 
 }

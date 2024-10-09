@@ -1,4 +1,4 @@
-package com.example.ecommerce.controller.guest;
+package com.example.ecommerce.controller.account;
 
 
 import com.example.ecommerce.models.users.UserRegisterRequest;

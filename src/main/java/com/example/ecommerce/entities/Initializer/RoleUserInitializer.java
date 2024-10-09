@@ -1,9 +1,5 @@
-package com.example.ecommerce.Initializer;
+package com.example.ecommerce.entities.Initializer;
 
-import com.example.ecommerce.repository.RolesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 //
 //@Component
 //public class RoleUserInitializer implements CommandLineRunner {

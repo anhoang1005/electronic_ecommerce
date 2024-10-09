@@ -1,7 +1,7 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.RoleEntity;
-import com.example.ecommerce.entities.UsersEntity;
+import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.AccountLockedException;
 import com.example.ecommerce.exceptions.users.InvalidCredentialsException;
@@ -53,11 +53,11 @@ public class IAccountService implements AccountService {
 
     @Override
     public JwtData loginUsers(String username, String password) {
-        UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmailOrUsername(username, username);
+        Users usersEntity = usersRepository.findUsersEntitiesByEmailOrUsername(username, username);
         if (usersEntity != null && passwordEncoder.matches(password, usersEntity.getPasswordHash())) {
             if (usersEntity.getActive()) {
                 List<String> listRoleString = usersEntity.getRoles().stream()
-                        .map(RoleEntity::getRoleName)
+                        .map(Roles::getRoleName)
                         .collect(Collectors.toList());
                 String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
                 String refreshJws = jwtUtils.generateRefreshTokens(username, listRoleString);
@@ -88,18 +88,18 @@ public class IAccountService implements AccountService {
     @Override
     public ResponseBody registerUsers(UserRegisterRequest user) {
         try {
-            UsersEntity checkUsername = usersRepository.findUsersEntitiesByUsername(user.getUsername());
+            Users checkUsername = usersRepository.findUsersEntitiesByUsername(user.getUsername());
             if (checkUsername != null) {
                 return new ResponseBody(null, ResponseBody.Status.SUCCESS, "USERNAME_EXISTED", ResponseBody.Code.SUCCESS);
             }
-            UsersEntity checkEmail = usersRepository.findUsersEntitiesByEmail(user.getEmail());
+            Users checkEmail = usersRepository.findUsersEntitiesByEmail(user.getEmail());
             if (checkEmail != null && checkEmail.getEnable()) {
                 return new ResponseBody(null, ResponseBody.Status.SUCCESS, "EMAIL_EXISTED", ResponseBody.Code.SUCCESS);
             } else{
-                Optional<RoleEntity> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
-                List<RoleEntity> roleEntityList = new ArrayList<>();
+                Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
+                List<Roles> roleEntityList = new ArrayList<>();
                 roleOptional.ifPresent(roleEntityList::add);
-                UsersEntity usersEntity = new UsersEntity();
+                Users usersEntity = new Users();
                 String verifyCode = generateVerifyCode();
                 usersEntity.setDob(dateMapperUtils.stringToLocalDate(user.getDob()));
                 usersEntity.setFirstName(user.getFirstName());
@@ -126,7 +126,7 @@ public class IAccountService implements AccountService {
     @Transactional
     @Override
     public ResponseBody checkVerifyCodeRegister(String email, String verifyCode) {
-        UsersEntity user = usersRepository.findUsersEntitiesByEmail(email);
+        Users user = usersRepository.findUsersEntitiesByEmail(email);
         if (user != null) {
             if (passwordEncoder.matches(verifyCode, user.getVerifyCode())) {
                 user.setEnable(true);
@@ -145,7 +145,7 @@ public class IAccountService implements AccountService {
     @Override
     public ResponseBody userForgotPassword(String email) {
         try {
-            UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmail(email);
+            Users usersEntity = usersRepository.findUsersEntitiesByEmail(email);
             if (usersEntity != null) {
                 String verifyCode = generateVerifyCode();
                 usersEntity.setVerifyCode(passwordEncoder.encode(verifyCode));
@@ -166,7 +166,7 @@ public class IAccountService implements AccountService {
     @Transactional
     @Override
     public ResponseBody checkVerifyCodeForgotPassword(String email, String newPassword, String verifyCode) {
-        UsersEntity usersEntity = usersRepository.findUsersEntitiesByEmail(email);
+        Users usersEntity = usersRepository.findUsersEntitiesByEmail(email);
         if(usersEntity != null){
             if(passwordEncoder.matches(verifyCode, usersEntity.getVerifyCode())){
                 usersEntity.setPasswordHash(passwordEncoder.encode(newPassword));
