@@ -65,8 +65,14 @@ public class Shop extends BaseEntity{
     @Column(nullable = false)
     private String backIdentityCard;
 
+    @Column(nullable = false)
     private String wardId;
+
+    @Column(nullable = false)
     private String districtId;
+
+    @Column(nullable = false)
+    private String provinceId;
 
     @PostPersist
     public void updateShopCode() {
@@ -79,6 +85,9 @@ public class Shop extends BaseEntity{
 
     @OneToMany(mappedBy = "shopOfMessageStory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<MessageChat> messageStoryOfShop;
+
+    @OneToMany(mappedBy = "shopOfShopReview", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ShopReview> shopReviewOfShop;
 
     @ManyToMany(mappedBy = "listShopUserFollow", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Users> listUsersFollowShop;

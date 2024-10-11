@@ -25,7 +25,7 @@ public class UsersMapper {
                 .phoneNumber(entity.getPhoneNumber())
                 .email(entity.getEmail())
                 .username(entity.getUsername())
-                .role(entity.getRoles().stream().map(Roles::getRoleName).collect(Collectors.toList()))
+                .role(entity.getListRolesOfUsers().stream().map(Roles::getRoleName).collect(Collectors.toList()))
                 .active(entity.getActive())
                 .enable(entity.getEnable())
                 .createdAt(dateMapperUtils.localDateTimeToString(entity.getCreatedAt()))

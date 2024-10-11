@@ -43,15 +43,6 @@ public class Users extends BaseEntity{
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = true, unique = true)
-    private String identityCode;
-
-    @Column(nullable = true)
-    private String frontIdentityImage;
-
-    @Column(nullable = true)
-    private String backIdentityImage;
-
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -71,10 +62,13 @@ public class Users extends BaseEntity{
     private Shop shopOfUsers;
 
     @OneToMany(mappedBy = "usersEntityInAddress", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Address> addressEntity;
+    private List<Address> listAddressEntity;
 
     @OneToMany(mappedBy = "usersOfMessageStory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<MessageChat> messageChatOfUser;
+
+    @OneToMany(mappedBy = "usersOfShopReview", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ShopReview> listShopReviewOfUsers;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
@@ -82,7 +76,7 @@ public class Users extends BaseEntity{
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<Roles> roles = new ArrayList<>();
+    private List<Roles> listRolesOfUsers = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(

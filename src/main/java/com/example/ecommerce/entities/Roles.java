@@ -27,8 +27,8 @@ public class Roles extends BaseEntity{
     @Column(nullable = false)
     private Boolean active;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Users> users = new ArrayList<>();
+    @ManyToMany(mappedBy = "listRolesOfUsers", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Users> listUsersOfRole = new ArrayList<>();
 
     public enum Position{
         QUANLI(1, "Quản lí"),

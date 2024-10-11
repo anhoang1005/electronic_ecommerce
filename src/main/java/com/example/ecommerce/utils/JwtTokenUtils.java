@@ -56,7 +56,7 @@ public class JwtTokenUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<String> extractRoles(String token) {
+	public List<String> extractClaims(String token) {
 		SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
 		@SuppressWarnings("deprecation")
 		Claims claims = Jwts.parser()

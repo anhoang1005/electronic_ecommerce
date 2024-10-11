@@ -15,4 +15,12 @@ public class AuthenticationUtils {
 		}
 		return isSuccess;
 	}
+
+	public String getEmailFromAuthentication() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null || authentication.getName()==null) {
+			return null;
+		}
+		return authentication.getName();
+	}
 }

@@ -55,7 +55,7 @@ public class CustomFilterJwt extends OncePerRequestFilter {
 				String username = jwtUtils.extractUsername(token);
 				Users usersEntity = userRepository.findUsersEntitiesByEmail(username);
 				if (usersEntity!=null) {
-					List<Roles> listRoleEntity = usersEntity.getRoles();
+					List<Roles> listRoleEntity = usersEntity.getListRolesOfUsers();
 					List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 					for (Roles roleEntity : listRoleEntity) {
 						authorities.add(new SimpleGrantedAuthority("ROLE_" + roleEntity.getRoleName()));

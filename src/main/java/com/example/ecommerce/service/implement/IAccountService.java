@@ -56,7 +56,7 @@ public class IAccountService implements AccountService {
         Users usersEntity = usersRepository.findUsersEntitiesByEmailOrUsername(username, username);
         if (usersEntity != null && passwordEncoder.matches(password, usersEntity.getPasswordHash())) {
             if (usersEntity.getActive()) {
-                List<String> listRoleString = usersEntity.getRoles().stream()
+                List<String> listRoleString = usersEntity.getListRolesOfUsers().stream()
                         .map(Roles::getRoleName)
                         .collect(Collectors.toList());
                 String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
@@ -104,12 +104,13 @@ public class IAccountService implements AccountService {
                 usersEntity.setDob(dateMapperUtils.stringToLocalDate(user.getDob()));
                 usersEntity.setFirstName(user.getFirstName());
                 usersEntity.setLastName(user.getLastName());
+                usersEntity.setGender((user.getIsMale() == 1) ? Users.Gender.NAM : Users.Gender.NU);
                 usersEntity.setEmail(user.getEmail());
                 usersEntity.setPhoneNumber(user.getPhoneNumber());
                 usersEntity.setEnable(false);
                 usersEntity.setUsername(user.getUsername());
                 usersEntity.setActive(true);
-                usersEntity.setRoles(roleEntityList);
+                usersEntity.setListRolesOfUsers(roleEntityList);
                 usersEntity.setImageUrl("user.jpg");
                 usersEntity.setVerifyCode(passwordEncoder.encode(verifyCode));
                 usersEntity.setPasswordHash(passwordEncoder.encode(user.getPassword()));
