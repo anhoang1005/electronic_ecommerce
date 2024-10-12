@@ -27,8 +27,16 @@ public class IShopService implements ShopService {
     private final ShopMapper shopMapper;
 
     @Override
-    public ResponseBody customerGetTheirShopDetail() {
-        return null;
+    public ResponseBody shopOwnerGetTheirShopDetail() {
+        try{
+            String email = authUtils.getEmailFromAuthentication();
+            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            Shop shop = users.getShopOfUsers();
+            return new ResponseBody(shopMapper.entityToShopDetailDto(shop), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        }catch (Exception e){
+            log.error("Get shop detail failed! Error {}", e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
     }
 
     @Override
@@ -66,32 +74,70 @@ public class IShopService implements ShopService {
             shop.setCancelOrder(0);
             shop.setReturnOrder(0);
             shop = shopRepository.save(shop);
-            log.info("Subscribe shop success");
+            log.info("Subscribe shop success!");
             return new ResponseBody(shopMapper.entityToShopDetailDto(shop),
                     ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
-            log.info("Subscribe shop failed!" + e.getMessage());
+            log.error("Subscribe shop failed! Error: " + e.getMessage());
             throw new RequestNotFoundException("ERROR");
         }
     }
 
     @Override
-    public ResponseBody customerUpdateTheirShopInfo(SubscribeShopRequest req) {
-        return null;
+    public ResponseBody shopOwnerUpdateTheirShopInfo(SubscribeShopRequest req) {
+        try{
+            String email = authUtils.getEmailFromAuthentication();
+            Shop shop = usersRepository.findUsersEntitiesByEmail(email).getShopOfUsers();
+            shop.setBusinessType(req.getBusinessType());
+            shop.setShopName(req.getShopName());
+            shop.setShopLogo("shop.png");
+            shop.setShopHotLine(req.getShopHotLine());
+            shop.setFullName(req.getFullName());
+            shop.setTaxCode(req.getTaxCode());
+            shop.setAddress(req.getAddress());
+            shop.setShopEmail(req.getShopEmail());
+            shop.setDescription(req.getDescription());
+            shop.setIdentityCode(req.getIdentityCode());
+            shop.setWardId(req.getWardId());
+            shop.setDistrictId(req.getDistrictId());
+            shop.setProvinceId(req.getProvinceId());
+            shop.setActive(true);
+            shop = shopRepository.save(shop);
+            log.info("Subscribe shop success!");
+            return new ResponseBody(shopMapper.entityToShopDetailDto(shop),
+                    ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Subscribe shop failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
     }
 
     @Override
-    public ResponseBody customerRemoveTheirShop(String shopCode) {
-        return null;
-    }
-
-    @Override
-    public ResponseBody adminAcceptSubscribeShop(String shopCode) {
-        return null;
+    public ResponseBody shopOwnerRemoveTheirShop() {
+        try{
+            String email = authUtils.getEmailFromAuthentication();
+            Shop shop = usersRepository.findUsersEntitiesByEmail(email).getShopOfUsers();
+            shop.setActive(false);
+            shop = shopRepository.save(shop);
+            log.info("{} remove shop {} success!", email, shop.getShopCode());
+            return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Remove shop failed! Error: {}", e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
     }
 
     @Override
     public ResponseBody adminChangeActiveShop(String shopCode, Boolean active) {
-        return null;
+        try{
+            Shop shop = shopRepository.findShopByShopCode(shopCode);
+            shop.setActive(active);
+            shop = shopRepository.save(shop);
+            log.info("Change active shop {} success!", shop.getShopCode());
+            return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Remove shop failed! Error: {}", e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
     }
 }

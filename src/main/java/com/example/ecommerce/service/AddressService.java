@@ -6,7 +6,10 @@ import com.example.ecommerce.payload.ResponseBody;
 
 public interface AddressService {
     ResponseBody customerGetAllAddress();
+
     ResponseBody customerCreateAddress(AddressRequest req);
+
     ResponseBody customerUpdateAddress(AddressRequest req);
+
     ResponseBody customerDeleteAddress(Long addressId);
 }

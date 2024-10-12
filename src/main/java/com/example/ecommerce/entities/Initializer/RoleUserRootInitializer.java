@@ -4,10 +4,12 @@ import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+@AllArgsConstructor
 @Component
 @Slf4j
 public class RoleUserRootInitializer implements CommandLineRunner {
@@ -15,11 +17,6 @@ public class RoleUserRootInitializer implements CommandLineRunner {
     private final DateTimeMapperUtils dateTimeMapperUtils;
     private final RolesRepository rolesRepository;
     private final UsersRepository usersRepository;
-    public RoleUserRootInitializer(RolesRepository rolesRepository, UsersRepository usersRepository, DateTimeMapperUtils dateTimeMapperUtils) {
-        this.rolesRepository = rolesRepository;
-        this.usersRepository = usersRepository;
-        this.dateTimeMapperUtils = dateTimeMapperUtils;
-    }
 
     @Override
     public void run(String... args) {
