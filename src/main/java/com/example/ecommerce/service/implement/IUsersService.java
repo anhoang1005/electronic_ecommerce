@@ -1,11 +1,13 @@
 package com.example.ecommerce.service.implement;
 
+import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.mapper.users.UsersMapper;
 import com.example.ecommerce.models.users.UserRegisterRequest;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.UsersService;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -28,6 +32,7 @@ public class IUsersService implements UsersService {
     private final AuthenticationUtils authenticationUtils;
     private final DateTimeMapperUtils dateMapperUtils;
     private final FileService fileService;
+    private final RolesRepository rolesRepository;
 
     @Override
     @Transactional
@@ -98,4 +103,33 @@ public class IUsersService implements UsersService {
             throw new RequestNotFoundException("Bad request");
         }
     }
+
+    @Override
+    public ResponseBody rootChangeRoleUsers(String userCode, boolean isAdmin) {
+        try {
+            Users users = usersRepository.findUsersByUserCode(userCode);
+            List<Roles> rolesUsers = users.getListRolesOfUsers();
+
+            //Kiem tra nguoi dung co quyen quan li hay khong
+            boolean hasQuanLiRole = rolesUsers.stream().anyMatch(role -> role.getRoleName().equals("QUANLI"));
+
+            if (isAdmin && !hasQuanLiRole) {
+                rolesRepository.findByRoleName("QUANLI")
+                        .ifPresent(rolesUsers::add);
+            } else if (!isAdmin && hasQuanLiRole) {
+                rolesUsers.removeIf(role -> role.getRoleName().equals("QUANLI"));
+            }
+            users.setListRolesOfUsers(rolesUsers);
+            usersRepository.save(users);
+
+            log.info("Root users change users {} to admin success!", userCode);
+            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e) {
+            log.error("Root users change users to {} admin failed! Error: {}", userCode, e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
+
+
+
 }

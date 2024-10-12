@@ -42,4 +42,11 @@ public class UsersController {
             @RequestParam("file") MultipartFile file){
         return ResponseEntity.ok(usersService.usersChangeAvatar(email, file));
     }
+
+    @PutMapping("/api/root/users/change-admin")
+    public ResponseEntity<ResponseBody> rootChangeAdminRoleApi(
+            @RequestParam("user_code") String userCode,
+            @RequestParam("is_admin") boolean isAdmin){
+        return ResponseEntity.ok(usersService.rootChangeRoleUsers(userCode, isAdmin));
+    }
 }

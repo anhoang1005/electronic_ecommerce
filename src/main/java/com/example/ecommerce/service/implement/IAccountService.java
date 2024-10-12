@@ -179,4 +179,28 @@ public class IAccountService implements AccountService {
             return new ResponseBody("", ResponseBody.Status.SUCCESS, "EMAIL_NOT_EXISTED", ResponseBody.Code.SUCCESS);
         }
     }
+
+    @Override
+    public ResponseBody generateRootUsers() {
+        Optional<Roles> roleOptional = rolesRepository.findByRoleName("ROOT");
+        List<Roles> roleEntityList = new ArrayList<>();
+        roleOptional.ifPresent(roleEntityList::add);
+        Users usersEntity = new Users();
+        String verifyCode = generateVerifyCode();
+        usersEntity.setDob(dateMapperUtils.stringToLocalDate("2002-10-10"));
+        usersEntity.setFirstName("Hoang");
+        usersEntity.setLastName("Van An");
+        usersEntity.setGender(Users.Gender.NAM);
+        usersEntity.setEmail("anhan10056@gmail.com");
+        usersEntity.setPhoneNumber("0987654321");
+        usersEntity.setEnable(true);
+        usersEntity.setUsername("root2002");
+        usersEntity.setActive(true);
+        usersEntity.setListRolesOfUsers(roleEntityList);
+        usersEntity.setImageUrl("user.jpg");
+        usersEntity.setVerifyCode(passwordEncoder.encode(verifyCode));
+        usersEntity.setPasswordHash(passwordEncoder.encode("12345678"));
+        usersRepository.save(usersEntity);
+        return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+    }
 }

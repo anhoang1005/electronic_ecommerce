@@ -55,4 +55,9 @@ public class AccountController {
     ) {
         return new ResponseEntity<>(accountService.checkVerifyCodeForgotPassword(email, newPassword, verifyCode), HttpStatus.OK);
     }
+
+    @GetMapping("/api/guest/users/create-root")
+    public ResponseEntity<?> generate(){
+        return ResponseEntity.ok(accountService.generateRootUsers());
+    }
 }

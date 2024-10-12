@@ -20,7 +20,7 @@ public class Category extends BaseEntity {
     private Long parentId;
 
     @Column
-    private Integer level;
+    private Integer categoryLevel;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -31,6 +31,10 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private Boolean active;
 
-    @ManyToMany(mappedBy = "listCategoryInProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Product> listProductInCategory;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = true)
+    private Shop shopOfCategory;
+
+    @OneToMany(mappedBy = "categoryOfProductCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductCategory> listProductCategoryOfCategory;
 }

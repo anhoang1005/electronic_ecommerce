@@ -15,4 +15,7 @@ public interface AccountService {
     ResponseBody userForgotPassword(String email);
 
     ResponseBody checkVerifyCodeForgotPassword(String email, String newPassword, String verifyCode);
+
+    ResponseBody generateRootUsers();
+
 }
