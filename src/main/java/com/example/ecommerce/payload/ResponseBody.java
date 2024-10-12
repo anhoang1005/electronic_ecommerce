@@ -1,5 +1,7 @@
 package com.example.ecommerce.payload;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
 @Getter

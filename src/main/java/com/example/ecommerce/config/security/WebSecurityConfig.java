@@ -39,6 +39,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(requests -> requests
                                 .requestMatchers(
                                 		"/api/guest/**").permitAll()
+				                .requestMatchers("/api/fake/**").permitAll()
                                 .requestMatchers(
                                 		"/api/admin/**").hasRole("QUANLI")
                                 .requestMatchers(
