@@ -1,6 +1,5 @@
 package com.example.ecommerce.utils;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
@@ -15,6 +14,7 @@ public class RandomUtils {
 
     public String generateRandomVoucherCode(){
         StringBuilder voucherCode = new StringBuilder();
+        Random random = new Random();
         for (int i = 0; i < VOUCHER_CODE_LENGTH; i++) {
             int index = random.nextInt(CHARACTERS.length());
             voucherCode.append(CHARACTERS.charAt(index));

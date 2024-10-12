@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.FileService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,14 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
+@AllArgsConstructor
 @Service
 @Slf4j
 public class IFileService implements FileService {
-
     private final Cloudinary cloudinary;
-    public IFileService(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
 
     //upload file len cloud
     @Override

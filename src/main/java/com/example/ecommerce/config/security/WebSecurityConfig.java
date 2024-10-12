@@ -45,7 +45,7 @@ public class WebSecurityConfig {
                                 .requestMatchers(
                                 		"/api/customer/**").hasRole("KHACHHANG")
 								.requestMatchers(
-										"/api/store/**").hasRole("CHUCUAHANG")
+										"/api/owner/**").hasRole("CHUCUAHANG")
 								.requestMatchers(
 										"/api/staff/**").hasRole("CONGTACVIEN")
 								.requestMatchers(

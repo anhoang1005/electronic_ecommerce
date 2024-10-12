@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 public class IAccountService implements AccountService {
-
     private final RolesRepository rolesRepository;
     private final UsersRepository usersRepository;
     private final JwtTokenUtils jwtUtils;
