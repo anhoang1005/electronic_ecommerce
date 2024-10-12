@@ -25,17 +25,20 @@ public class Product extends BaseEntity{
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Double basePrice;
+    @Column(columnDefinition = "TEXT")
+    private String productDetail;
 
-    @Column(nullable = false)
-    private Double sellPrice;
-
-    @Column(nullable = false)
-    private Integer soldQuantity;
-
-    @Column(nullable = false)
-    private Integer stockQuantity;
+//    @Column(nullable = false)
+//    private Double basePrice;
+//
+//    @Column(nullable = false)
+//    private Double sellPrice;
+//
+//    @Column(nullable = false)
+//    private Integer soldQuantity;
+//
+//    @Column(nullable = false)
+//    private Integer stockQuantity;
 
     @Column(nullable = false)
     private Integer reviewCount;
@@ -50,13 +53,16 @@ public class Product extends BaseEntity{
     @JoinColumn(name = "brand_id")
     private Brand brandInProduct;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "product_category",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private List<Category> listCategoryInProduct;
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinTable(
+//            name = "product_category",
+//            joinColumns = @JoinColumn(name = "product_id"),
+//            inverseJoinColumns = @JoinColumn(name = "category_id")
+//    )
+//    private List<Category> listCategoryInProduct;
+
+    @OneToMany(mappedBy = "productOfProductCategory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ProductCategory> productCategory;
 }
 
 

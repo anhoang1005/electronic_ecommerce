@@ -1,9 +1,7 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -59,6 +57,9 @@ public class Shop extends BaseEntity{
     @Column(nullable = false, length = 100)
     private String fullName;
 
+    @Column(nullable = false, length = 150)
+    private String shopEmail;
+
     @Column(nullable = false)
     private String frontIdentityCard;
 
@@ -73,6 +74,9 @@ public class Shop extends BaseEntity{
 
     @Column(nullable = false)
     private String provinceId;
+
+    @Column(nullable = false)
+    private Boolean active;
 
     @PostPersist
     public void updateShopCode() {
@@ -92,6 +96,11 @@ public class Shop extends BaseEntity{
     @ManyToMany(mappedBy = "listShopUserFollow", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Users> listUsersFollowShop;
 
+    @OneToMany(mappedBy = "shopOfCategory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Category> listCategoryOfShop;
+
+    @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<OrdersShop> listOrdersShopOfShop;
 
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),

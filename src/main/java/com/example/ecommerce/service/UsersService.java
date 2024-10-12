@@ -4,6 +4,8 @@ import com.example.ecommerce.models.users.UserRegisterRequest;
 import com.example.ecommerce.payload.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface UsersService {
 
     ResponseBody usersChangePassword(String email, String oldPassword, String newPassword);
@@ -13,5 +15,7 @@ public interface UsersService {
     ResponseBody usersChangeAvatar(String email, MultipartFile file);
 
     ResponseBody usersGetUsersDetailResponse(String email);
+
+    ResponseBody rootChangeRoleUsers(String userCode, boolean isAdmin);
 
 }

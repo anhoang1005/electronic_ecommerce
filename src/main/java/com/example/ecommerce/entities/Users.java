@@ -70,6 +70,9 @@ public class Users extends BaseEntity{
     @OneToMany(mappedBy = "usersOfShopReview", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ShopReview> listShopReviewOfUsers;
 
+    @OneToMany(mappedBy = "usersOfOrder", fetch = FetchType.LAZY)
+    private List<Orders> listOrdersOfUsers;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_roles",
