@@ -1,10 +1,14 @@
 package com.example.ecommerce.models.shop;
 
 import com.example.ecommerce.entities.Shop;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class SubscribeShopRequest {
     private Shop.BusinessType businessType;

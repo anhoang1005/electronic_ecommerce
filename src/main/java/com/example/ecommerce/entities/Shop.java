@@ -32,6 +32,8 @@ public class Shop extends BaseEntity{
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private Integer reviewCount;
+    private Long totalReview;
     private Double rating;
     private Integer productQuantity;
     private Integer followCount;
@@ -60,10 +62,10 @@ public class Shop extends BaseEntity{
     @Column(nullable = false, length = 150)
     private String shopEmail;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String frontIdentityCard;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String backIdentityCard;
 
     @Column(nullable = false)
@@ -77,6 +79,29 @@ public class Shop extends BaseEntity{
 
     @Column(nullable = false)
     private Boolean active;
+
+    @Column(nullable = false)
+    private Boolean enable;
+
+    @Version
+    private long version;
+
+    @PrePersist
+    public void initializeDefaultValues() {
+        this.totalReview = 0L;
+        this.reviewCount = 0;
+        this.rating = 0.0;
+        this.productQuantity = 0;
+        this.followCount = 0;
+        this.waitingOrder = 0;
+        this.processOrder = 0;
+        this.deliveringOrder = 0;
+        this.successOrder = 0;
+        this.cancelOrder = 0;
+        this.returnOrder = 0;
+        this.active = true;
+        this.enable = true;
+    }
 
     @PostPersist
     public void updateShopCode() {

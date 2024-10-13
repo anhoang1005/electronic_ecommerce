@@ -3,6 +3,8 @@ package com.example.ecommerce.entities.Initializer;
 import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.UsersRepository;
+import com.example.ecommerce.service.AccountService;
+import com.example.ecommerce.service.UsersService;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +16,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RoleUserRootInitializer implements CommandLineRunner {
 
-    private final DateTimeMapperUtils dateTimeMapperUtils;
     private final RolesRepository rolesRepository;
-    private final UsersRepository usersRepository;
+    private final AccountService accountService;
 
     @Override
     public void run(String... args) {
@@ -35,6 +36,14 @@ public class RoleUserRootInitializer implements CommandLineRunner {
                 roleEntity.setRoleName("QUANLI");
                 roleEntity.setActive(true);
                 roleEntity.setNote("Tài khoản của quản lí hệ thống");
+                rolesRepository.save(roleEntity);
+            }
+            if (!rolesRepository.existsByRoleName("CHUCUAHANG")) {
+                Roles roleEntity = new Roles();
+                roleEntity.setRoleCode("CH");
+                roleEntity.setRoleName("CHUCUAHANG");
+                roleEntity.setActive(true);
+                roleEntity.setNote("Tài khoản của chủ cửa hàng");
                 rolesRepository.save(roleEntity);
             }
             if (!rolesRepository.existsByRoleName("KHACHHANG")) {
