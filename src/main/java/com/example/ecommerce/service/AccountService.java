@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.models.users.UserRegisterRequest;
 import com.example.ecommerce.payload.JwtData;
 import com.example.ecommerce.payload.ResponseBody;
@@ -17,5 +18,7 @@ public interface AccountService {
     ResponseBody checkVerifyCodeForgotPassword(String email, String newPassword, String verifyCode);
 
     ResponseBody generateRootUsers();
+
+    boolean changeRoleUsers(String userCode, String roleString, boolean isAdd);
 
 }

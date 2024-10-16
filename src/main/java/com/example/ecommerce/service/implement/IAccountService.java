@@ -54,6 +54,9 @@ public class IAccountService implements AccountService {
     public JwtData loginUsers(String username, String password) {
         Users usersEntity = usersRepository.findUsersEntitiesByEmailOrUsername(username, username);
         if (usersEntity != null && passwordEncoder.matches(password, usersEntity.getPasswordHash())) {
+            if(!usersEntity.getEnable()){
+                throw new InvalidCredentialsException("Invalid Account!");
+            }
             if (usersEntity.getActive()) {
                 List<String> listRoleString = usersEntity.getListRolesOfUsers().stream()
                         .map(Roles::getRoleName)
@@ -183,7 +186,7 @@ public class IAccountService implements AccountService {
     public ResponseBody generateRootUsers() {
         Optional<Roles> roleOptional = rolesRepository.findByRoleName("ROOT");
         List<Roles> roleEntityList = new ArrayList<>();
-        roleOptional.ifPresent(roleEntityList::add);
+        roleEntityList.add(roleOptional.get());
         Users usersEntity = new Users();
         String verifyCode = generateVerifyCode();
         usersEntity.setDob(dateMapperUtils.stringToLocalDate("2002-10-10"));
@@ -202,4 +205,30 @@ public class IAccountService implements AccountService {
         usersRepository.save(usersEntity);
         return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
     }
+
+    @Override
+    public boolean changeRoleUsers(String userCode, String roleString, boolean isAdd) {
+        Users user = usersRepository.findUsersByUserCode(userCode);
+        try {
+            List<Roles> userRoles = user.getListRolesOfUsers();
+            Optional<Roles> roleOptional = rolesRepository.findByRoleName(roleString);
+            if (roleOptional.isPresent()) {
+                Roles role = roleOptional.get();
+                if (isAdd) {
+                    if (!userRoles.contains(role)) {
+                        userRoles.add(role);
+                    }
+                } else {
+                    userRoles.remove(role);
+                }
+                usersRepository.save(user);
+                log.info("Change roles users {} to {} success", user.getEmail(), userRoles);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("Change roles users {} failed", user.getEmail());
+        }
+        return false;
+    }
+
 }

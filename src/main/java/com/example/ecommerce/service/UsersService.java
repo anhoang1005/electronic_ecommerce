@@ -1,5 +1,7 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.models.users.UserRegisterRequest;
 import com.example.ecommerce.payload.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;

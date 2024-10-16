@@ -13,7 +13,7 @@ public class ShopReview {
     private Long id;
 
     @Column(nullable = false)
-    private Double rating;
+    private Integer rating;
 
     @Column(nullable = false, length = 300)
     private String comment;
@@ -21,7 +21,7 @@ public class ShopReview {
     @Column(nullable = false)
     private Boolean isReply;
 
-    @Column(nullable = false, length = 300)
+    @Column(length = 300)
     private String reply;
 
     @Column(nullable = false)
