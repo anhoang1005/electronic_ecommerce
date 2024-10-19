@@ -20,4 +20,9 @@ public class FakerController {
 
         return "done";
     }
+    @PostMapping("/shops")
+    public String fakerShop(){
+        fakeService.generateAndInsertFakeShopData();
+        return "done";
+    }
 }

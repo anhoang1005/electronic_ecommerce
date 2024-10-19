@@ -1,8 +1,16 @@
 package com.example.ecommerce.entities;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import lombok.Data;
 
+import java.time.LocalDateTime;
+@Data
+@Entity
+@Table(name = "vourches")
 public class Voucher{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "voucher_id")
     private Long id;
     private String voucherCode;
     private VoucherType voucherType;

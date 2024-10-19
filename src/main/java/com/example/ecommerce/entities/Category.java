@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.entities.enums.CategoryType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,11 +23,18 @@ public class Category extends BaseEntity {
     @Column
     private Integer categoryLevel;
 
+    @Column(name = "category_name",nullable = false)
+    private String categoryName;
+
+    @Column(name = "category_code",nullable = false)
+    private String categoryCode;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String categoryType;
+    @Column(nullable = false,name = "category_type")
+    @Enumerated(EnumType.STRING)
+    private CategoryType categoryType;
 
     @Column(nullable = false)
     private Boolean active;

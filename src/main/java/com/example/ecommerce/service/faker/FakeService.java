@@ -1,12 +1,15 @@
 package com.example.ecommerce.service.faker;
 
 import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.repository.RolesRepository;
+import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.utils.RandomUtils;
 import com.github.javafaker.Faker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FakeService {
 
     private final UsersRepository usersRepository;
@@ -25,7 +29,10 @@ public class FakeService {
     private final PasswordEncoder passwordEncoder;
     private final RandomUtils randomUtils;
     private final RolesRepository rolesRepository;
+    private final ShopRepository shopRepository;
 
+
+    //user - fake
     @Transactional
     public void generateAndInsertFakeUserData(){
 
@@ -70,5 +77,28 @@ public class FakeService {
     }
 
 
+    //shop - fake
+    @Transactional
+    public void generateAndInsertFakeShopData(){
+        for(int i = 0 ;i<1;i++){
+            Shop shop = new Shop();
+            shop.setShopCode(randomUtils.generateRandomString(15));
+            shop.setBusinessType(Shop.BusinessType.CA_NHAN);
+            shop.setShopName(faker.name().name());
+            shop.setShopLogo(faker.animal().name());
+            shop.setAddress(faker.address().fullAddress());
+            shop.setShopHotLine(faker.phoneNumber().phoneNumber());
+            shop.setIdentityCode(randomUtils.generateRandomString(9));
+            shop.setFullName(faker.name().fullName());
+            shop.setShopEmail(faker.internet().emailAddress());
+            shop.setWardId(randomUtils.generateRandomString(4));
+            shop.setProvinceId(randomUtils.generateRandomString(4));
+            shop.setProvinceId(randomUtils.generateRandomString(4));
+
+            shop.setUsersInShop(usersRepository.findUsersById(Long.valueOf(1)));
+            shopRepository.save(shop);
+            log.info(shop.toString());
+        }
+    }
 
 }

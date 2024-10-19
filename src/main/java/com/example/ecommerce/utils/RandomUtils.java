@@ -1,5 +1,6 @@
 package com.example.ecommerce.utils;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
