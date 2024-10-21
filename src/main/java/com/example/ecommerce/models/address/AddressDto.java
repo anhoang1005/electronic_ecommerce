@@ -27,4 +27,12 @@ public class AddressDto {
     private String provinceId;
     @JsonProperty("note")
     private String note;
+    @JsonProperty("house_name")
+    private String houseName;
+    @JsonProperty("ward_name")
+    private String wardName;
+    @JsonProperty("district_name")
+    private String districtName;
+    @JsonProperty("province_name")
+    private String provinceName;
 }
