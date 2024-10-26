@@ -22,8 +22,17 @@ public class JwtData {
     @JsonProperty("token_type")
     private String tokenType = "Bearer";
 
+    @JsonProperty("user_code")
+    private String userCode;
+
+    @JsonProperty("shop_code")
+    private String shopCode;
+
     @JsonProperty("full_name")
     private String fullName;
+
+    @JsonProperty("gender")
+    private String gender;
 
     @JsonProperty("image_url")
     private String imageUrl;

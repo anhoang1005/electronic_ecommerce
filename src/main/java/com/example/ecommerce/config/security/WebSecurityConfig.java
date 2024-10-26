@@ -43,7 +43,9 @@ public class WebSecurityConfig {
         http.addFilterBefore(customFilterJwt, UsernamePasswordAuthenticationFilter.class);
         http.authorizeHttpRequests(requests -> requests
                                 .requestMatchers(
-                                		"/api/guest/**").permitAll()
+                                		"/api/guest/**",
+										"/ws/**",
+										"/ws").permitAll()
 								.requestMatchers(
 										"/api/root/**").hasRole("ROOT")
                                 .requestMatchers(
@@ -55,7 +57,8 @@ public class WebSecurityConfig {
 								.requestMatchers(
 										"/api/staff/**").hasRole("CONGTACVIEN")
 								.requestMatchers(
-										"/api/all/**")
+										"/api/all/**",
+										"/**")
 										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
                                 .anyRequest().authenticated());
 		return http.build();

@@ -21,8 +21,16 @@ public class Brand extends BaseEntity{
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private Integer productQuantity;
+
     @Column(nullable = false)
     private Boolean active;
+
+    @PrePersist
+    public void initializeDefaultValues() {
+        this.active = true;
+        this.productQuantity = 0;
+    }
 
     @OneToMany(mappedBy = "brandInProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Product> listProductInBrand;

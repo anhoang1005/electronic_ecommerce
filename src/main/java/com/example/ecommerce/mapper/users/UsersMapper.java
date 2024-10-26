@@ -21,6 +21,7 @@ public class UsersMapper {
                 .imageUrl(entity.getImageUrl())
                 .firstName(entity.getFirstName())
                 .lastName(entity.getLastName())
+                .gender(entity.getGender().getValueString())
                 .dob(dateMapperUtils.localDateToString(entity.getDob()))
                 .phoneNumber(entity.getPhoneNumber())
                 .email(entity.getEmail())

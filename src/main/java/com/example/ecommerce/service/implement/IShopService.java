@@ -55,7 +55,12 @@ public class IShopService implements ShopService {
             }
             Shop shop = mapRequestToShop(req, new Shop());
             shop.setUsersInShop(user);
-            uploadShopImages(shop, frontCard, backCard);
+            if(frontCard==null || backCard == null){
+                shop.setFrontIdentityCard(null);
+                shop.setBackIdentityCard(null);
+            } else{
+                uploadShopImages(shop, frontCard, backCard);
+            }
             shop = shopRepository.save(shop);
             accountService.changeRoleUsers(user.getUserCode(), "CHUCUAHANG", true);
             log.info("Subscribe shop {} success!", shop.getShopCode());

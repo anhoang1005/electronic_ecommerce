@@ -20,25 +20,18 @@ public class JpaConfig {
 
     @Value("${spring.datasource.driver-class-name}")
     private String DRIVER_CLASS_NAME;
-
     @Value("${spring.datasource.url}")
     private String JDBC_URL;
-
     @Value("${spring.datasource.username}")
     private String USERNAME;
-
     @Value("${spring.datasource.password}")
     private String PASSWORD;
-
     @Value("${spring.jpa.properties.hibernate.dialect}")
     private String HIBERNATE_DIALECT;
-
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String HIBERNATE_DDL_AUTO;
-
     @Value("${spring.jpa.generate-ddl}")
     private String HIBERNATE_GENERATE_DDL;
-
     @Value("${spring.jpa.show-sql}")
     private String HIBERNATE_SHOW_SQL;
 

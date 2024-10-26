@@ -16,4 +16,6 @@ public class ShopReviewDto {
     private Boolean isReply;
     private String reply;
     private Boolean active;
+    private String createdAt;
+    private String modifiedAt;
 }

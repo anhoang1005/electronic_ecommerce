@@ -28,13 +28,21 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private String categoryType;
 
+    private Integer productQuantity;
+
     @Column(nullable = false)
     private Boolean active;
+
+    @PrePersist
+    public void initializeDefaultValues() {
+        this.active = true;
+        this.productQuantity = 0;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = true)
     private Shop shopOfCategory;
 
-    @OneToMany(mappedBy = "categoryOfProductCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductCategory> listProductCategoryOfCategory;
+    @ManyToMany(mappedBy = "listCategoryInProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Product> listProductOfCategory;
 }

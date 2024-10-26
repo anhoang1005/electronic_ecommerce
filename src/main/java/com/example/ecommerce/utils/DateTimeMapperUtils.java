@@ -28,4 +28,9 @@ public class DateTimeMapperUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return LocalDateTime.parse(dateTimeString, formatter);
     }
+
+    public String localDateTimeToHouseString(LocalDateTime dateTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
+        return dateTime.format(formatter);
+    }
 }
