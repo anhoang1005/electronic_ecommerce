@@ -10,6 +10,7 @@ import com.example.ecommerce.mapper.message_chat.MessageChatMapper;
 import com.example.ecommerce.models.message_chat.*;
 import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.payload.socket_payload.MessageData;
 import com.example.ecommerce.repository.MessageChatRepository;
 import com.example.ecommerce.repository.MessageRepository;
 import com.example.ecommerce.repository.ShopRepository;
@@ -171,7 +172,7 @@ public class IMessageChatService implements MessageChatService {
 
     @Override
     @Transactional
-    public void userSendMessage(SocketMessage req, Boolean isShopSender) {
+    public void userSendMessage(MessageData req, Boolean isShopSender) {
         try {
             MessageChat messageChat = messageChatRepository.findById(req.getChatId())
                     .orElseThrow(() -> new RequestNotFoundException("CHAT_NOT_FOUND"));
@@ -209,7 +210,7 @@ public class IMessageChatService implements MessageChatService {
     }
 
     @Override
-    public void userSeenMessage(SocketMessage req, Boolean isShop) {
+    public void userSeenMessage(MessageData req, Boolean isShop) {
         try{
             MessageChat messageChat = messageChatRepository.findById(req.getChatId())
                     .orElseThrow(() -> new RequestNotFoundException("CHAT_NOT_FOUND"));

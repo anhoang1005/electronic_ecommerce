@@ -1,4 +1,4 @@
-package com.example.ecommerce.models.message_chat;
+package com.example.ecommerce.payload.socket_payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,19 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SocketMessage {
+public class MessageData {
     private Long chatId;
     private String userCode;
     private String shopCode;
     private Long replyTo;
     private String content;
     private String imageUrl;
-    private String createdAt;
-    private Type type;
-    public enum Type{
-        CHAT,
-        SEEN,
-        UPDATE,
-        SENT;
-    }
 }
