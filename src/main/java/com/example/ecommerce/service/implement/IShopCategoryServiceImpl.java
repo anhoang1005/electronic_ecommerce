@@ -5,19 +5,23 @@ import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.ShopCategory;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
+import com.example.ecommerce.entities.enums.ErrorType;
+import com.example.ecommerce.exceptions.BaseException;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
 import com.example.ecommerce.payload.CategoryResponse;
+import com.example.ecommerce.payload.ObjectChangedActiveResponse;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.ShopCategoryRepository;
 import com.example.ecommerce.repository.ShopRepository;
+import com.example.ecommerce.repository.UsersRepository;
 import com.example.ecommerce.service.IShopCategoryService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -31,17 +35,25 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     private final ShopRepository shopRepository;
     private final RandomUtils randomUtils;
     private final AuthenticationUtils authenticationUtils;
+    private final UsersRepository usersRepository;
+    private final RolesRepository rolesRepository;
     @Override
-    public ResponseBody createCategory(CategoryDto dto) {
-        log.info(dto.getCategoryName());
-        List<String> roles = authenticationUtils.getRoleFromAuthentication();
-        if(roles.isEmpty()){
-            throw new UnauthorizedException("Sth wrong");
-        }
-        log.info(roles.toString());
+    public ResponseBody createCategory(CategoryDto dto, Long shopId) {
+        Shop shop = shopRepository.findShopById(shopId);
+//        Long userId = usersRepository.findUsersEntitiesByEmail(authenticationUtils.getEmailFromAuthentication()).getId();
+//        if(!shop.getUsersInShop().getId().equals(userId)){
+//            throw new UnauthorizedException("Unauthorized!");
+//        }
+//
+//        List<String> roles = authenticationUtils.getRoleFromAuthentication();
+//        if(roles.isEmpty()){
+//            throw new UnauthorizedException("Sth wrong");
+//        }
+        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
+                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
         ShopCategory category = new ShopCategory();
         category.setCategoryType(CategoryType.SHOP);
-        Shop shop = shopRepository.findShopById(dto.getShopId());
+
         if(ObjectUtils.isEmpty(shop)){
             throw new RequestNotFoundException("Shop havent exists");
         }
@@ -77,5 +89,43 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         );
         return responseBody;
 
+    }
+
+    @Override
+    public ResponseBody unActiveCategory(Long id, Long shopId) {
+        Shop shop = shopRepository.findShopById(shopId);
+        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
+                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
+        if(!shop.getActive()){
+            shop.setActive(false);
+            shopRepository.save(shop);
+
+            ObjectChangedActiveResponse objectChangedActiveResponse = new ObjectChangedActiveResponse();
+            objectChangedActiveResponse.setObjectActive(shop.getActive());
+            objectChangedActiveResponse.setObjectChangedId(shop.getId());
+            ResponseBody responseBody = new ResponseBody(
+                    objectChangedActiveResponse,
+                    ResponseBody.Status.SUCCESS,
+                    ResponseBody.Code.SUCCESS
+            );
+            return responseBody;
+        }
+        throw new BaseException(ErrorType.SOMETHING_WRONG.toString());
+    }
+
+    @Override
+    public ResponseBody addProduct(Long id, Long shopId, Long productId) {
+        Shop shop = shopRepository.findShopById(shopId);
+        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
+                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
+        return null;
+    }
+
+    @Override
+    public ResponseBody removeProduct(Long id, Long shopId, Long productId) {
+        Shop shop = shopRepository.findShopById(shopId);
+        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
+                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
+        return null;
     }
 }

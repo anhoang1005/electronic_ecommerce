@@ -1,7 +1,9 @@
 package com.example.ecommerce.config.security;
 
 import com.example.ecommerce.entities.enums.BaseRole;
+import com.example.ecommerce.exceptions.CustomAccessDeniedHandler;
 import com.fasterxml.jackson.databind.ser.Serializers;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,12 +38,15 @@ public class WebSecurityConfig {
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 		http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http.exceptionHandling()
+						.authenticationEntryPoint(((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
+								.accessDeniedHandler(new CustomAccessDeniedHandler());
         http.addFilterBefore(customFilterJwt, UsernamePasswordAuthenticationFilter.class);
         http.authorizeHttpRequests(requests -> requests
                                 .requestMatchers(

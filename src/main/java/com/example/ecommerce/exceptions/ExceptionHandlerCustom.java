@@ -59,4 +59,14 @@ public class ExceptionHandlerCustom extends ResponseEntityExceptionHandler {
         );
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
+    @ExceptionHandler({BaseException.class})
+    public ResponseEntity<Object> baseException(RuntimeException e){
+        ResponseBody responseBody = new ResponseBody(
+                null,
+                ResponseBody.Status.SUCCESS,
+                e.getMessage(),
+                ResponseBody.Code.BAD_REQUEST
+        );
+        return new ResponseEntity<>(responseBody,HttpStatus.OK);
+    }
 }

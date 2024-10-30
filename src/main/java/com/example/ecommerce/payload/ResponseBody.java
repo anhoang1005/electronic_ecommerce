@@ -39,6 +39,7 @@ public class ResponseBody {
 
     public enum Code {
         SUCCESS(200, "Successful"),
+        BAD_REQUEST(300,"Bad request"),
         CLIENT_ERROR(400, "Client error"),
         UNAUTHORIZED_REQUEST(401, "Unauthorized request"),
         FORBIDDEN(403, "Forbidden"),
