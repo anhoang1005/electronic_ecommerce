@@ -22,8 +22,8 @@ public class ShopController {
     @PostMapping("/api/customer/shop/subscribe")
     public ResponseEntity<?> customerSubscribeShopApi(
             @RequestParam("subscribe_body") String jsonData,
-            @RequestParam("front_card")MultipartFile frontCard,
-            @RequestParam("back_card")MultipartFile backCard){
+            @RequestParam(name = "front_card", required = false)MultipartFile frontCard,
+            @RequestParam(name = "back_card", required = false)MultipartFile backCard){
         SubscribeShopRequest req = null;
         try{
             req = objectMapper.readValue(jsonData, SubscribeShopRequest.class);

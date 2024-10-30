@@ -17,6 +17,12 @@ public class AddressDto {
     private String phoneNumber;
     @JsonProperty("address")
     private String address;
+    @JsonProperty("ward_name")
+    private String wardName;
+    @JsonProperty("district_name")
+    private String districtName;
+    @JsonProperty("province_name")
+    private String provinceName;
     @JsonProperty("is_default")
     private Boolean isDefault;
     @JsonProperty("ward_id")

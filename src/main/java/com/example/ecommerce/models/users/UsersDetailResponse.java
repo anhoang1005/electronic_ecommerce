@@ -18,6 +18,8 @@ public class UsersDetailResponse {
     private String firstName;
     @JsonProperty("last_name")
     private String lastName;
+    @JsonProperty("gender")
+    private String gender;
     @JsonProperty("date_of_birth")
     private String dob;
     @JsonProperty("phone_number")

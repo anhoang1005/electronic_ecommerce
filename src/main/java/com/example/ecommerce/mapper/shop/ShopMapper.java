@@ -14,6 +14,7 @@ public class ShopMapper {
     public ShopDetailDto entityToShopDetailDto(Shop shop) {
 
         return ShopDetailDto.builder()
+                .shopCode(shop.getShopCode())
                 .businessType(shop.getBusinessType())
                 .shopName(shop.getShopName())
                 .shopLogo(shop.getShopLogo())

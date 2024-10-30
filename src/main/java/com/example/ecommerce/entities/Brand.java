@@ -21,6 +21,8 @@ public class Brand extends BaseEntity{
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private Integer productQuantity;
+
     @Column(nullable = false)
     private Boolean active;
 

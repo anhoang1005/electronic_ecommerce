@@ -15,7 +15,7 @@ public class Message extends BaseEntity{
     @Column(nullable = false)
     private Boolean isShopSender;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long replyTo;
 
     @Column(nullable = true, columnDefinition = "TEXT")
@@ -27,7 +27,14 @@ public class Message extends BaseEntity{
     @Column(nullable = false)
     private Boolean isRead;
 
+    @Column(nullable = false)
     private Boolean active;
+
+    @PrePersist
+    public void initializeDefaultValues() {
+        this.active = true;
+        this.isRead = false;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "message_story_id")

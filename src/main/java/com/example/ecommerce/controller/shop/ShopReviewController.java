@@ -14,7 +14,7 @@ public class ShopReviewController {
     @Autowired
     private ShopReviewService shopReviewService;
 
-    @GetMapping("/api/guest/shop/page-review")
+    @PostMapping("/api/guest/shop/page-review")
     public ResponseEntity<?> customerGetPageShopReviewApi(
             @RequestBody ShopReviewFilter filter){
         return ResponseEntity.ok(shopReviewService.customerGetPageReviewOfShop(filter));
@@ -38,7 +38,7 @@ public class ShopReviewController {
         return ResponseEntity.ok(shopReviewService.customerUpdateReview(req));
     }
 
-    @DeleteMapping("//api/customer/shop/delete-review")
+    @DeleteMapping("/api/customer/shop/delete-review")
     public ResponseEntity<?> customerDeleteShopReviewApi(
             @RequestParam("shop_code") String shopCode){
         return ResponseEntity.ok(shopReviewService.customerDeleteReview(shopCode));

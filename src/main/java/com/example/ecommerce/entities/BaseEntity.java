@@ -9,9 +9,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -20,11 +18,11 @@ import java.util.Date;
 public class BaseEntity {
 	
 	@CreatedBy
-	@Column(name = "created_by", length = 100)
+	@Column(name = "created_by", length = 100, updatable = false)
 	private String createdBy;
 	
 	@CreatedDate
-	@Column(columnDefinition = "TIMESTAMP",updatable = false)
+	@Column(columnDefinition = "TIMESTAMP", updatable = false)
 	private LocalDateTime createdAt;
 	
 	@LastModifiedBy

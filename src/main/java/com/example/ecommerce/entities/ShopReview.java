@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "shop_review")
-public class ShopReview {
+public class ShopReview extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,13 +15,13 @@ public class ShopReview {
     @Column(nullable = false)
     private Integer rating;
 
-    @Column(nullable = false, length = 300)
+@Column(nullable = false, columnDefinition = "TEXT")
     private String comment;
 
     @Column(nullable = false)
     private Boolean isReply;
 
-    @Column(length = 300)
+    @Column(nullable = true, length = 300, columnDefinition = "TEXT")
     private String reply;
 
     @Column(nullable = false)

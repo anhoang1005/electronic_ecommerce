@@ -39,10 +39,10 @@ public class IMailService implements MailService {
     @Override
     public void sendVerifyRegisterEmail(String toAddress, String verifyCode) {
         String fromAddress = fromEmail;
-        String senderName = "CHOVN";
-        String subject = "Mã xác nhận tài khoản người dùng CHOVN";
+        String senderName = "ELECTROHUB";
+        String subject = "Mã xác nhận tài khoản người dùng ELECTROHUB";
         String content = "Xin chào [[name]],<br>"
-                + "Đây là mã xác nhận để kích hoạt tài khoản người dùng CHOVN của bạn, vui lòng không để lộ ra ngoài!:<br>"
+                + "Đây là mã xác nhận để kích hoạt tài khoản người dùng ELECTROHUB của bạn, vui lòng không để lộ ra ngoài!:<br>"
                 + "<h4>Mã xác nhận: [[verifyCode]]</h4><br>"
                 + "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi,<br>"
                 + "[[Company]]";
@@ -66,8 +66,8 @@ public class IMailService implements MailService {
     @Override
     public void sendFogotPasswordMail(String fullName, String toAddress, String verifyCode) {
         String fromAddress = fromEmail;
-        String senderName = "CHOVN";
-        String subject = "Mã xác nhận đổi mặt khẩu tài khoản CHOVN";
+        String senderName = "ELECTROHUB";
+        String subject = "Mã xác nhận đổi mặt khẩu tài khoản ELECTROHUB";
         String content = "Xin chào [[name]],<br>"
                 + "Đây là mã đổi mật khẩu tạm thời của bạn, vui lòng không để lộ ra ngoài!<br>"
                 + "<h4>Mã xác nhận: [[verifyCode]]</h4><br>"

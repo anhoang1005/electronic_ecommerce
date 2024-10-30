@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ShopDetailDto {
+    private String shopCode;
     private Shop.BusinessType businessType;
     private String shopName;
     private String shopLogo;
