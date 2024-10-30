@@ -25,7 +25,6 @@ public class Product extends BaseEntity{
 
     private String title;
     private Integer sold;
-    private Double rating;
     private Integer review;
 
     @Column(name = "min_initial_price")
@@ -36,6 +35,9 @@ public class Product extends BaseEntity{
 
     private String currency;
     private Long favorite;
+    private Long starCount;
+    private Long reviewCount;
+    private Double rating;
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
@@ -85,8 +87,11 @@ public class Product extends BaseEntity{
     @PrePersist
     public void onCreate(){
         this.sold = 0;
-        this.favorite = 0L;
         this.isAvailable = true;
+        this.rating = 0.0;
+        this.favorite = 0L;
+        this.reviewCount = 0L;
+        this.starCount = 0L;
     }
 }
 
