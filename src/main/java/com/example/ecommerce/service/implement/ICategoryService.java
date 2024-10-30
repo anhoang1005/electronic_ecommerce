@@ -2,10 +2,12 @@ package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.Category;
 import com.example.ecommerce.entities.Shop;
+import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
+import com.example.ecommerce.payload.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.CategoryRepository;
 import com.example.ecommerce.repository.ShopRepository;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,8 +38,9 @@ public class ICategoryService implements CategoryService {
         }
         log.info(roles.toString());
         Category category = new Category();
-        if(roles.contains("QUANLI")){
+        if(roles.contains(BaseRole.ROLE_QUANLY.toString()) || roles.contains(BaseRole.ROLE_ROOT.toString())){
             category.setCategoryType(CategoryType.SYSTEM);
+            category.setActive(true);
         }else{
             category.setCategoryType(CategoryType.SHOP);
             if(!ObjectUtils.isEmpty(dto.getShopId())){
@@ -57,6 +61,7 @@ public class ICategoryService implements CategoryService {
             Integer parentLevel = parent.getCategoryLevel();
             Integer childLevel = parentLevel + 1;
             category.setCategoryLevel(childLevel);
+            category.setParentCategory(parent);
 
         }else{
             category.setCategoryLevel(0);
@@ -65,6 +70,59 @@ public class ICategoryService implements CategoryService {
         category.setDescription(dto.getDescription());
 
         categoryRepository.save(category);
+        //Todo : thieu response
         return null;
+    }
+
+    @Override
+    public ResponseBody findCategoryById(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody updateCategory(Long id, CategoryDto dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody unActiveCategory(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody removeProductFromCategory(Long id, Long productId) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody addProductToCategory(Long id, Long productId) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody getListCategory(Long parentId, Integer level) {
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        if(ObjectUtils.isEmpty(parentId)){
+            List<Category> categories = categoryRepository.findCategoriesByCategoryLevel(level);
+            for(Category category : categories){
+                CategoryResponse response = new CategoryResponse();
+                response.setCategoryId(category.getId());
+                response.setCategoryName(category.getCategoryName());
+                categoryResponses.add(response);
+            }
+        }else{
+            Category parent = categoryRepository.findById(parentId).orElseThrow(
+                    () -> new RequestNotFoundException("Category parent not found")
+            );
+            List<Category> categories = categoryRepository.findCategoriesByCategoryLevelAndParentCategory(level,parent);
+            for(Category category : categories){
+                CategoryResponse response = new CategoryResponse();
+                response.setCategoryId(category.getId());
+                response.setCategoryName(category.getCategoryName());
+                categoryResponses.add(response);
+            }
+        }
+
+        return new ResponseBody(categoryResponses, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
     }
 }

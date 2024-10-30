@@ -25,4 +25,9 @@ public class FakerController {
         fakeService.generateAndInsertFakeShopData();
         return "done";
     }
+    @PostMapping("/roots")
+    public String createRoot(){
+        fakeService.createRootAccount();
+        return "done";
+    }
 }

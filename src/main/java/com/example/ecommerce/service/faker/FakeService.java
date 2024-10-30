@@ -3,6 +3,7 @@ package com.example.ecommerce.service.faker;
 import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
+import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.repository.UsersRepository;
@@ -77,6 +78,30 @@ public class FakeService {
     }
 
 
+    public void createRootAccount(){
+        Optional<Roles> root = rolesRepository.findByRoleName(BaseRole.ROOT.toString());
+        List<Roles> roleEntityList = new ArrayList<>();
+        root.ifPresent(roleEntityList::add);
+//        Optional<Roles> root = rolesRepository.findByRoleName("ROOT");
+//        List<Roles> roleEntityList = new ArrayList<>();
+//        root.ifPresent(roleEntityList::add);
+
+        Users users = new Users();
+        users.setFirstName(faker.name().firstName());
+        users.setLastName(faker.name().lastName());
+        users.setDob(generateFakeLocalDate());
+        users.setGender(randomGender());
+        users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
+        users.setPasswordHash(passwordEncoder.encode("1234"));
+        users.setActive(true);
+        users.setImageUrl("user.jpg");
+        users.setVerifyCode(randomUtils.generateRandomString(9));
+        users.setListRolesOfUsers(roleEntityList);
+        users.setEnable(true);
+        users.setUsername("root");
+        users.setEmail("root@gmail.com");
+        usersRepository.save(users);
+    }
     //shop - fake
     @Transactional
     public void generateAndInsertFakeShopData(){

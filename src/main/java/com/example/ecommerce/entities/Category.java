@@ -1,6 +1,8 @@
 package com.example.ecommerce.entities;
 
 import com.example.ecommerce.entities.enums.CategoryType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,8 +19,17 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private Long parentId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_id")
+    @JsonBackReference
+    private Category parentCategory;
+
+    @OneToMany(
+            mappedBy = "parentCategory",
+            fetch = FetchType.EAGER,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @JsonManagedReference
+    private List<Category> childrens;
 
     @Column
     private Integer categoryLevel;
@@ -39,10 +50,8 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private Boolean active;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shop_id", nullable = true)
-    private Shop shopOfCategory;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "shop_id")
+//    private Shop shopOfCategory;
 
-    @OneToMany(mappedBy = "categoryOfProductCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductCategory> listProductCategoryOfCategory;
 }

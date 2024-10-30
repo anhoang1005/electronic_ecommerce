@@ -24,4 +24,8 @@ public class ProductImage extends BaseEntity{
     @JoinColumn(name = "product_id")
     private Product productOfProductImage;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id")
+    private Variant variant;
+
 }

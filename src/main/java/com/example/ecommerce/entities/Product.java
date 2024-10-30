@@ -1,8 +1,11 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.entities.enums.ProductState;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -11,58 +14,80 @@ import java.util.List;
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
 
-    @Column(nullable = true, unique = true, length = 30)
+    @Column(name = "product_code")
     private String productCode;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "product_slug")
     private String productSlug;
 
-    @Column(nullable = false, length = 150)
-    private String productTitle;
+    private String title;
+    private Integer sold;
+    private Double rating;
+    private Integer review;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "min_initial_price")
+    private BigDecimal minInitialPrice;
+
+    @Column(name = "max_initital_price")
+    private BigDecimal maxInitialPrice;
+
+    private String currency;
+    private Long favorite;
+
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String breadcrumb;
+
+    @Lob
+    @Column(name = "product_specifications", columnDefinition = "MEDIUMTEXT")
+    private String productSpecifications;
+
+    @Lob
+    @Column(name = "product_description",columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String productDetail;
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String variations;
 
-//    @Column(nullable = false)
-//    private Double basePrice;
-//
-//    @Column(nullable = false)
-//    private Double sellPrice;
-//
-//    @Column(nullable = false)
-//    private Integer soldQuantity;
-//
-//    @Column(nullable = false)
-//    private Integer stockQuantity;
+    @Lob
+    @Column(name = "product_ratings", columnDefinition = "MEDIUMTEXT")
+    private String productRatings;
 
-    @Column(nullable = false)
-    private Integer reviewCount;
+    @Column(nullable = false,name = "is_available")
+    private Boolean isAvailable;
 
-    @Column(nullable = false)
-    private Boolean active;
+    @Column(nullable = false, name = "is_hidden")
+    private Boolean isHidden;
 
     @OneToMany(mappedBy = "productOfProductImage")
     private List<ProductImage> listImageOfProduct;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "brand_id")
-    private Brand brandInProduct;
+    private Brand brand;
 
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(
-//            name = "product_category",
-//            joinColumns = @JoinColumn(name = "product_id"),
-//            inverseJoinColumns = @JoinColumn(name = "category_id")
-//    )
-//    private List<Category> listCategoryInProduct;
+    @Column(name = "product_state")
+    @Enumerated(EnumType.STRING)
+    private ProductState productState;
 
-    @OneToMany(mappedBy = "productOfProductCategory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ProductCategory> productCategory;
+    @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Variant> variants = new ArrayList<>();
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<ProductAttributeValue> productAttributeValues = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @PrePersist
+    public void onCreate(){
+        this.sold = 0;
+        this.favorite = Long.valueOf(0);
+        this.isAvailable = true;
+    }
 }
 
 

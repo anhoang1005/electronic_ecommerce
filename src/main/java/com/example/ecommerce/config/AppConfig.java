@@ -1,5 +1,6 @@
 package com.example.ecommerce.config;
 
+import com.example.ecommerce.utils.JsonConvert;
 import com.github.javafaker.Faker;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,5 +32,10 @@ public class AppConfig {
     @Bean
     public Random random(){
         return new Random();
+    }
+
+    @Bean
+    public JsonConvert jsonConvert(){
+        return new JsonConvert();
     }
 }

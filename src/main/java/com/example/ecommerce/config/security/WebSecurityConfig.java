@@ -1,5 +1,7 @@
 package com.example.ecommerce.config.security;
 
+import com.example.ecommerce.entities.enums.BaseRole;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -46,18 +48,22 @@ public class WebSecurityConfig {
                                 		"/api/guest/**").permitAll()
 				                .requestMatchers("/api/fake/**").permitAll()
 								.requestMatchers(
-										"/api/root/**").hasRole("ROOT")
+										"/api/root/**").hasRole(BaseRole.ROOT.toString())
                                 .requestMatchers(
-                                		"/api/admin/**").hasRole("QUANLI")
+                                		"/api/admin/**").hasAnyRole(BaseRole.QUANLY.toString(),BaseRole.ROOT.toString())
                                 .requestMatchers(
-                                		"/api/customer/**").hasRole("KHACHHANG")
+                                		"/api/customer/**").hasRole(BaseRole.KHACHHANG.toString())
 								.requestMatchers(
-										"/api/owner/**").hasRole("CHUCUAHANG")
+										"/api/owner/**").hasRole(BaseRole.CHUCUAHANG.toString())
 								.requestMatchers(
-										"/api/staff/**").hasRole("CONGTACVIEN")
+										"/api/staff/**").hasRole(BaseRole.CONGTACVIEN.toString())
 								.requestMatchers(
 										"/api/all/**")
-										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
+										.hasAnyRole(BaseRole.ROOT.toString(),
+												BaseRole.CHUCUAHANG.toString(),
+												BaseRole.QUANLY.toString(),
+												BaseRole.KHACHHANG.toString(),
+												BaseRole.CONGTACVIEN.toString())
                                 .anyRequest().authenticated());
 		return http.build();
 	}
