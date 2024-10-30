@@ -34,9 +34,8 @@ public class IShopService implements ShopService {
     @Override
     public ResponseBody customerGetTheirShopDetail() {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
-            Shop shop = users.getShopOfUsers();
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            Shop shop = shopRepository.findShopByShopCode(shopCode);
             return new ResponseBody(shopMapper.entityToShopDetailDto(shop), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         }catch (Exception e){
             log.error("Get shop detail failed! Error {}", e.getMessage());
@@ -48,8 +47,8 @@ public class IShopService implements ShopService {
     @Transactional
     public ResponseBody customerSubscribeShop(SubscribeShopRequest req, MultipartFile frontCard, MultipartFile backCard) {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Users user = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users user = usersRepository.findUsersByUserCode(userCode);
             if(user.getShopOfUsers()!=null){
                 return new ResponseBody("", ResponseBody.Status.SUCCESS, "SHOP_EXISTED", ResponseBody.Code.SUCCESS);
             }
@@ -75,9 +74,8 @@ public class IShopService implements ShopService {
     @Transactional
     public ResponseBody shopOwnerUpdateTheirShopInfo(SubscribeShopRequest req) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Users user = usersRepository.findUsersEntitiesByEmail(email);
-            Shop shop = user.getShopOfUsers();
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            Shop shop = shopRepository.findShopByShopCode(shopCode);
             updateShopInfo(req, shop);
             shopRepository.save(shop);
             log.info("Update shop {} success!", shop.getShopCode());
@@ -91,13 +89,13 @@ public class IShopService implements ShopService {
     @Override
     public ResponseBody shopOwnerRemoveTheirShop() {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Shop shop = users.getShopOfUsers();
             shop.setActive(false);
             shopRepository.save(shop);
             accountService.changeRoleUsers(users.getUserCode(), "CHUCUAHANG", false);
-            log.info("{} removed shop {} success!", email, shop.getShopCode());
+            log.info("{} removed shop {} success!", userCode, shop.getShopCode());
             return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Remove shop failed! Error: " + e.getMessage());
@@ -108,8 +106,8 @@ public class IShopService implements ShopService {
     @Override
     public ResponseBody customerRestoreTheirShop() {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Shop shop = users.getShopOfUsers();
             shop.setActive(true);
             shopRepository.save(shop);
@@ -140,8 +138,8 @@ public class IShopService implements ShopService {
     @Transactional
     public ResponseBody customerFollowAndUnfollowShop(String shopCode, boolean isFollow) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Shop shop = shopRepository.findShopByShopCode(shopCode);
             if(users == null || shop == null){
                 throw new RequestNotFoundException("ERROR");

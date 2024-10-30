@@ -10,7 +10,6 @@ import com.example.ecommerce.payload.JwtData;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.RolesRepository;
 import com.example.ecommerce.repository.UsersRepository;
-import com.example.ecommerce.security.UserDetailsCustom;
 import com.example.ecommerce.service.AccountService;
 import com.example.ecommerce.service.MailService;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
@@ -64,7 +63,6 @@ public class IAccountService implements AccountService {
                         .collect(Collectors.toList());
                 String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
                 String refreshJws = jwtUtils.generateRefreshTokens(username, listRoleString);
-//                UserDetailsCustom userDetailsCustom =
                 return JwtData.builder()
                         .tokenType("Bearer ")
                         .accessToken(accessJws)

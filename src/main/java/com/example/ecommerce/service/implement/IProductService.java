@@ -12,7 +12,6 @@ import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
-import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,9 +23,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -37,14 +34,12 @@ public class IProductService implements ProductService {
     private final VariantRepository variantRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final AttributeRepository attributeRepository;
-    private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
     private final VariantAttributeValueRepository variantAttributeValueRepository;
     private final ProductAttributeValueRepository productAttributeValueRepository;
     private final JsonConvert jsonConvert;
     private final CategoryMapper categoryMapper;
     private final FileService fileService;
-    private final ProductImageRepository productImageRepository;
     @Override
     public Product getProductById(Long id) {
         return null;

@@ -85,7 +85,7 @@ public class Product extends BaseEntity{
     @PrePersist
     public void onCreate(){
         this.sold = 0;
-        this.favorite = Long.valueOf(0);
+        this.favorite = 0L;
         this.isAvailable = true;
     }
 }

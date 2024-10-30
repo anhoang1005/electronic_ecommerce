@@ -1,6 +1,5 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.Category;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.ShopCategory;
 import com.example.ecommerce.entities.enums.BaseRole;
@@ -8,7 +7,6 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ErrorType;
 import com.example.ecommerce.exceptions.BaseException;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
-import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
 import com.example.ecommerce.payload.CategoryResponse;
 import com.example.ecommerce.payload.ObjectChangedActiveResponse;
@@ -24,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
