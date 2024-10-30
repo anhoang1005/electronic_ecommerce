@@ -8,6 +8,7 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
+import com.example.ecommerce.payload.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.ShopCategoryRepository;
 import com.example.ecommerce.repository.ShopRepository;
@@ -16,6 +17,7 @@ import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -31,6 +33,7 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     private final AuthenticationUtils authenticationUtils;
     @Override
     public ResponseBody createCategory(CategoryDto dto) {
+        log.info(dto.getCategoryName());
         List<String> roles = authenticationUtils.getRoleFromAuthentication();
         if(roles.isEmpty()){
             throw new UnauthorizedException("Sth wrong");
@@ -38,11 +41,9 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         log.info(roles.toString());
         ShopCategory category = new ShopCategory();
         category.setCategoryType(CategoryType.SHOP);
-        if(!ObjectUtils.isEmpty(dto.getShopId())){
-            Shop shop = shopRepository.findShopById(dto.getShopId());
-            if(ObjectUtils.isEmpty(shop)){
-                throw new RequestNotFoundException("Shop havent exists");
-            }
+        Shop shop = shopRepository.findShopById(dto.getShopId());
+        if(ObjectUtils.isEmpty(shop)){
+            throw new RequestNotFoundException("Shop havent exists");
         }
         category.setCategoryName(dto.getCategoryName());
         category.setDescription(dto.getDescription());
@@ -64,8 +65,17 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         category.setDescription(dto.getDescription());
 
         shopCategoryRepository.save(category);
-        //Todo : thieu response
-        return null;
+
+        CategoryResponse categoryResponse = new CategoryResponse();
+        categoryResponse.setCategoryId(category.getId());
+        categoryResponse.setCategoryName(category.getCategoryName());
+
+        ResponseBody responseBody = new ResponseBody(
+                categoryResponse,
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+        return responseBody;
 
     }
 }

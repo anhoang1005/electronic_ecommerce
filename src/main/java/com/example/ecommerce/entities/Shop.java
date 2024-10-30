@@ -122,7 +122,7 @@ public class Shop extends BaseEntity{
     private List<Users> listUsersFollowShop;
 
     @OneToMany(mappedBy = "shopOfCategory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Category> listCategoryOfShop;
+    private List<ShopCategory> listCategoryOfShop;
 
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
