@@ -1,6 +1,7 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.Roles;
+import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.AccountLockedException;
@@ -63,13 +64,14 @@ public class IAccountService implements AccountService {
                         .collect(Collectors.toList());
                 String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
                 String refreshJws = jwtUtils.generateRefreshTokens(username, listRoleString);
+                Shop shop = usersEntity.getShopOfUsers();
                 return JwtData.builder()
                         .tokenType("Bearer ")
                         .accessToken(accessJws)
                         .refreshToken(refreshJws)
                         .dob(dateMapperUtils.localDateToString(usersEntity.getDob()))
                         .gender(usersEntity.getGender().getValueString())
-                        .shopCode(usersEntity.getShopOfUsers().getShopCode())
+                        .shopCode((shop!=null) ? shop.getShopCode() : null)
                         .userCode(usersEntity.getUserCode())
                         .fullName(usersEntity.getFirstName() + " " + usersEntity.getLastName())
                         .imageUrl(usersEntity.getImageUrl())
