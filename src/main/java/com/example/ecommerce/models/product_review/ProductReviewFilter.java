@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 @Builder
 public class ProductReviewFilter {
     private String productId;

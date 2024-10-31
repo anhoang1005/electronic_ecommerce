@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 @Builder
 public class ProductReviewRequest {
     private Long reviewId;

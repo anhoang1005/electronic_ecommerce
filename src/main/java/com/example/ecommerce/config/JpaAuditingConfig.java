@@ -27,8 +27,12 @@ public class JpaAuditingConfig {
             if (authentication == null || !authentication.isAuthenticated()) {
             	return Optional.of("guest");
             }
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return Optional.ofNullable(userDetails.getEmail());
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) principal;
+                return Optional.ofNullable(userDetails.getEmail());
+            }
+            return Optional.of("guest");
         }
     }
 }

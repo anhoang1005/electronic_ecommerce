@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
 @Builder
 public class ProductReviewDto {
     @JsonProperty("review_id")
