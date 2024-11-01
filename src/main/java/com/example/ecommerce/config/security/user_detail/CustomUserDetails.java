@@ -1,28 +1,30 @@
-package com.example.ecommerce.security;
+package com.example.ecommerce.config.security.user_detail;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+
+@Data
 @NoArgsConstructor
-
-public class UserDetailsCustom implements UserDetails {
-    private Long userId;
+@AllArgsConstructor
+@Builder
+public class CustomUserDetails implements UserDetails {
+    private Long id;
+    private String userCode;
+    private String shopCode;
+    private String fullName;
     private String email;
+    private String username;
     private String password;
-    private Collection<? extends GrantedAuthority> authorities;
-
-    public UserDetailsCustom(Long userId, String email, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.userId = userId;
-        this.email = email;
-        this.password = password;
-        this.authorities = authorities;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
+    private boolean active;
+    private boolean enable;
+    private Collection<SimpleGrantedAuthority> authorities;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -36,7 +38,7 @@ public class UserDetailsCustom implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class UserDetailsCustom implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.active;
     }
 
     @Override
@@ -56,6 +58,7 @@ public class UserDetailsCustom implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enable;
     }
+
 }

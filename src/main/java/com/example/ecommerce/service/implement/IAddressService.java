@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Service
 public class IAddressService implements AddressService {
-    private final AuthenticationUtils authenUtils;
+    private final AuthenticationUtils authUtils;
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
     private final UsersRepository usersRepository;
@@ -32,8 +32,8 @@ public class IAddressService implements AddressService {
     @Override
     public ResponseBody customerGetAllAddress() {
         try{
-            String email = authenUtils.getEmailFromAuthentication();
-            List<Address> listAddress = addressRepository.getListAddressByUserEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            List<Address> listAddress = addressRepository.getListAddressByUserCode(userCode);
             List<AddressDto> listDtos = new ArrayList<>();
             if(listAddress!=null){
                 listDtos = listAddress.stream()
@@ -51,8 +51,8 @@ public class IAddressService implements AddressService {
     @Transactional
     public ResponseBody customerCreateAddress(AddressRequest req) {
         try{
-            String email = authenUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Address address = new Address();
             if(req.getAddressType() == 2){
                 address.setAddressType(Address.AddressType.VAN_PHONG);
@@ -87,9 +87,9 @@ public class IAddressService implements AddressService {
     @Transactional
     public ResponseBody customerUpdateAddress(AddressRequest req) {
         try{
-            String email = authenUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
-            Address address = addressRepository.findAddressByIdAndUserEmail(req.getAddressId(), email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
+            Address address = addressRepository.findAddressByIdAndUserCode(req.getAddressId(), userCode);
             if(req.getAddressType() == 2){
                 address.setAddressType(Address.AddressType.VAN_PHONG);
             } else{
@@ -122,8 +122,8 @@ public class IAddressService implements AddressService {
     @Override
     public ResponseBody customerDeleteAddress(Long addressId) {
         try{
-            String email = authenUtils.getEmailFromAuthentication();
-            Address address = addressRepository.findAddressByIdAndUserEmail(addressId, email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Address address = addressRepository.findAddressByIdAndUserCode(addressId, userCode);
             addressRepository.delete(address);
             return new ResponseBody("",
                     ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);

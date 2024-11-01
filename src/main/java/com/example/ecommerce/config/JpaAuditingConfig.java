@@ -1,5 +1,6 @@
 package com.example.ecommerce.config;
 
+import com.example.ecommerce.config.security.user_detail.CustomUserDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -26,7 +27,12 @@ public class JpaAuditingConfig {
             if (authentication == null || !authentication.isAuthenticated()) {
             	return Optional.of("guest");
             }
-            return Optional.ofNullable(authentication.getName());
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) principal;
+                return Optional.ofNullable(userDetails.getEmail());
+            }
+            return Optional.of("guest");
         }
     }
 }

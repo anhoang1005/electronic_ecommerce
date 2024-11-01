@@ -14,10 +14,10 @@ import java.util.Optional;
 public interface ShopReviewRepository extends JpaRepository<ShopReview, Long> {
 
     @Query(value = "select sr from ShopReview sr " +
-            "where sr.usersOfShopReview.email = :email " +
+            "where sr.usersOfShopReview.userCode = :userCode " +
             "and sr.shopOfShopReview.shopCode = :shopCode")
-    Optional<ShopReview> findShopReviewByUserEmailAndShopCode(
-            @Param("email") String email,
+    Optional<ShopReview> findShopReviewByUserCodeAndShopCode(
+            @Param("userCode") String userCode,
             @Param("shopCode") String shopCode);
 
     ShopReview findShopReviewById(Long id);
@@ -31,8 +31,8 @@ public interface ShopReviewRepository extends JpaRepository<ShopReview, Long> {
             @Param("rating") Integer rating,
             Pageable pageable);
 
-    @Query("select sr from ShopReview sr where sr.shopOfShopReview.usersInShop.email = :ownerEmail " +
+    @Query("select sr from ShopReview sr where sr.shopOfShopReview.shopCode = :shopCode " +
             "and sr.usersOfShopReview.userCode = :userCode")
-    Optional<ShopReview> ownerFindReviewByUsersCodeAndOwnerShopEmail(@Param("ownerEmail") String ownerEmail,
+    Optional<ShopReview> ownerFindReviewByUsersCodeAndShopCode(@Param("shopCode") String shopCode,
                                                                      @Param("userCode") String userCode);
 }

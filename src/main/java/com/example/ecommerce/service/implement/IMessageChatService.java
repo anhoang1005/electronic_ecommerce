@@ -44,9 +44,8 @@ public class IMessageChatService implements MessageChatService {
     @Override
     public ResponseBody shopOwnerGetAllMessageChat(MessageChatFilter filter) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
-            Shop shop = users.getShopOfUsers();
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            Shop shop = shopRepository.findShopByShopCode(shopCode);
             if (shop == null) {
                 throw new RequestNotFoundException("ERROR");
             }
@@ -74,15 +73,11 @@ public class IMessageChatService implements MessageChatService {
     @Override
     public ResponseBody customerGetAllMessageChat(MessageChatFilter filter) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
-            if (users == null) {
-                throw new RequestNotFoundException("ERROR");
-            }
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
             Pageable pageable = PageRequest.of(
                     filter.getPageNumber() - 1, filter.getPageSize(), Sort.by(Sort.Order.desc("modifiedAt")));
             Page<MessageChat> page = messageChatRepository.getListMessageChatOfShop(
-                    filter.getShopCode(), users.getUserCode(), pageable);
+                    filter.getShopCode(), userCode, pageable);
             List<MessageChatDto> listChat = page.stream()
                     .map(messageChatMapper::entityToCustomerMessageChatDto)
                     .collect(Collectors.toList());
@@ -104,18 +99,19 @@ public class IMessageChatService implements MessageChatService {
     @Transactional
     public ResponseBody usersCreateShopMessageChat(String shopCode, String userCode, Boolean isShop) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
             MessageChat chat = new MessageChat();
             Users users;
             Shop shop;
             if (isShop) {
+                String ownerShopCode = authUtils.getUserFromAuthentication().getShopCode();
                 users = usersRepository.findUsersByUserCode(userCode);
-                shop = usersRepository.findUsersEntitiesByEmail(email).getShopOfUsers();
+                shop = shopRepository.findShopByShopCode(ownerShopCode);
                 if (messageChatRepository.getMessageChatByShopCodeAndUserCode(userCode, shop.getShopCode()).isPresent()) {
                     return new ResponseBody("CHAT_EXISTED", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
                 }
             } else {
-                users = usersRepository.findUsersEntitiesByEmail(email);
+                String customerShopCode = authUtils.getUserFromAuthentication().getUserCode();
+                users = usersRepository.findUsersByUserCode(customerShopCode);
                 shop = shopRepository.findShopByShopCode(shopCode);
                 if (messageChatRepository.getMessageChatByShopCodeAndUserCode(users.getUserCode(), shop.getShopCode()).isPresent()) {
                     return new ResponseBody("CHAT_EXISTED", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
@@ -231,7 +227,7 @@ public class IMessageChatService implements MessageChatService {
     @Transactional
     public ResponseBody userRemoveMessage(Long messageId) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
+            String email = authUtils.getUserFromAuthentication().getEmail();
             Message message = messageRepository.findById(messageId)
                     .orElseThrow(() -> new RequestNotFoundException("MESSAGE_NOT_FOUND"));
             if(message.getCreatedBy().equals(email)){

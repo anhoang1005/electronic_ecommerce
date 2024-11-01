@@ -1,5 +1,6 @@
 package com.example.ecommerce.utils;
 
+import com.example.ecommerce.config.security.user_detail.CustomUserDetails;
 import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.entities.enums.ErrorType;
@@ -16,23 +17,16 @@ import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationUtils {
-	
-	public boolean checkUsersAuthentication(String email) {
-		boolean isSuccess = true;
+
+	public CustomUserDetails getUserFromAuthentication(){
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || !authentication.getName().equals(email)) {
-			isSuccess = false;
+		if (authentication != null && authentication.isAuthenticated()) {
+			CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+			return userDetails;
 		}
-		return isSuccess;
+		return null;
 	}
 
-	public String getEmailFromAuthentication() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || authentication.getName()==null) {
-			return null;
-		}
-		return authentication.getName();
-	}
 	public List<String> getRoleFromAuthentication() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || authentication.getAuthorities() == null) {

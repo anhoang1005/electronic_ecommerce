@@ -12,12 +12,12 @@ import java.util.List;
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Query(value = "select a from Address a " +
-            "where a.usersEntityInAddress.email = :userEmail")
-    List<Address> getListAddressByUserEmail(@Param("userEmail") String userEmail);
+            "where a.usersEntityInAddress.userCode = :userCode")
+    List<Address> getListAddressByUserCode(@Param("userCode") String userCode);
 
     @Query(value = "select a from Address a " +
             "where a.id = :addressId " +
-            "and a.usersEntityInAddress.email = :email")
-    Address findAddressByIdAndUserEmail(@Param("addressId") Long addressId,
-                                        @Param("email") String email);
+            "and a.usersEntityInAddress.userCode = :userCode")
+    Address findAddressByIdAndUserCode(@Param("addressId") Long addressId,
+                                        @Param("userCode") String userCode);
 }

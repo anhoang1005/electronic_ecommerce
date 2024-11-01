@@ -16,6 +16,7 @@ public class AddressMapper {
                                 + ", " + address.getWardName()
                                 + ", " + address.getDistrictName()
                                 + ", " + address.getProvinceName())
+                .houseName(address.getHouseName())
                 .wardName(address.getWardName())
                 .districtName(address.getDistrictName())
                 .provinceName(address.getProvinceName())

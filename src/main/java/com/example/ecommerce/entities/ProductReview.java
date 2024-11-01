@@ -27,7 +27,7 @@ public class ProductReview extends BaseEntity{
     private String tag;
 
     @Column(nullable = false)
-    private String isShopReply;
+    private Boolean isShopReply;
 
     @Column(nullable = true, columnDefinition = "TEXT")
     private String shopReply;
@@ -36,11 +36,21 @@ public class ProductReview extends BaseEntity{
     private Integer likeCount;
 
     @Column(nullable = false)
-    private String active;
+    private Boolean active;
+
+    @PrePersist
+    public void initializeDefaultValues() {
+        this.active = true;
+        this.likeCount = 0;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product productOfProductReview;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Users usersOfProductReview;
 
     @ManyToMany(mappedBy = "listProductReviewUserLike", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Users> listUsersLikeReview;

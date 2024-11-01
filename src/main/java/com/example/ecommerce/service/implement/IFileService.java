@@ -37,7 +37,6 @@ import java.util.concurrent.CompletableFuture;
 public class IFileService implements FileService {
     private final Cloudinary cloudinary;
     private final ShopRepository shopRepository;
-    private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud

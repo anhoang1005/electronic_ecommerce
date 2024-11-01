@@ -64,8 +64,8 @@ public class IShopReviewService implements ShopReviewService {
     @Override
     public ResponseBody customerGetTheirReviewOfShop(String shopCode) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
-            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserEmailAndShopCode(email, shopCode);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserCodeAndShopCode(userCode, shopCode);
             ShopReviewDto reviewDto = srOptional.map(shopReviewMapper::entityToShopReviewDto)
                     .orElse(null);
             if(reviewDto!=null){
@@ -83,8 +83,8 @@ public class IShopReviewService implements ShopReviewService {
     @Transactional
     public ResponseBody customerCreateReview(ShopReviewRequest req) {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Users users = usersRepository.findUsersEntitiesByEmail(email);
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Shop shop = shopRepository.findShopByShopCode(req.getShopCode());
             if (shop == null || users == null) {
                 throw new RequestNotFoundException("ERROR");
@@ -114,8 +114,8 @@ public class IShopReviewService implements ShopReviewService {
     @Transactional
     public ResponseBody customerUpdateReview(ShopReviewRequest req) {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserEmailAndShopCode(email, req.getShopCode());
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserCodeAndShopCode(userCode, req.getShopCode());
             if(srOptional.isPresent()){
                 ShopReview review = srOptional.get();
                 Shop shop = review.getShopOfShopReview();
@@ -147,9 +147,9 @@ public class IShopReviewService implements ShopReviewService {
     @Transactional
     public ResponseBody customerDeleteReview(String shopCode) {
         try {
-            String email = authUtils.getEmailFromAuthentication();
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
             Shop shop = shopRepository.findShopByShopCode(shopCode);
-            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserEmailAndShopCode(email, shopCode);
+            Optional<ShopReview> srOptional = shopReviewRepository.findShopReviewByUserCodeAndShopCode(userCode, shopCode);
             if(srOptional.isPresent()){
                 ShopReview review = srOptional.get();
                 shop.setReviewCount(shop.getReviewCount() - 1);
@@ -203,9 +203,9 @@ public class IShopReviewService implements ShopReviewService {
     @Override
     public ResponseBody ownerShopReplyShopReview(String userCode, String reply) {
         try{
-            String email = authUtils.getEmailFromAuthentication();
-            Optional<ShopReview> srOptional = shopReviewRepository.ownerFindReviewByUsersCodeAndOwnerShopEmail(
-                    email, userCode);
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            Optional<ShopReview> srOptional = shopReviewRepository.ownerFindReviewByUsersCodeAndShopCode(
+                    shopCode, userCode);
             if(srOptional.isPresent()){
                 ShopReview review = srOptional.get();
                 review.setIsReply(true);

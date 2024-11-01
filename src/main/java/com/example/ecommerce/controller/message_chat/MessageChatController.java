@@ -20,7 +20,7 @@ public class MessageChatController {
         return ResponseEntity.ok(messageChatService.customerGetAllMessageChat(filter));
     }
 
-    @PostMapping("/api/shop/message-chat")
+    @PostMapping("/api/owner/message-chat")
     public ResponseEntity<?> shopGetAllChatApi(
             @RequestBody MessageChatFilter filter){
         return ResponseEntity.ok(messageChatService.shopOwnerGetAllMessageChat(filter));

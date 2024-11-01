@@ -75,13 +75,11 @@ public class ICategoryService implements CategoryService {
         CategoryResponse categoryResponse = new CategoryResponse();
         categoryResponse.setCategoryId(category.getId());
         categoryResponse.setCategoryName(category.getCategoryName());
-
-        ResponseBody responseBody = new ResponseBody(
+        return new ResponseBody(
                 categoryResponse,
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );
-        return responseBody;
     }
 
     @Override
