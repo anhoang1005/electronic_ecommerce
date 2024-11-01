@@ -6,5 +6,6 @@ public enum ErrorType {
     USER_NOT_FOUND,
     SHOP_NOT_FOUND,
     CATEGORY_NOT_FOUND,
-    BRAND_NOT_FOUND
+    BRAND_NOT_FOUND,
+    PRODUCT_NOT_FOUND
 }

@@ -29,6 +29,7 @@ public class ShopCategory {
     @JsonManagedReference
     private List<ShopCategory> childrens;
 
+
     @Column
     private Integer categoryLevel;
 
@@ -48,7 +49,17 @@ public class ShopCategory {
     @Column(nullable = false)
     private Boolean active;
 
+    @Column(nullable = false,name ="id_delete")
+    private Boolean isDelete;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop shopOfCategory;
+    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
+    private List<ShopCategoryProduct> shopCategoryProducts;
+    @PrePersist
+    public void onCreate(){
+        this.isDelete = false;
+        this.active = false;
+    }
 }

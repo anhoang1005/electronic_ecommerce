@@ -49,6 +49,9 @@ public class Category extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean active;
+
+//    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
+//    private List<CategoryProduct> categoryProducts;
 //
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "shop_id")

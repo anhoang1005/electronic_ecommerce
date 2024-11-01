@@ -1,8 +1,6 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.Category;
-import com.example.ecommerce.entities.Shop;
-import com.example.ecommerce.entities.ShopCategory;
+import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ErrorType;
@@ -13,16 +11,15 @@ import com.example.ecommerce.models.category.CategoryDto;
 import com.example.ecommerce.payload.CategoryResponse;
 import com.example.ecommerce.payload.ObjectChangedActiveResponse;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.repository.RolesRepository;
-import com.example.ecommerce.repository.ShopCategoryRepository;
-import com.example.ecommerce.repository.ShopRepository;
-import com.example.ecommerce.repository.UsersRepository;
+import com.example.ecommerce.payload.UpdateObjectsResponse;
+import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.IShopCategoryService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -35,8 +32,9 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     private final ShopRepository shopRepository;
     private final RandomUtils randomUtils;
     private final AuthenticationUtils authenticationUtils;
-    private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
+    private final ProductRepository productRepository;
+    private final ShopCategoryProductRepository shopCategoryProductRepository;
     @Override
     public ResponseBody createCategory(CategoryDto dto, Long shopId) {
         Shop shop = shopRepository.findShopById(shopId);
@@ -60,6 +58,8 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         category.setCategoryName(dto.getCategoryName());
         category.setDescription(dto.getDescription());
         category.setActive(false);
+        category.setShopOfCategory(shop);
+        category.setShopOfCategory(shop);
         if(!ObjectUtils.isEmpty(dto.getParentId())){
             ShopCategory parent = shopCategoryRepository.findShopCategoriesById(dto.getParentId());
             if(ObjectUtils.isEmpty(parent)){
@@ -100,6 +100,11 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
             shop.setActive(false);
             shopRepository.save(shop);
 
+            List<ShopCategoryProduct> shopCategoryProducts = shop.getShopCategoryProducts().stream().toList();
+            for(ShopCategoryProduct scp : shopCategoryProducts){
+                scp.setActive(false);
+            }
+
             ObjectChangedActiveResponse objectChangedActiveResponse = new ObjectChangedActiveResponse();
             objectChangedActiveResponse.setObjectActive(shop.getActive());
             objectChangedActiveResponse.setObjectChangedId(shop.getId());
@@ -114,18 +119,65 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     }
 
     @Override
+    @Transactional
     public ResponseBody addProduct(Long id, Long shopId, Long productId) {
         Shop shop = shopRepository.findShopById(shopId);
         authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
                 rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
-        return null;
+
+        ShopCategory shopCategory = shopCategoryRepository.findById(id)
+                .orElseThrow(
+                        () -> new RequestNotFoundException(ErrorType.CATEGORY_NOT_FOUND.toString())
+                );
+
+        Product product = productRepository.findById(productId)
+                        .orElseThrow(
+                                () -> new RequestNotFoundException(ErrorType.PRODUCT_NOT_FOUND.toString())
+                        );
+        ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
+        shopCategoryProduct.setProduct(product);
+        shopCategoryProduct.setShopCategory(shopCategory);
+        shopCategoryProduct.setActive(true);
+        shopCategoryProductRepository.save(shopCategoryProduct);
+
+        UpdateObjectsResponse updateObjectsResponse = new UpdateObjectsResponse();
+        updateObjectsResponse.setUpdatedObjectId(shopCategory.getId());
+        updateObjectsResponse.setAfterUpdatedAmount(shopCategory.getShopCategoryProducts().size());
+        return new ResponseBody(
+                updateObjectsResponse,
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
     }
 
     @Override
+    @Transactional
     public ResponseBody removeProduct(Long id, Long shopId, Long productId) {
         Shop shop = shopRepository.findShopById(shopId);
         authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
                 rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
-        return null;
+
+        ShopCategory shopCategory = shopCategoryRepository.findById(id)
+                .orElseThrow(
+                        () -> new RequestNotFoundException(ErrorType.CATEGORY_NOT_FOUND.toString())
+                );
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new RequestNotFoundException(ErrorType.PRODUCT_NOT_FOUND.toString())
+                );
+
+        ShopCategoryProduct shopCategoryProduct = shopCategoryProductRepository.findShopCategoryProductByProductIdAndShopCategoryId(product.getId(), shopCategory.getId());
+        shopCategoryProduct.setActive(false);
+        shopCategoryProductRepository.save(shopCategoryProduct);
+
+        UpdateObjectsResponse updateObjectsResponse = new UpdateObjectsResponse();
+        updateObjectsResponse.setUpdatedObjectId(shopCategory.getId());
+        updateObjectsResponse.setAfterUpdatedAmount(shopCategory.getShopCategoryProducts().size());
+        return new ResponseBody(
+                updateObjectsResponse,
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
     }
 }
