@@ -49,9 +49,5 @@ public class Category extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean active;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "shop_id")
-//    private Shop shopOfCategory;
 
 }

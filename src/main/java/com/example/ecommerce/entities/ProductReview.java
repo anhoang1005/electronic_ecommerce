@@ -42,6 +42,8 @@ public class ProductReview extends BaseEntity{
     public void initializeDefaultValues() {
         this.active = true;
         this.likeCount = 0;
+        this.isShopReply = false;
+        this.shopReply = null;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

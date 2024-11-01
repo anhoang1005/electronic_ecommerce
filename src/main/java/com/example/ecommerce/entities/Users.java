@@ -7,7 +7,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_user_usercode", columnList = "userCode")
@@ -52,17 +53,30 @@ public class Users extends BaseEntity{
     @Column(nullable = true)
     private String verifyCode;
 
+    private Long readNotifyId;
+
+    private Integer shopFollowCount;
+
     @Column(nullable = false)
     private Boolean active;
 
     @Column(nullable = false)
     private Boolean enable;
 
+    @PrePersist
+    void createUsers(){
+        this.shopFollowCount = 0;
+        this.readNotifyId = 0L;
+    }
+
     @OneToOne(mappedBy = "usersInShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Shop shopOfUsers;
 
     @OneToMany(mappedBy = "usersEntityInAddress", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Address> listAddressEntity;
+
+    @OneToMany(mappedBy = "usersOfNotifyUsers" ,fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotificationUsers> listNotifyUserOfUser;
 
     @OneToMany(mappedBy = "usersOfMessageStory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<MessageChat> messageChatOfUser;

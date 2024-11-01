@@ -2,17 +2,13 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.payload.socket_payload.NotificationData;
+import com.example.ecommerce.payload.socket_payload.SocketBody;
 
 public interface NotificationService {
-    ResponseBody sendNotifyToOneUser(String userCode, String role, NotificationData data);
-    ResponseBody sendNotifyToManyUser();
-    ResponseBody sendNotifyToAllUser();
+    ResponseBody sendNotifyToOneUser(String userCode, SocketBody.Type type, NotificationData data);
+    ResponseBody sendNotifyToAllUser(SocketBody.Type type, NotificationData data);
+    ResponseBody shopSendNotifyToAllUserFollow(NotificationData data);
 
-    ResponseBody sendSystemNotifyToAllUser(NotificationData data);
-    ResponseBody sendSystemNotifyToAllShopOwner(NotificationData data);
-    ResponseBody sendSystemNotifyToAllAdmin(NotificationData data);
-
-    ResponseBody shopSendNotifyToOneCustomer();
-    ResponseBody shopSendNotifyToAllCustomer();
-
+    ResponseBody customerGetTheirNotification(int pageNumber, int pageSize);
+    ResponseBody customerGetNotificationDetail(Long notifyId);
 }

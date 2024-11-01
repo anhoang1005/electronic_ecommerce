@@ -1,5 +1,6 @@
 package com.example.ecommerce.payload.socket_payload;
 
+import com.example.ecommerce.entities.Notification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
