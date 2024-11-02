@@ -13,5 +13,5 @@ public interface ProductReviewService {
     ResponseBody shopOwnerReplyProductReview(Long reviewId, String shopReply);
     ResponseBody customerGetTheirReview(Long productId);
 
-    ResponseBody customerLikeProductReview(Long reviewId, boolean isLike);
+    ResponseBody customerLikeProductReview(Long reviewId, boolean like);
 }

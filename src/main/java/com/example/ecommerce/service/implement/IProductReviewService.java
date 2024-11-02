@@ -87,6 +87,8 @@ public class IProductReviewService implements ProductReviewService {
                 review.setImageComment(null);
             }
             review = productReviewRepository.save(review);
+            productRepository.findAndLockUpdateReview(
+                    req.getProductId(), 0, review.getRating(), "INSERT");
             return new ResponseBody(productReviewMapper.entityToPRDto(review), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Create review error! Error: {}", e.getMessage());
@@ -101,6 +103,7 @@ public class IProductReviewService implements ProductReviewService {
             String userCode = authUtils.getUserFromAuthentication().getUserCode();
             ProductReview review = productReviewRepository.findById(req.getReviewId())
                     .orElseThrow(() -> new RequestNotFoundException("ERROR"));
+            Integer oldStar = review.getRating();
             if(review.getUsersOfProductReview().getUserCode().equals(userCode)){
                 throw new UnauthorizedException("Unauthorized");
             }
@@ -112,6 +115,10 @@ public class IProductReviewService implements ProductReviewService {
                 review.setImageComment(responseBody.getData().toString());
             }
             review = productReviewRepository.save(review);
+            if(!review.getRating().equals(oldStar)){
+                productRepository.findAndLockUpdateReview(
+                        req.getProductId(), oldStar, review.getRating(), "UPDATE");
+            }
             return new ResponseBody(productReviewMapper.entityToPRDto(review), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Update review error! Error: {}", e.getMessage());
@@ -126,6 +133,8 @@ public class IProductReviewService implements ProductReviewService {
             ProductReview review = productReviewRepository.findByProductIdAndUserId(productId, userId)
                     .orElseThrow(() -> new RequestNotFoundException("ERROR"));
             productReviewRepository.delete(review);
+            productRepository.findAndLockUpdateReview(
+                    productId, review.getRating(), 0, "DELETE");
             return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Delete review error! Error: {}", e.getMessage());
@@ -164,7 +173,7 @@ public class IProductReviewService implements ProductReviewService {
     }
 
     @Override
-    public ResponseBody customerLikeProductReview(Long reviewId, boolean isLike) {
+    public ResponseBody customerLikeProductReview(Long reviewId, boolean like) {
         return null;
     }
 }
