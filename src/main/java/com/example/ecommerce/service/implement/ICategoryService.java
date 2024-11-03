@@ -7,7 +7,7 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
-import com.example.ecommerce.payload.CategoryResponse;
+import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.CategoryRepository;
 import com.example.ecommerce.repository.ShopRepository;

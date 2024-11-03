@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -41,6 +42,7 @@ public class Variant extends BaseEntity{
     private String productVariation;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonIgnore
     private Product product;
 
 

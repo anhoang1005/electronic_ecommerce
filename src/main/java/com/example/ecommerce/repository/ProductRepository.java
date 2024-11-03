@@ -30,4 +30,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
         product.setRating(rating);
         save(product);
     }
+
+    Product findProductById(Long id);
 }

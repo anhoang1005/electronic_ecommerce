@@ -1,6 +1,9 @@
 package com.example.ecommerce.config;
 
 import com.example.ecommerce.utils.JsonConvert;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.javafaker.Faker;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +29,17 @@ public class AppConfig {
         return new Random();
     }
 
+
     @Bean
-    public JsonConvert jsonConvert(){
-        return new JsonConvert();
+    public ObjectMapper objectMapper(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
+    }
+    @Bean
+    public JsonConvert jsonConvert(ObjectMapper objectMapper){
+        return new JsonConvert(objectMapper);
     }
 
 }

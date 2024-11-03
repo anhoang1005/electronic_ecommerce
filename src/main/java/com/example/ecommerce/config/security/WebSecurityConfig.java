@@ -54,6 +54,7 @@ public class WebSecurityConfig {
 										"/api/faker/**",
 										"/ws/**",
 										"/ws").permitAll()
+				.requestMatchers("/api/fake/**").permitAll()
 								.requestMatchers(
 										"/api/root/**").hasRole(BaseRole.ROOT.toString())
                                 .requestMatchers(

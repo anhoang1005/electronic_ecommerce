@@ -1,14 +1,14 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "shop", indexes = {
         @Index(name = "idx_shop_shopCode", columnList = "shop_code")
@@ -89,6 +89,9 @@ public class Shop extends BaseEntity{
     @Version
     private long version;
 
+//    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+//    private List<ShopCategoryProduct> shopCategoryProducts;
+
     @PrePersist
     public void initializeDefaultValues() {
         this.totalReview = 0L;
@@ -129,12 +132,6 @@ public class Shop extends BaseEntity{
 
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
-
-    @OneToMany(mappedBy = "shopOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Post> listPostOfShop;
-
-    @OneToMany(mappedBy = "shopOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PostComment> listPostCommentOfShop;
 
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),
