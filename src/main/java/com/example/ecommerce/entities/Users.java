@@ -96,6 +96,9 @@ public class Users extends BaseEntity{
     @OneToMany(mappedBy = "usersOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PostComment> listPostCommentOfUsers;
 
+    @OneToMany(mappedBy = "usersOfPostReaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostReaction> listPostReactionOfUser;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_roles",

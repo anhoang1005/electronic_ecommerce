@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.entities.enums.BaseRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,12 +35,19 @@ public class PostComment extends BaseEntity{
     @Column(nullable = false)
     private Boolean active;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BaseRole commentRole;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private PostComment commentParent;
 
     @OneToMany(mappedBy = "commentParent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PostComment> listPostCommentChildren;
+
+    @OneToMany(mappedBy = "postCommentOfReaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostReaction> listReactionOfComment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
