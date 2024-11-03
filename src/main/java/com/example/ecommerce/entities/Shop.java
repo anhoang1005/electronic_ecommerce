@@ -2,16 +2,16 @@ package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "shop", indexes = {
-        @Index(name = "idx_shop_shopCode", columnList = "shop_code")
+        @Index(name = "idx_shop_shopCode", columnList = "shopCode")
 })
 public class Shop extends BaseEntity{
 
@@ -19,7 +19,7 @@ public class Shop extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "shop_code", columnDefinition = "VARCHAR(15)", unique = true)
+    @Column(columnDefinition = "VARCHAR(15)", unique = true)
     private String shopCode;
 
     @Enumerated(EnumType.STRING)

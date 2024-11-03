@@ -4,11 +4,14 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "category", indexes = {
         @Index(name = "idx_category_parent_id", columnList = "parentId")

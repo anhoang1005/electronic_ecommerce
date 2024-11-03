@@ -20,20 +20,18 @@ public class ShopCategoryController {
         return iShopCategoryService.createCategory(dto,Long.valueOf(httpServletRequest.getHeader("shop-id")));
     }
     @DeleteMapping("/{id}")
-    public ResponseBody delete(@PathVariable Long id,
-                               HttpServletRequest httpServletRequest){
-        return iShopCategoryService.unActiveCategory(id,Long.valueOf(httpServletRequest.getHeader("shop-id")));
+    public ResponseBody delete(@PathVariable Long id){
+        return iShopCategoryService.unActiveCategory(id);
     }
     @PostMapping("/{id}/add-product/{idProduct}")
     public ResponseBody addProduct(@PathVariable("id")Long id,
-                                   @PathVariable("idProduct") Long idProduct,
-                                   HttpServletRequest httpServletRequest){
-        return iShopCategoryService.addProduct(id,Long.valueOf(httpServletRequest.getHeader("shop-id")),idProduct);
+                                   @PathVariable("idProduct") Long idProduct){
+        return iShopCategoryService.addProduct(id,idProduct);
     }
     @PostMapping("/{id}/remove-product/{idProduct}")
     public ResponseBody removeProduct(@PathVariable("id")Long id,
-                                   @PathVariable("idProduct") Long idProduct,
-                                   HttpServletRequest httpServletRequest){
-        return iShopCategoryService.removeProduct(id,Long.valueOf(httpServletRequest.getHeader("shop-id")),idProduct);
+                                   @PathVariable("idProduct") Long idProduct
+                                  ){
+        return iShopCategoryService.removeProduct(id,idProduct);
     }
 }

@@ -22,12 +22,33 @@ public class FakerController {
     }
     @PostMapping("/shops")
     public String fakerShop(){
-        fakeService.generateAndInsertFakeShopData();
+        fakeService.generateAndInsertFakeShopDate();
         return "done";
     }
     @PostMapping("/roots")
     public String createRoot(){
         fakeService.createRootAccount();
+        return "done";
+    }
+    @PostMapping("/shop-categories")
+    public String fakerShopCategory(){
+        fakeService.generateAndInserFakeShopCategoryData();
+        return "done";
+    }
+
+    @PostMapping("/attributes")
+    public String fakerAttributes(){
+        fakeService.generateAndInsertFakeAttributeData();
+        return "done";
+    }
+    @PostMapping("/brands")
+    public String fakerBrand(){
+        fakeService.generateAndInsertFakeBrand();
+        return "done";
+    }
+    @PostMapping("/products")
+    public String fakeProduct(){
+        fakeService.generateAndInsertFakeProductData();
         return "done";
     }
 }

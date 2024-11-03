@@ -1,4 +1,4 @@
-package com.example.ecommerce.payload;
+package com.example.ecommerce.payload.category;
 
 import lombok.Data;
 
