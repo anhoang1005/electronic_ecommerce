@@ -8,8 +8,11 @@ import com.example.ecommerce.entities.Shop;
 
 import com.example.ecommerce.entities.Variant;
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
+import com.example.ecommerce.mapper.post.PostMapper;
+import com.example.ecommerce.models.post.MediaUrl;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.ProductImageRepository;
 import com.example.ecommerce.repository.ProductRepository;
@@ -42,6 +45,8 @@ public class IFileService implements FileService {
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
     private final ProductDocumentService productDocumentService;
+    private final PostMapper postMapper;
+    private final PostRepository postRepository;
     private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
@@ -56,6 +61,25 @@ public class IFileService implements FileService {
             log.info(io.getMessage());
             throw new FileFailedUploadException("Failed upload file");
         }
+    }
+
+    @Async
+    @Override
+    public void uploadListFilePostToCloudinary(Post post, List<MultipartFile> listFile) {
+        List<MediaUrl> listMedia = new ArrayList<>();
+        int count = 1;
+        for(MultipartFile file : listFile){
+            try{
+                var data = this.cloudinary.uploader().upload(file.getBytes(), Map.of());
+                listMedia.add(new MediaUrl(count, data.get("url").toString()));
+            } catch (Exception e){
+                log.info(e.getMessage());
+                throw new FileFailedUploadException("ERROR");
+            }
+            count++;
+        }
+        post.setMediaUrl(postMapper.convertToDatabaseColumn(listMedia));
+        postRepository.save(post);
     }
 
     @Override
