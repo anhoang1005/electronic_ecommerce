@@ -12,6 +12,7 @@ import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
+import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,6 +41,8 @@ public class IProductService implements ProductService {
     private final JsonConvert jsonConvert;
     private final CategoryMapper categoryMapper;
     private final FileService fileService;
+    private final ProductImageRepository productImageRepository;
+    private final CategoryProductRepository categoryProductRepository;
     @Override
     public Product getProductById(Long id) {
         return null;
@@ -136,7 +139,9 @@ public class IProductService implements ProductService {
             }
             product.getVariants().add(variant);
         }
-        product.setCategory(category);
+
+
+//        product.setCategory(category);
         //
         for(ProductAttributeValue productAttributeValue : product.getProductAttributeValues()){
             productAttributeValue.setProduct(product);
@@ -160,6 +165,10 @@ public class IProductService implements ProductService {
             current = current.getParentCategory();
         }
         productRepository.save(product);
+        CategoryProduct categoryProduct = new CategoryProduct();
+        categoryProduct.setCategory(category);
+        categoryProduct.setProduct(product);
+        categoryProductRepository.save(categoryProduct);
         CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product,imagesUrl);
         return null;
     }

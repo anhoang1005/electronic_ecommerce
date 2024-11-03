@@ -59,11 +59,11 @@ public class Product extends BaseEntity{
     @Column(name = "product_ratings", columnDefinition = "MEDIUMTEXT")
     private String productRatings;
 
-    @Column(nullable = false,name = "is_available")
-    private Boolean isAvailable;
-
     @Column(nullable = false, name = "is_hidden")
     private Boolean isHidden;
+
+    @Column(nullable = false, name = "is_accepted")
+    private Boolean isAccepted;
 
     @OneToMany(mappedBy = "productOfProductImage")
     private List<ProductImage> listImageOfProduct;
@@ -78,8 +78,18 @@ public class Product extends BaseEntity{
 
     @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Variant> variants = new ArrayList<>();
+
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ProductAttributeValue> productAttributeValues = new ArrayList<>();
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "category_id")
+//    private Category category;
+
+    @OneToMany(mappedBy = "product")
+    private List<CategoryProduct> categoryProducts = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private List<ShopCategoryProduct> shopCategoryProducts = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -87,7 +97,8 @@ public class Product extends BaseEntity{
     @PrePersist
     public void onCreate(){
         this.sold = 0;
-        this.isAvailable = true;
+        this.favorite = 0L;
+        this.isAccepted = false;
         this.rating = 0.0;
         this.favorite = 0L;
         this.reviewCount = 0L;

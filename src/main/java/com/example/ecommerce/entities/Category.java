@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "category", indexes = {
-        @Index(name = "idx_category_parent_id", columnList = "parent_id")
+        @Index(name = "idx_category_parent_id", columnList = "parentId")
 })
 public class Category extends BaseEntity {
 
@@ -49,5 +49,12 @@ public class Category extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean active;
+
+//    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
+//    private List<CategoryProduct> categoryProducts;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "shop_id")
+//    private Shop shopOfCategory;
 
 }

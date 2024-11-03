@@ -89,6 +89,9 @@ public class Shop extends BaseEntity{
     @Version
     private long version;
 
+    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<ShopCategoryProduct> shopCategoryProducts;
+
     @PrePersist
     public void initializeDefaultValues() {
         this.totalReview = 0L;
