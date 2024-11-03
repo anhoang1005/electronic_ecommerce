@@ -7,12 +7,11 @@ import com.example.ecommerce.mapper.category.CategoryMapper;
 import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.variant.VariantDTO;
-import com.example.ecommerce.payload.CategoryResponse;
+import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
-import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,7 +48,7 @@ public class IProductService implements ProductService {
     }
 
     @Override
-    @Transactional
+
     public ResponseBody createProduct(ProductDTO dto, List<MultipartFile> productFile) {
         log.info(dto.toString());
         Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
@@ -62,7 +61,7 @@ public class IProductService implements ProductService {
         product.setProductSlug(StringFormatUtils.convertToSlug(dto.getTitle()));
         product.setCurrency(dto.getCurrency());
         product.setIsHidden(dto.isHidden());
-
+        product.setCategory(category);
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
         for(VariantDTO variantDTO : dto.getVariantDTOS()){
             Variant variant = new Variant();
@@ -140,8 +139,6 @@ public class IProductService implements ProductService {
             product.getVariants().add(variant);
         }
 
-
-//        product.setCategory(category);
         //
         for(ProductAttributeValue productAttributeValue : product.getProductAttributeValues()){
             productAttributeValue.setProduct(product);
@@ -164,12 +161,20 @@ public class IProductService implements ProductService {
             }
             current = current.getParentCategory();
         }
+        List<Variant> variants = product.getVariants();
+        try {
+            product.setVariations(jsonConvert.convertListObjectToJson(variants));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         productRepository.save(product);
         CategoryProduct categoryProduct = new CategoryProduct();
         categoryProduct.setCategory(category);
         categoryProduct.setProduct(product);
         categoryProductRepository.save(categoryProduct);
         CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product,imagesUrl);
+
+
         return null;
     }
 }

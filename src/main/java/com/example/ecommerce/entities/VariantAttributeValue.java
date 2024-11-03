@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class VariantAttributeValue {
 
     @ManyToOne
     @JoinColumn(name = "variant_id")
+    @JsonIgnore
     private Variant variant;
 
     @ManyToOne

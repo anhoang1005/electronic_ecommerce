@@ -4,11 +4,14 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "shop_categories")
 public class ShopCategory {
@@ -55,7 +58,7 @@ public class ShopCategory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop shopOfCategory;
-    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "shopCategory",fetch = FetchType.EAGER)
     private List<ShopCategoryProduct> shopCategoryProducts;
     @PrePersist
     public void onCreate(){

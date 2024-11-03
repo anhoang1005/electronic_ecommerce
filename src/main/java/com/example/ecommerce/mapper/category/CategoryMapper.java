@@ -1,7 +1,7 @@
 package com.example.ecommerce.mapper.category;
 
 import com.example.ecommerce.entities.Category;
-import com.example.ecommerce.payload.CategoryResponse;
+import com.example.ecommerce.payload.category.CategoryResponse;
 import org.springframework.stereotype.Component;
 
 @Component

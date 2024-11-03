@@ -48,7 +48,7 @@ public class AuthenticationUtils {
 			return null;
 		}
 		Object principal = authentication.getPrincipal();
-		if(principal instanceof Users user){
+		if(principal instanceof CustomUserDetails user){
 			return user.getId();
 		}
 		return null;

@@ -7,7 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 public class JsonConvert {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper ;
+    public JsonConvert(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     // json -> list<String> loai bo phan tu dau cuoi
     public final List<String> extractCategories(String json) throws JsonProcessingException{

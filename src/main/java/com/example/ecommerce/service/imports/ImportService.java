@@ -56,7 +56,7 @@ public class ImportService {
                 product.setVariations(getStringValue(row.getCell(24)));
 //                product.setBrand(getStringValue(row.getCell(26)));
                 product.setProductSlug("demo");
-                product.setIsAvailable(true);
+//                product.setIsAvailable(true);
                 product.setProductRatings(getStringValue(row.getCell(36)));
 //                product.setProductVariation(getStringValue(row.getCell(30)));
 

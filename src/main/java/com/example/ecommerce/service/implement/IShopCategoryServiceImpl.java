@@ -1,17 +1,15 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.*;
-import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ErrorType;
 import com.example.ecommerce.exceptions.BaseException;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
-import com.example.ecommerce.exceptions.users.UnauthorizedException;
 import com.example.ecommerce.models.category.CategoryDto;
-import com.example.ecommerce.payload.CategoryResponse;
-import com.example.ecommerce.payload.ObjectChangedActiveResponse;
+import com.example.ecommerce.payload.category.CategoryResponse;
+import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.payload.UpdateObjectsResponse;
+import com.example.ecommerce.payload.object.UpdateObjectsResponse;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.IShopCategoryService;
 import com.example.ecommerce.utils.AuthenticationUtils;
@@ -35,20 +33,10 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     private final RolesRepository rolesRepository;
     private final ProductRepository productRepository;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
+    private final UsersRepository usersRepository;
     @Override
     public ResponseBody createCategory(CategoryDto dto, Long shopId) {
         Shop shop = shopRepository.findShopById(shopId);
-//        Long userId = usersRepository.findUsersEntitiesByEmail(authenticationUtils.getEmailFromAuthentication()).getId();
-//        if(!shop.getUsersInShop().getId().equals(userId)){
-//            throw new UnauthorizedException("Unauthorized!");
-//        }
-//
-//        List<String> roles = authenticationUtils.getRoleFromAuthentication();
-//        if(roles.isEmpty()){
-//            throw new UnauthorizedException("Sth wrong");
-//        }
-        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
-                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
         ShopCategory category = new ShopCategory();
         category.setCategoryType(CategoryType.SHOP);
 
@@ -58,7 +46,6 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         category.setCategoryName(dto.getCategoryName());
         category.setDescription(dto.getDescription());
         category.setActive(false);
-        category.setShopOfCategory(shop);
         category.setShopOfCategory(shop);
         if(!ObjectUtils.isEmpty(dto.getParentId())){
             ShopCategory parent = shopCategoryRepository.findShopCategoriesById(dto.getParentId());
@@ -92,18 +79,21 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     }
 
     @Override
-    public ResponseBody unActiveCategory(Long id, Long shopId) {
-        Shop shop = shopRepository.findShopById(shopId);
-        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
-                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
-        if(!shop.getActive()){
-            shop.setActive(false);
-            shopRepository.save(shop);
+    public ResponseBody unActiveCategory(Long id) {
+        Users users = usersRepository.findUsersById(authenticationUtils.getUserIdFromAuthentication());
+        Shop shop = users.getShopOfUsers();
 
-            List<ShopCategoryProduct> shopCategoryProducts = shop.getShopCategoryProducts().stream().toList();
+        ShopCategory shopCategory = shopCategoryRepository.findById(id).orElseThrow(
+                () -> new RequestNotFoundException(ErrorType.CATEGORY_NOT_FOUND.toString())
+        );
+        if(!shopCategory.getActive()){
+            shopCategory.setActive(false);
+            List<ShopCategoryProduct> shopCategoryProducts = shopCategory.getShopCategoryProducts().stream().toList();
             for(ShopCategoryProduct scp : shopCategoryProducts){
                 scp.setActive(false);
             }
+            shopCategoryRepository.save(shopCategory);
+
 
             ObjectChangedActiveResponse objectChangedActiveResponse = new ObjectChangedActiveResponse();
             objectChangedActiveResponse.setObjectActive(shop.getActive());
@@ -120,10 +110,11 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
 
     @Override
     @Transactional
-    public ResponseBody addProduct(Long id, Long shopId, Long productId) {
-        Shop shop = shopRepository.findShopById(shopId);
-        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
-                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
+    public ResponseBody addProduct(Long id,Long productId) {
+        Users users = usersRepository.findUsersById(authenticationUtils.getUserIdFromAuthentication());
+        Shop shop = users.getShopOfUsers();
+//        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
+//                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
 
         ShopCategory shopCategory = shopCategoryRepository.findById(id)
                 .orElseThrow(
@@ -152,10 +143,9 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
 
     @Override
     @Transactional
-    public ResponseBody removeProduct(Long id, Long shopId, Long productId) {
-        Shop shop = shopRepository.findShopById(shopId);
-        authenticationUtils.globalCheckOwnerObjectItemByUserId(shop.getUsersInShop().getId(),
-                rolesRepository.findRolesByRoleName(BaseRole.CHUCUAHANG.toString()));
+    public ResponseBody removeProduct(Long id, Long productId) {
+        Users users = usersRepository.findUsersById(authenticationUtils.getUserIdFromAuthentication());
+        Shop shop = users.getShopOfUsers();
 
         ShopCategory shopCategory = shopCategoryRepository.findById(id)
                 .orElseThrow(

@@ -1,11 +1,14 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "shop", indexes = {
         @Index(name = "idx_shop_shopCode", columnList = "shopCode")
@@ -86,8 +89,8 @@ public class Shop extends BaseEntity{
     @Version
     private long version;
 
-    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<ShopCategoryProduct> shopCategoryProducts;
+//    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+//    private List<ShopCategoryProduct> shopCategoryProducts;
 
     @PrePersist
     public void initializeDefaultValues() {
