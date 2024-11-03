@@ -2,13 +2,19 @@ package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "message_chat")
+@Table(name = "message_chat", indexes = {
+        @Index(name = "idx_message_chat_user_id", columnList = "user_id"),
+        @Index(name = "idx_message_chat_shop_id", columnList = "shop_id"),
+})
 public class MessageChat extends BaseEntity{
 
     @Id

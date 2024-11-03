@@ -2,10 +2,15 @@ package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "message")
+@Table(name = "message", indexes = {
+        @Index(name = "idx_message_message_story_id", columnList = "message_story_id")
+})
 public class Message extends BaseEntity{
 
     @Id

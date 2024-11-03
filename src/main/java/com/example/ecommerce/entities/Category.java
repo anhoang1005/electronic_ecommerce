@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "category", indexes = {
-        @Index(name = "idx_category_parent_id", columnList = "parentId")
+        @Index(name = "idx_category_parent_id", columnList = "parent_id")
 })
 public class Category extends BaseEntity {
 

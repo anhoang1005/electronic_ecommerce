@@ -3,10 +3,13 @@ package com.example.ecommerce.entities;
 import com.example.ecommerce.payload.socket_payload.SocketBody;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "notification")
 public class Notification extends BaseEntity{

@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "shop", indexes = {
-        @Index(name = "idx_shop_shopCode", columnList = "shopCode")
+        @Index(name = "idx_shop_shopCode", columnList = "shop_code")
 })
 public class Shop extends BaseEntity{
 
@@ -19,7 +19,7 @@ public class Shop extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "VARCHAR(15)", unique = true)
+    @Column(name = "shop_code", columnDefinition = "VARCHAR(15)", unique = true)
     private String shopCode;
 
     @Enumerated(EnumType.STRING)
@@ -129,6 +129,12 @@ public class Shop extends BaseEntity{
 
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
+
+    @OneToMany(mappedBy = "shopOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Post> listPostOfShop;
+
+    @OneToMany(mappedBy = "shopOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostComment> listPostCommentOfShop;
 
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),

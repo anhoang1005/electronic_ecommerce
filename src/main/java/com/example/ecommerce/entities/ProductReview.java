@@ -1,13 +1,18 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "product_review")
+@Table(name = "product_review", indexes = {
+        @Index(name = "idx_product_id", columnList = "product_id"),
+        @Index(name = "idx_user_id", columnList = "user_id")
+})
 public class ProductReview extends BaseEntity{
 
     @Id

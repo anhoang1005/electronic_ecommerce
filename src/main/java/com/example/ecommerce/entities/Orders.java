@@ -2,19 +2,26 @@ package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_orders_order_code", columnList = "order_code"),
+        @Index(name = "idx_orders_order_status", columnList = "order_status"),
+        @Index(name = "idx_orders_user_id", columnList = "user_id")
+})
 public class Orders extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(name = "order_code", nullable = false)
     private String orderCode;
 
     @Column(nullable = false)

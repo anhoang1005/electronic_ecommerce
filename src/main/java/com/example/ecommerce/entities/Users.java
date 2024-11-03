@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_usercode", columnList = "userCode")
+        @Index(name = "idx_user_usercode", columnList = "user_code")
 })
 public class Users extends BaseEntity{
 
@@ -19,7 +19,7 @@ public class Users extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true, unique = true)
+    @Column(name = "user_code", nullable = true, unique = true)
     private String userCode;
 
     @Column(nullable = false)
@@ -89,6 +89,12 @@ public class Users extends BaseEntity{
 
     @OneToMany(mappedBy = "usersOfOrder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Orders> listOrdersOfUsers;
+
+    @OneToMany(mappedBy = "usersOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Post> listPostOfUsers;
+
+    @OneToMany(mappedBy = "usersOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostComment> listPostCommentOfUsers;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(

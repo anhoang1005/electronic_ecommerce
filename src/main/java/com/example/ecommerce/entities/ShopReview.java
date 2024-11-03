@@ -5,7 +5,10 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "shop_review")
+@Table(name = "shop_review", indexes = {
+        @Index(name = "idx_shop_review_shop_id", columnList = "shop_id"),
+        @Index(name = "idx_shop_review_user_id", columnList = "user_id"),
+})
 public class ShopReview extends BaseEntity{
 
     @Id
@@ -15,7 +18,7 @@ public class ShopReview extends BaseEntity{
     @Column(nullable = false)
     private Integer rating;
 
-@Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String comment;
 
     @Column(nullable = false)
