@@ -9,8 +9,9 @@ public interface ProductReviewService {
     ResponseBody guestGetListReviewOfProduct(ProductReviewFilter filter);
     ResponseBody customerCreateProductReview(ProductReviewRequest req, MultipartFile image);
     ResponseBody customerUpdateProductReview(ProductReviewRequest req, MultipartFile image);
-    ResponseBody customerDeleteProductReview(String productId);
-    ResponseBody shopOwnerReplyProductReview(String reviewId, String shopReply);
+    ResponseBody customerDeleteProductReview(Long productId);
+    ResponseBody shopOwnerReplyProductReview(Long reviewId, String shopReply);
+    ResponseBody customerGetTheirReview(Long productId);
 
-    ResponseBody customerLikeProductReview(String reviewId, boolean isLike);
+    ResponseBody customerLikeProductReview(Long reviewId, boolean like);
 }

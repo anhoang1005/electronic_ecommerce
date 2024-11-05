@@ -7,10 +7,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_usercode", columnList = "userCode")
+        @Index(name = "idx_user_usercode", columnList = "user_code")
 })
 public class Users extends BaseEntity{
 
@@ -18,7 +19,7 @@ public class Users extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true, unique = true)
+    @Column(name = "user_code", nullable = true, unique = true)
     private String userCode;
 
     @Column(nullable = false)
@@ -52,17 +53,30 @@ public class Users extends BaseEntity{
     @Column(nullable = true)
     private String verifyCode;
 
+    private Long readNotifyId;
+
+    private Integer shopFollowCount;
+
     @Column(nullable = false)
     private Boolean active;
 
     @Column(nullable = false)
     private Boolean enable;
 
+    @PrePersist
+    void createUsers(){
+        this.shopFollowCount = 0;
+        this.readNotifyId = 0L;
+    }
+
     @OneToOne(mappedBy = "usersInShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Shop shopOfUsers;
 
     @OneToMany(mappedBy = "usersEntityInAddress", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Address> listAddressEntity;
+
+    @OneToMany(mappedBy = "usersOfNotifyUsers" ,fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotificationUsers> listNotifyUserOfUser;
 
     @OneToMany(mappedBy = "usersOfMessageStory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<MessageChat> messageChatOfUser;
@@ -75,6 +89,12 @@ public class Users extends BaseEntity{
 
     @OneToMany(mappedBy = "usersOfOrder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Orders> listOrdersOfUsers;
+
+    @OneToMany(mappedBy = "usersOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Post> listPostOfUsers;
+
+    @OneToMany(mappedBy = "usersOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostComment> listPostCommentOfUsers;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(

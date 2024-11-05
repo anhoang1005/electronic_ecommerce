@@ -21,6 +21,7 @@ public class SocketBody {
         SENT,
         SEEN,
         SYSTEM_NOTIFY,
+        ROOT_NOTIFY,
         SHOP_NOTIFY,
         ADMIN_NOTIFY,
         CUSTOMER_NOTIFY,

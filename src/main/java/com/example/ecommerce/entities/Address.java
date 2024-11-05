@@ -5,7 +5,9 @@ import lombok.*;
 
 @Data
 @Entity
-@Table(name = "address")
+@Table(name = "address", indexes = {
+        @Index(name = "idx_address_user_id", columnList = "user_id")
+})
 public class Address extends BaseEntity{
 
     @Id
