@@ -12,6 +12,7 @@ import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
+import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,6 +43,7 @@ public class IProductService implements ProductService {
     private final FileService fileService;
     private final ProductImageRepository productImageRepository;
     private final CategoryProductRepository categoryProductRepository;
+    private final ProductDocumentService productDocumentService;
     @Override
     public Product getProductById(Long id) {
         return null;
@@ -174,7 +176,8 @@ public class IProductService implements ProductService {
         categoryProductRepository.save(categoryProduct);
         CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product,imagesUrl);
 
-
+        //
+        productDocumentService.saveProductToElasticSearch(product);
         return null;
     }
 }
