@@ -1,14 +1,19 @@
 package com.example.ecommerce.entities;
 
 import com.example.ecommerce.entities.enums.ProductState;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "Product")
 public class Product extends BaseEntity{
@@ -65,10 +70,11 @@ public class Product extends BaseEntity{
     @Column(nullable = false, name = "is_accepted")
     private Boolean isAccepted;
 
-    @OneToMany(mappedBy = "productOfProductImage")
+    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL)
+    @JsonManagedReference("product-image")
     private List<ProductImage> listImageOfProduct;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
@@ -80,30 +86,49 @@ public class Product extends BaseEntity{
     private List<Variant> variants = new ArrayList<>();
 
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonManagedReference("product-attribute-value-product")
     private List<ProductAttributeValue> productAttributeValues = new ArrayList<>();
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "category_id")
-//    private Category category;
-
     @OneToMany(mappedBy = "product")
+    @JsonManagedReference("product-category-product")
     private List<CategoryProduct> categoryProducts = new ArrayList<>();
-    @OneToMany(mappedBy = "product")
+
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @JsonManagedReference("product-shop-category-product")
     private List<ShopCategoryProduct> shopCategoryProducts = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+    @JsonBackReference("product-category")
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    @JsonBackReference("product-shop")
+    private Shop shop;
+
     @PrePersist
-    public void onCreate(){
-        this.sold = 0;
-        this.favorite = 0L;
-        this.isAccepted = false;
-        this.rating = 0.0;
-        this.favorite = 0L;
-        this.reviewCount = 0L;
-        this.starCount = 0L;
+    public void onCreate() {
+        if (this.sold == null) {
+            this.sold = 0;
+        }
+        if (this.favorite == null) {
+            this.favorite = 0L;
+        }
+        if (this.isAccepted == null) {
+            this.isAccepted = false;
+        }
+        if (this.rating == null) {
+            this.rating = 0.0;
+        }
+        if (this.reviewCount == null) {
+            this.reviewCount = 0L;
+        }
+        if (this.starCount == null) {
+            this.starCount = 0L;
+        }
     }
+
 }
 
 

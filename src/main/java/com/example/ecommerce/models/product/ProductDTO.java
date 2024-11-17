@@ -9,9 +9,11 @@ import java.util.List;
 @Data
 public class ProductDTO {
     private Long categoryId;
+    private Long brandId;
     private String title;
     private String description;
     private String currency;
     private boolean isHidden;
     private List<VariantDTO> variantDTOS = new ArrayList<>();
+    private List<Long> shopCategoryIds = new ArrayList<>();
 }

@@ -5,14 +5,21 @@ import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.mapper.category.CategoryMapper;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.category.CategoryResponse;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.*;
+import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.AccountService;
+import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.javafaker.Faker;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +58,10 @@ public class FakeService {
     private final CategoryProductRepository categoryProductRepository;
     private final ProductAttributeValueRepository productAttributeValueRepository;
     private final VariantAttributeValueRepository variantAttributeValueRepository;
+    private final ProductProducer productProducer;
+    private final EntityManagerFactory entityManagerFactory;
+    private final ShopCategoryProductRepository shopCategoryProductRepository;
+
 
 
     //user - fake
@@ -208,143 +220,215 @@ public class FakeService {
         }
     }
     @Transactional
-    public void generateAndInsertFakeProductData(){
+    public void generateAndInsertFakeProductData() {
         List<Shop> shops = shopRepository.findAll();
-        for(Shop shop : shops){
-           int countProduct = random.nextInt(50) + 5;
-           for(int i = 0 ; i<countProduct;i++){
-               Category category = randomCategories();
-               Product product = new Product();
-               String title = faker.funnyName().name();
-               product.setTitle(title);
-               product.setDescription(faker.lorem().toString());
-               product.setProductSlug(StringFormatUtils.convertToSlug(title));
-               product.setCurrency("VND");
-               product.setIsHidden(false);
-               product.setProductState(ProductState.ACTIVE);
-               product.setCategory(category);
-               product.setBrand(randomBrand());
-               product.setProductCode("PID"+randomUtils.generateRandomString(15));
-               int countAttribute = 2;
 
-               Map<Attribute,List<AttributeValue>> mapAttribute = new HashMap<>();
-               List<Attribute> attributes = randomAttributes(countAttribute);
-               for(Attribute attribute : attributes){
-                   int countAttributeValue = random.nextInt(attributeValueRepository.findAttributeValuesByAttributeId(attribute.getId()).size());
-                   List<AttributeValue> attributeValues = randomAttributeValues(attribute,countAttributeValue);
-                   mapAttribute.put(attribute,attributeValues);
-               }
+        // Tạo ExecutorService một lần duy nhất, có thể thay đổi kích thước pool tùy theo nhu cầu
+        ExecutorService executorService = Executors.newFixedThreadPool(10); // Executor cho tạo sản phẩm
+        ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10); // Executor cho RabbitMQ
 
-               Set<String> pairedCombinations = new HashSet<>();
+        try {
+            // Sử dụng CompletableFuture để làm việc bất đồng bộ mạnh mẽ hơn
+            for (Shop shop : shops) {
+                int countProduct = 5;
 
-               Attribute attribute1 = attributes.get(0);
-               List<AttributeValue> values1 = mapAttribute.get(attribute1);
+                // Danh sách chứa tất cả các CompletableFuture cho các sản phẩm
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-               Attribute attribute2 = attributes.get(1);
-               List<AttributeValue> values2 = mapAttribute.get(attribute2);
+                // Tạo danh sách sản phẩm và gửi vào RabbitMQ
+                for (int i = 0; i < countProduct; i++) {
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
+                            .thenAcceptAsync(product -> {
+                                if (product != null) {
+                                    productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+                                }
+                            }, rabbitMqExecutor);
 
-               for (AttributeValue value1 : values1) {
-                   for (AttributeValue value2 : values2) {
+                    futures.add(future);
+                }
 
-                       String pair = value1.getId() + "-" + value2.getId();
-
-                       if (!pairedCombinations.contains(pair)) {
-                           pairedCombinations.add(pair);
-
-                           Variant variant = new Variant();
-                           variant.setPrice(BigDecimal.valueOf(faker.number().randomDouble(2, 1, 1000)));
-                           variant.setQuantity(faker.number().randomDigit());
-                           variant.setSku(faker.code().toString());
-                           variant.setVariantSlug("demo_");
-                           variant.setHeight(faker.number().randomDouble(1,1,10));
-                           variant.setWeight(faker.number().randomDouble(1,1,10));
-                           variant.setLength(faker.number().randomDouble(1,1,10));
-                           variant.setWidth(faker.number().randomDouble(1,1,10));
-
-                           StringBuilder stringBuilder = new StringBuilder();
-
-                           VariantAttributeValue variantAttributeValue1 = new VariantAttributeValue();
-                           variantAttributeValue1.setAttribute(attribute1);
-                           variantAttributeValue1.setAttributeValue(value1);
-                           variant.getVariantAttributeValueList().add(variantAttributeValue1);
-
-                           stringBuilder.append(attribute1.getAttributeName().toLowerCase())
-                                   .append("=")
-                                   .append(value1.getValue().toLowerCase())
-                                   .append(";");
-
-                           ProductAttributeValue productAttributeValue1 = new ProductAttributeValue();
-                           productAttributeValue1.setAttribute(attribute1);
-                           productAttributeValue1.setAttributeValue(value1);
-                           product.getProductAttributeValues().add(productAttributeValue1);
-
-                           VariantAttributeValue variantAttributeValue2 = new VariantAttributeValue();
-                           variantAttributeValue2.setAttributeValue(value2);
-                           variantAttributeValue2.setAttribute(attribute2);
-                           variant.getVariantAttributeValueList().add(variantAttributeValue2);
-
-                           ProductAttributeValue productAttributeValue2 = new ProductAttributeValue();
-                           productAttributeValue1.setAttribute(attribute2);
-                           productAttributeValue1.setAttributeValue(value2);
-                           product.getProductAttributeValues().add(productAttributeValue2);
-
-                           stringBuilder.append(attribute2.getAttributeName().toLowerCase())
-                                   .append("=")
-                                   .append(value2.getValue().toLowerCase())
-                                   .append(";");
-
-                           if(stringBuilder.length() > 0) {
-                               stringBuilder.substring(0,stringBuilder.length()-1);
-                           }
-
-                           variant.setProductVariation(stringBuilder.toString());
-                           variantRepository.save(variant);
-
-                           for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
-                               variantAttributeValue.setVariant(variant);
-                               variantAttributeValueRepository.save(variantAttributeValue);
-                           }
-
-                           product.getVariants().add(variant);
-                       }
-                   }
-               }
-               for(ProductAttributeValue productAttributeValue : product.getProductAttributeValues()){
-                   productAttributeValue.setProduct(product);
-                   productAttributeValueRepository.save(productAttributeValue);
-               }
-               //
-               for(Variant variant : product.getVariants()){
-                   variant.setProduct(product);
-                   variantRepository.save(variant);
-               }
-
-               List<CategoryResponse> categoryResponses = new ArrayList<>();
-               categoryResponses.add(categoryMapper.entityToCategoryResponse(category));
-               Category current = category;
-               while(!ObjectUtils.isEmpty(current.getParentCategory())) {
-                   categoryResponses.add(categoryMapper.entityToCategoryResponse(category.getParentCategory()));
-                   try {
-                       product.setBreadcrumb(jsonConvert.convertListObjectToJson(categoryResponses));
-                   } catch (JsonProcessingException e) {
-                       throw new RuntimeException(e);
-                   }
-                   current = current.getParentCategory();
-               }
-               List<Variant> variants = product.getVariants();
-               try {
-                   product.setVariations(jsonConvert.convertListObjectToJson(variants));
-               } catch (JsonProcessingException e) {
-                   throw new RuntimeException(e);
-               }
-               productRepository.save(product);
-               CategoryProduct categoryProduct = new CategoryProduct();
-               categoryProduct.setCategory(category);
-               categoryProduct.setProduct(product);
-               categoryProductRepository.save(categoryProduct);
-           }
+                // Đợi tất cả các công việc hoàn thành
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }
+        } finally {
+            // Đảm bảo shutdown dù có lỗi xảy ra
+            executorService.shutdown();
+            rabbitMqExecutor.shutdown();
         }
     }
+
+
+
+    @Transactional
+    public Product createProduct(Shop shop) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try{
+            transaction.begin();
+
+            Category category = em.merge(categoryRepository.findRandomCategory());
+            ShopCategory shopCategory = em.merge(shopCategoryRepository.findRandomShopCategory());
+            List<ShopCategory> shopCategories = new ArrayList<>();
+            shopCategories.add(shopCategory);
+            Brand brand = em.merge(brandRepository.findRandomBrand());
+            Product product = new Product();
+            String title = faker.funnyName().name();
+            product.setTitle(title);
+            product.setDescription(faker.lorem().toString());
+            product.setProductSlug(StringFormatUtils.convertToSlug(title));
+            product.setCurrency("VND");
+            product.setIsHidden(false);
+            product.setProductState(ProductState.ACTIVE);
+            product.setCategory(category);
+            product.setBrand(brand);
+            product.setProductCode("PID" + randomUtils.generateRandomString(15));
+            product.setShop(shop);
+            product.setSold(random.nextInt(100,10000));
+            product.setRating(Double.parseDouble(String.format("%.1f", faker.number().randomDouble(1, 1, 5))));
+
+
+            List<BigDecimal> prices = new ArrayList<>();
+
+            int countAttribute = 2;
+            Map<Attribute, List<AttributeValue>> mapAttribute = new HashMap<>();
+            List<Attribute> attributes = randomAttributes(countAttribute);
+            for (Attribute attribute : attributes) {
+                int countAttributeValue = random.nextInt(attributeValueRepository.findAttributeValuesByAttributeId(attribute.getId()).size());
+                List<AttributeValue> attributeValues = randomAttributeValues(attribute, countAttributeValue);
+                mapAttribute.put(attribute, attributeValues);
+            }
+
+            Set<String> pairedCombinations = new HashSet<>();
+            Attribute attribute1 = attributes.get(0);
+            List<AttributeValue> values1 = mapAttribute.get(attribute1);
+
+            Attribute attribute2 = attributes.get(1);
+            List<AttributeValue> values2 = mapAttribute.get(attribute2);
+
+            for (AttributeValue value1 : values1) {
+                for (AttributeValue value2 : values2) {
+                    String pair = value1.getId() + "-" + value2.getId();
+                    if (!pairedCombinations.contains(pair)) {
+                        pairedCombinations.add(pair);
+
+                        Variant variant = new Variant();
+                        BigDecimal price = new BigDecimal(String.format("%.2f", faker.number().randomDouble(2, 1, 1000)));
+                        variant.setPrice(price);
+                        prices.add(price);
+                        variant.setQuantity(faker.number().randomDigit());
+                        variant.setSku(faker.code().toString());
+                        variant.setVariantSlug("demo_");
+                        variant.setHeight(faker.number().randomDouble(1, 1, 10));
+                        variant.setWeight(faker.number().randomDouble(1, 1, 10));
+                        variant.setLength(faker.number().randomDouble(1, 1, 10));
+                        variant.setWidth(faker.number().randomDouble(1, 1, 10));
+
+                        StringBuilder stringBuilder = new StringBuilder();
+
+                        variant.setProductVariation(stringBuilder.toString());
+                        em.merge(variant);
+                        addVariantAttributeValueAndProductAttributeValue(variant, attribute1, value1, product, stringBuilder);
+                        addVariantAttributeValueAndProductAttributeValue(variant, attribute2, value2, product, stringBuilder);
+
+
+                        for (VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()) {
+                            variantAttributeValue.setVariant(variant);
+                            em.merge(variantAttributeValue);
+                        }
+
+                        product.getVariants().add(variant);
+                    }
+                }
+            }
+            ///
+            List<CategoryResponse> categoryResponses = new ArrayList<>();
+            categoryResponses.add(categoryMapper.entityToCategoryResponse(category));
+            Category current = category;
+            while (!ObjectUtils.isEmpty(current.getParentCategory())) {
+                categoryResponses.add(categoryMapper.entityToCategoryResponse(category.getParentCategory()));
+                try {
+                    product.setBreadcrumb(jsonConvert.convertListObjectToJson(categoryResponses));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                current = current.getParentCategory();
+            }
+
+            try {
+                product.setVariations(jsonConvert.convertListObjectToJson(product.getVariants()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            product.setMinInitialPrice(prices.stream().min(BigDecimal::compareTo).orElse(null));
+            product.setMaxInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
+
+            productRepository.save(product);
+            CategoryProduct categoryProduct = new CategoryProduct();
+            categoryProduct.setCategory(category);
+            categoryProduct.setProduct(product);
+            categoryProductRepository.save(categoryProduct);
+
+            ///
+            ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
+            shopCategoryProduct.setProduct(product);
+            shopCategoryProduct.setShopCategory(shopCategory);
+            shopCategoryProductRepository.save(shopCategoryProduct);
+
+            ///
+            for (ProductAttributeValue productAttributeValue : product.getProductAttributeValues()) {
+                productAttributeValue.setProduct(product);
+                productAttributeValueRepository.save(productAttributeValue);
+            }
+
+            for (Variant variant : product.getVariants()) {
+                variant.setProduct(product);
+                variantRepository.save(variant);
+            }
+
+            return product;
+        }catch (Exception e){
+            if(transaction.isActive()){
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }finally {
+            if(em.isOpen()){
+                em.close();
+            }
+        }
+    }
+
+    // Helper method to add variant and product attribute values
+    private void addVariantAttributeValueAndProductAttributeValue(Variant variant, Attribute attribute,
+                                                                  AttributeValue value, Product product, StringBuilder stringBuilder) {
+        VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
+        variantAttributeValue.setAttribute(attribute);
+        variantAttributeValue.setAttributeValue(value);
+        variant.getVariantAttributeValueList().add(variantAttributeValue);
+
+        stringBuilder.append(attribute.getAttributeName().toLowerCase())
+                .append("=")
+                .append(value.getValue().toLowerCase())
+                .append(";");
+
+        ProductAttributeValue productAttributeValue = new ProductAttributeValue();
+        productAttributeValue.setAttribute(attribute);
+        productAttributeValue.setAttributeValue(value);
+        product.getProductAttributeValues().add(productAttributeValue);
+    }
+
+    // Helper method to save product attributes and variants
+    private void saveProductAttributesAndVariants(Product product) {
+
+    }
+
+    // Helper method to save breadcrumb and variations
+    private void saveBreadcrumbAndProductDetails(Product product, Category category) {
+
+    }
+
     private List<Attribute> randomAttributes(int count){
         List<Attribute> attributes = attributeRepository.findAll();
         Collections.shuffle(attributes);
@@ -357,12 +441,10 @@ public class FakeService {
 
     }
     private Category randomCategories(){
-        List<Category> categories = categoryRepository.findAll();
-        return categories.get(random.nextInt(categories.size()));
+        return categoryRepository.findRandomCategory();
     }
     private Brand randomBrand(){
-        List<Brand> brands = brandRepository.findAll();
-        return brands.get(random.nextInt(brands.size()));
+        return brandRepository.findRandomBrand();
     }
 
 

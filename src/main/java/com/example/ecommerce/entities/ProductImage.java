@@ -1,9 +1,13 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "product_image")
 public class ProductImage extends BaseEntity{
@@ -22,6 +26,7 @@ public class ProductImage extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonBackReference("product-image")
     private Product productOfProductImage;
 
     @OneToOne(fetch = FetchType.LAZY)

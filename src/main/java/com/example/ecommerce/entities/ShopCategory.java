@@ -59,6 +59,7 @@ public class ShopCategory {
     @JoinColumn(name = "shop_id")
     private Shop shopOfCategory;
     @OneToMany(mappedBy = "shopCategory",fetch = FetchType.EAGER)
+    @JsonManagedReference("shop-category-shop-category-product")
     private List<ShopCategoryProduct> shopCategoryProducts;
     @PrePersist
     public void onCreate(){
