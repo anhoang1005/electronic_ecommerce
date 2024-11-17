@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,10 +17,12 @@ public class ShopCategoryProduct {
 
     @ManyToOne
     @JoinColumn(name = "shopCategory_id")
+    @JsonBackReference("shop-category-shop-category-product")
     private ShopCategory shopCategory;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonBackReference("product-shop-category-product")
     private Product product;
 
 //    @ManyToOne

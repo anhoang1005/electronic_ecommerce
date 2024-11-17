@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -92,6 +93,9 @@ public class Shop extends BaseEntity{
 //    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
 //    private List<ShopCategoryProduct> shopCategoryProducts;
 
+    @OneToMany(mappedBy = "shop")
+    @JsonManagedReference("product-shop")
+    private List<Product> products;
     @PrePersist
     public void initializeDefaultValues() {
         this.totalReview = 0L;

@@ -2,17 +2,21 @@ package com.example.ecommerce.entities.elastic;
 
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.ProductState;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
+
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Setter
@@ -21,6 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Document(indexName = "product-document")
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__type")
 public class ProductDocument {
     @Id
     private Long id;
@@ -44,16 +49,16 @@ public class ProductDocument {
     private Long brandId;
     @Transient
     private Brand brand;
-    @Field(type = FieldType.Nested)
-    private List<ProductAttributeValue> attributeValues;
-    @Field(type = FieldType.Nested)
-    private List<Variant> variants;
+    @JsonProperty("shop_id")
+    private Long shopId;
+    @Transient
+    private Shop shop;
     @Field(type = FieldType.Keyword)
     private Long categoryIds;
     @Field(type = FieldType.Keyword)
     private List<Long> shopCategoryIds;
     @Field(type = FieldType.Text)
     private String productUrl;
-
-
+    @Field(type = FieldType.Date)
+    private Date updatedAt;
 }

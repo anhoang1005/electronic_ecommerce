@@ -2,6 +2,7 @@ package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     Category findCategoryByCategoryNameAndCategoryLevel(String name,Integer level);
     List<Category> findCategoriesByCategoryLevel(Integer level);
     List<Category> findCategoriesByCategoryLevelAndParentCategory(Integer level, Category parent);
+    @Query("SELECT cr  from Category cr order by function('RAND') LIMIT 1")
+    Category findRandomCategory();
 }

@@ -1,9 +1,12 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.*;
+import com.example.ecommerce.entities.elastic.ProductDocument;
+import com.example.ecommerce.entities.enums.ErrorMessage;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.category.CategoryMapper;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.variant.VariantDTO;
@@ -13,19 +16,23 @@ import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
+import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.security.SecurityUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -43,19 +50,28 @@ public class IProductService implements ProductService {
     private final FileService fileService;
     private final ProductImageRepository productImageRepository;
     private final CategoryProductRepository categoryProductRepository;
-    private final ProductDocumentService productDocumentService;
+    private final BrandRepository brandRepository;
+    private final UsersRepository usersRepository;
+    private final AuthenticationUtils authenticationUtils;
+    private final ShopCategoryProductRepository shopCategoryProductRepository;
+    private final ShopCategoryRepository shopCategoryRepository;
+
     @Override
     public Product getProductById(Long id) {
         return null;
     }
 
     @Override
-
+    @Transactional
     public ResponseBody createProduct(ProductDTO dto, List<MultipartFile> productFile) {
         log.info(dto.toString());
         Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
                 () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId())
         );
+        Brand brand = brandRepository.findById(dto.getBrandId()).orElseThrow(
+                () -> new RequestNotFoundException("Brand not found")
+        );
+        Shop shop = usersRepository.findUsersById(authenticationUtils.getUserIdFromAuthentication()).getShopOfUsers();
         Product product = new Product();
         product.setTitle(dto.getTitle());
         product.setDescription(dto.getDescription());
@@ -64,10 +80,15 @@ public class IProductService implements ProductService {
         product.setCurrency(dto.getCurrency());
         product.setIsHidden(dto.isHidden());
         product.setCategory(category);
+        product.setBrand(brand);
+        product.setShop(shop);
+        List<BigDecimal> prices = new ArrayList<>();
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
         for(VariantDTO variantDTO : dto.getVariantDTOS()){
             Variant variant = new Variant();
-            variant.setPrice(variantDTO.getPrice());
+            BigDecimal price = variantDTO.getPrice();
+            prices.add(price);
+            variant.setPrice(price);
             variant.setQuantity(variantDTO.getQuantity());
             variant.setSku(variantDTO.getSku());
             variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
@@ -169,15 +190,36 @@ public class IProductService implements ProductService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        product.setMaxInitialPrice(prices.stream().min(BigDecimal::compareTo).orElse(null));
+        product.setMinInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
+
         productRepository.save(product);
+//        dto.getShopCategoryIds().parallelStream().forEach( id -> {
+//
+//        });
+        for(Long id : dto.getShopCategoryIds()){
+            ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
+            ShopCategory shopCategory = shopCategoryRepository.findById(id).orElseThrow(
+                    () -> new RequestNotFoundException(ErrorMessage.SHOP_CATEGORY_NOT_FOUND.toString())
+            );
+            shopCategoryProduct.setShopCategory(shopCategory);
+            shopCategoryProduct.setProduct(product);
+            shopCategoryProductRepository.save(shopCategoryProduct);
+
+            product.getShopCategoryProducts().add(shopCategoryProduct);
+        }
         CategoryProduct categoryProduct = new CategoryProduct();
         categoryProduct.setCategory(category);
         categoryProduct.setProduct(product);
         categoryProductRepository.save(categoryProduct);
-        CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product,imagesUrl);
+        product.getCategoryProducts().add(categoryProduct);
 
-        //
-        productDocumentService.saveProductToElasticSearch(product);
-        return null;
+        CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product, imagesUrl);
+        ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
+        return new ResponseBody(
+                productDocument,
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
     }
 }

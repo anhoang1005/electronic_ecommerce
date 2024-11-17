@@ -2,6 +2,7 @@ package com.example.ecommerce.entities;
 
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,14 +25,14 @@ public class Category extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    @JsonBackReference
+    @JsonIgnore
     private Category parentCategory;
 
     @OneToMany(
             mappedBy = "parentCategory",
             fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
-    @JsonManagedReference
+    @JsonIgnore
     private List<Category> childrens;
 
     @Column
@@ -50,6 +51,9 @@ public class Category extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CategoryType categoryType;
 
+    @OneToMany(mappedBy = "category")
+    @JsonManagedReference("product-category")
+    private List<Product> products;
     @Column(nullable = false)
     private Boolean active;
 
