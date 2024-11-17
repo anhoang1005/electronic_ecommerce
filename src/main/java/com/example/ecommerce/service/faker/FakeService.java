@@ -223,19 +223,13 @@ public class FakeService {
     public void generateAndInsertFakeProductData() {
         List<Shop> shops = shopRepository.findAll();
 
-        // Tạo ExecutorService một lần duy nhất, có thể thay đổi kích thước pool tùy theo nhu cầu
-        ExecutorService executorService = Executors.newFixedThreadPool(10); // Executor cho tạo sản phẩm
-        ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10); // Executor cho RabbitMQ
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
 
         try {
-            // Sử dụng CompletableFuture để làm việc bất đồng bộ mạnh mẽ hơn
             for (Shop shop : shops) {
                 int countProduct = 5;
-
-                // Danh sách chứa tất cả các CompletableFuture cho các sản phẩm
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-                // Tạo danh sách sản phẩm và gửi vào RabbitMQ
                 for (int i = 0; i < countProduct; i++) {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
                             .thenAcceptAsync(product -> {
@@ -247,11 +241,9 @@ public class FakeService {
                     futures.add(future);
                 }
 
-                // Đợi tất cả các công việc hoàn thành
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
             }
         } finally {
-            // Đảm bảo shutdown dù có lỗi xảy ra
             executorService.shutdown();
             rabbitMqExecutor.shutdown();
         }
