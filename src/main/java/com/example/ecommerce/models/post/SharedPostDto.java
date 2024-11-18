@@ -23,7 +23,9 @@ public class SharedPostDto {
     @JsonProperty("content")
     private String content;
     @JsonProperty("media_url")
-    private List<MediaUrl> mediaUrl;
+    private List<String> mediaUrl;
     @JsonProperty("hash_tag")
     private List<String> hashTag;
+    @JsonProperty("created_at")
+    private String createdAt;
 }

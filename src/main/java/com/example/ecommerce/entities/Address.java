@@ -3,7 +3,10 @@ package com.example.ecommerce.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "address", indexes = {
         @Index(name = "idx_address_user_id", columnList = "user_id")

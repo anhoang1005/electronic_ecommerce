@@ -40,6 +40,7 @@ public class PostReaction{
     }
 
     public enum Reaction{
+        NONE,
         LIKE,
         LOVE,
         HAHA,

@@ -27,7 +27,7 @@ public class PostDto {
     @JsonProperty("visibility")
     private Post.Visibility visibility;
     @JsonProperty("media_url")
-    private List<MediaUrl> mediaUrl;
+    private List<String> mediaUrl;
     @JsonProperty("location")
     private String location;
     @JsonProperty("hash_tag")

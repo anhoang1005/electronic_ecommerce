@@ -58,6 +58,7 @@ public class Post extends BaseEntity{
 
     @PrePersist
     public void onCreate(){
+        this.sharedCount = 0;
         this.commentCount = 0;
         this.likeCount = 0;
         this.commentCount = 0;
@@ -85,7 +86,12 @@ public class Post extends BaseEntity{
     @JoinColumn(name = "shop_id", nullable = true)
     private Shop shopOfPost;
 
-    @ManyToMany(mappedBy = "listPostOfHashTag" ,fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "post_hashtag_relation",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
+    )
     private List<PostHashTag> listHashTagOfPost = new ArrayList<>();
 
     public enum Visibility{
