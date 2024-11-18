@@ -2,11 +2,8 @@ package com.example.ecommerce.service.implement;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.ecommerce.entities.Product;
-import com.example.ecommerce.entities.ProductImage;
-import com.example.ecommerce.entities.Shop;
+import com.example.ecommerce.entities.*;
 
-import com.example.ecommerce.entities.Variant;
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.models.post.MediaUrl;
