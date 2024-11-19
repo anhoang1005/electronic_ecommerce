@@ -294,7 +294,7 @@ public class IPostService implements PostService {
                     .orElseThrow(()-> new RequestNotFoundException("ERROR"));
             PostReaction postReaction = postReactionRepository.findPostReactionByPostIdAndUserId(userId, postId);
             if(postReaction!=null){
-                if(reaction== PostReaction.Reaction.NONE){
+                if(reaction==PostReaction.Reaction.NONE){
                     postReactionRepository.delete(postReaction);
                     postRepository.decrementLikeCount(postId);
                 } else {

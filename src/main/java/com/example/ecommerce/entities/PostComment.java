@@ -23,11 +23,14 @@ public class PostComment extends BaseEntity{
     @Column(nullable = false)
     private Integer lever;
 
+    @Column(nullable = true)
+    private Integer childrenCount;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = true, columnDefinition = "TEXT")
-    private String media_url;
+    private String mediaUrl;
 
     @Column(nullable = false)
     private Integer like_count;
@@ -65,5 +68,6 @@ public class PostComment extends BaseEntity{
     public void onCreate(){
         this.like_count = 0;
         this.active = true;
+        this.childrenCount = 0;
     }
 }

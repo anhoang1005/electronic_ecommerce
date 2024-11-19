@@ -19,6 +19,7 @@ public class PostReaction{
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Reaction reaction;
 
