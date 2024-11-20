@@ -133,6 +133,9 @@ public class Shop extends BaseEntity{
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
 
+    @OneToMany(mappedBy = "shopOfNotifyUsers", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotificationUsers> listNotifyUserOfShop;
+
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),
         HO_KINH_DOANH(2, "Hộ kinh doanh"),

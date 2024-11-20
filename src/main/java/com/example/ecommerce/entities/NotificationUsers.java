@@ -11,11 +11,15 @@ import lombok.Setter;
 @Table(name = "notification_users", indexes = {
         @Index(name = "idx_notification_user_user_id", columnList = "user_id")
 })
-public class NotificationUsers extends BaseEntity{
+public class NotificationUsers{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = true)
+    private Shop shopOfNotifyUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notify_id", nullable = false)

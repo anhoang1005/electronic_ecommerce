@@ -1,6 +1,5 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.ProductVariants;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.cart.CartItemsDto;
 import com.example.ecommerce.payload.ResponseBody;
@@ -44,6 +43,11 @@ public class ICartService implements CartService {
             Map<Long, Integer> cartItems = hashOperations.entries(cartKey);
             List<CartItemsDto> cartItemsDto = new ArrayList<>();
             cartItems.forEach((productId, quantity) -> {
+                    CartItemsDto dto = CartItemsDto.builder()
+                            .productId(productId)
+                            .quantity(quantity)
+                            .build();
+                    cartItemsDto.add(dto);
 //                ProductVariants variants variants = productRepository.findById(productId)
 //                        .orElseThrow(()-> new RequestNotFoundException("ERROR"));
 //                if(va.isActive()){
