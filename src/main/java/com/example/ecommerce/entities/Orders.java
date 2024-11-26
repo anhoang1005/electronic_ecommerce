@@ -1,7 +1,6 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,6 @@ import java.util.List;
 @Entity
 @Table(name = "orders", indexes = {
         @Index(name = "idx_orders_order_code", columnList = "order_code"),
-        @Index(name = "idx_orders_order_status", columnList = "order_status"),
         @Index(name = "idx_orders_user_id", columnList = "user_id")
 })
 public class Orders extends BaseEntity{
@@ -24,11 +22,12 @@ public class Orders extends BaseEntity{
     @Column(name = "order_code", nullable = false)
     private String orderCode;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String orderStatus;
+    private Status status;
 
     @Column(nullable = false)
-    private String totalAmount;
+    private Double totalAmount;
 
     @Column(nullable = false)
     private String deliveryMethod;
@@ -46,10 +45,7 @@ public class Orders extends BaseEntity{
     private String paymentMethod;
 
     @Column(nullable = false)
-    private String isPayment;
-
-    @Column(nullable = false)
-    private Boolean active;
+    private Boolean isPayment;
 
     @OneToMany(mappedBy = "ordersOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrderShopOfOrders;
@@ -57,4 +53,10 @@ public class Orders extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users usersOfOrder;
+
+    public enum Status{
+        DANG_XU_LY,
+        HOAN_THANH,
+        DA_HUY
+    }
 }

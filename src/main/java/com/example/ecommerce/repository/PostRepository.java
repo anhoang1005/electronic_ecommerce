@@ -2,9 +2,11 @@ package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Post;
 import com.example.ecommerce.entities.PostHashTag;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,11 +39,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Modifying
     @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
     void incrementLikeCount(@Param("id") Long postId);
 
     @Modifying
     @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :id")
     void decrementLikeCount(@Param("id") Long postId);
 }

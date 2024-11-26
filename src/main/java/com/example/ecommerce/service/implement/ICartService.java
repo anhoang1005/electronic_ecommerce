@@ -25,8 +25,7 @@ public class ICartService implements CartService {
     private final AuthenticationUtils authUtils;
     private final ProductRepository productRepository;
 
-    public ICartService(RedisTemplate<String,
-                        Object> redisTemplate,
+    public ICartService(RedisTemplate<String, Object> redisTemplate,
                         AuthenticationUtils authUtils,
                         ProductRepository productRepository) {
         this.redisTemplate = redisTemplate;
@@ -50,7 +49,7 @@ public class ICartService implements CartService {
                     cartItemsDto.add(dto);
 //                ProductVariants variants variants = productRepository.findById(productId)
 //                        .orElseThrow(()-> new RequestNotFoundException("ERROR"));
-//                if(va.isActive()){
+//                if(variants.isActive()){
 //                    cartItemsDto.add(CartItemsDto.builder()
 //                            .title(variants.getTitle())
 //                            .thumbnail(variants.getThumbnail())
@@ -140,7 +139,11 @@ public class ICartService implements CartService {
             String userCode = authUtils.getUserFromAuthentication().getUserCode();
             String cartKey = CART_KEY_PREFIX + userCode;
             Map<Long, Integer> cartItems = hashOperations.entries(cartKey);
-            return cartItems.size();
+            if(!cartItems.isEmpty()){
+                return cartItems.size();
+            } else {
+                return 0;
+            }
         } catch (Exception e){
             log.error("get item to cart failed! " + e.getMessage());
             throw new RequestNotFoundException("ERROR");
