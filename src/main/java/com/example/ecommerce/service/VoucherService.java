@@ -4,6 +4,7 @@ import com.example.ecommerce.entities.Voucher;
 import com.example.ecommerce.models.voucher.CreateVoucherRequest;
 import com.example.ecommerce.models.voucher.VoucherCheckout;
 import com.example.ecommerce.models.voucher.VoucherDto;
+import com.example.ecommerce.models.voucher.VoucherFilter;
 import com.example.ecommerce.payload.ResponseBody;
 
 public interface VoucherService {
@@ -25,7 +26,7 @@ public interface VoucherService {
 
     VoucherDto customerUseVoucher(String voucherCode);
 
-    ResponseBody shopVoucherDashboard();
+    ResponseBody shopVoucherDashboard(VoucherFilter ft);
 
-    ResponseBody adminVoucherDashboard();
+    ResponseBody adminVoucherDashboard(VoucherFilter ft);
 }

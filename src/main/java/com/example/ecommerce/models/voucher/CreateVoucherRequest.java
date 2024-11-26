@@ -17,7 +17,6 @@ public class CreateVoucherRequest {
     private Voucher.Type type;
     private Voucher.DiscountType discountType;
     private String title;
-    private String description;
     private Integer voucherCount;
     private Integer remainingCount;
     private Double discountValue;
@@ -25,7 +24,7 @@ public class CreateVoucherRequest {
     private Double minTotalOrder;
     private Double shippingDiscount;
     private Double maxShippingDiscount;
-    private LocalDateTime startedAt;
-    private LocalDateTime expiredAt;
+    private String startedAt;
+    private String expiredAt;
     private Voucher.Status status;
 }

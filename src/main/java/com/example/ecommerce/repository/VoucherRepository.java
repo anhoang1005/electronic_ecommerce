@@ -16,9 +16,9 @@ public interface VoucherRepository extends JpaRepository<Voucher,Long> {
     Optional<Voucher> findVoucherByVoucherCode(String voucherCode);
 
     @Query(value = "select v from Voucher v " +
-            "where v.voucherCode = :voucherCode " +
+            "where (:voucherCode is null or v.voucherCode = :voucherCode) " +
             "and v.status = :status " +
-            "and v.expiredAt < :currentDateTime " +
+            "and v.expiredAt < :current " +
             "and (:type is null or v.type = :type)" )
     Page<Voucher> customerGetListVoucher(@Param("voucherCode") String voucherCode,
                                          @Param("type") Voucher.Type type,
@@ -27,5 +27,19 @@ public interface VoucherRepository extends JpaRepository<Voucher,Long> {
                                          Pageable pageable);
 
 
+    @Query(value = "select v from Voucher v " +
+            "where (:voucherCode is null or v.voucherCode = :voucherCode) " +
+            "and (:type is null or v.type = :type) " +
+            "and (:discountType is null or v.discountType = :discountType) " +
+            "and ((:startSt is null or :startEd is null) or v.startedAt between :startSt and :startEd) " +
+            "and ((:expirySt is null or :expiryEd is null) or v.expiredAt between :expirySt and :expiryEd)")
+    Page<Voucher> adminGetListVoucher(@Param("voucherCode") String voucherCode,
+                                      @Param("type") Voucher.Type type,
+                                      @Param("discountType") Voucher.DiscountType discountType,
+                                      @Param("startSt") LocalDateTime startSt,
+                                      @Param("startEd") LocalDateTime startEd,
+                                      @Param("expirySt") LocalDateTime expirySt,
+                                      @Param("expiryEd") LocalDateTime expiryEd,
+                                      Pageable pageable);
 
 }

@@ -68,7 +68,7 @@ public class WebSecurityConfig {
 								.requestMatchers(
 										"/api/all/**",
 										"/**")
-										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
+										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLY", "KHACHHANG", "CONGTACVIEN")
                                 .anyRequest().authenticated());
 		return http.build();
 	}
