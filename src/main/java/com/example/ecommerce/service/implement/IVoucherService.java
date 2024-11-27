@@ -5,10 +5,7 @@ import com.example.ecommerce.entities.ShopVoucher;
 import com.example.ecommerce.entities.Voucher;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.voucher.VoucherMapper;
-import com.example.ecommerce.models.voucher.CreateVoucherRequest;
-import com.example.ecommerce.models.voucher.VoucherCheckout;
-import com.example.ecommerce.models.voucher.VoucherDto;
-import com.example.ecommerce.models.voucher.VoucherFilter;
+import com.example.ecommerce.models.voucher.*;
 import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.ShopRepository;
@@ -321,11 +318,36 @@ public class IVoucherService implements VoucherService {
     @Override
     public ResponseBody shopVoucherDashboard(VoucherFilter ft) {
         try{
-            Sort sort = Sort.by(Sort.Order.desc("id"));
-            Pageable pageable = PageRequest.of(ft.getPageNumber() - 1, ft.getPageSize(), sort);
-            //Page<Voucher> page = voucherRepository.adminGetListVoucher(ft.getVoucherCode(), ft.get);
-
-            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+            Sort value = (ft.getSort() == null) ?
+                    Sort.by(Sort.Order.desc("id")) : switch (ft.getSort()) {
+                case "id-asc" -> Sort.by(Sort.Order.asc("id"));
+                case "started-desc" -> Sort.by(Sort.Order.desc("startedAt"));
+                case "started-asc" -> Sort.by(Sort.Order.asc("startedAt"));
+                case "expired-desc" -> Sort.by(Sort.Order.desc("expiredAt"));
+                case "expired-asc" -> Sort.by(Sort.Order.asc("expiredAt"));
+                default -> Sort.by(Sort.Order.desc("id"));
+            };
+            LocalDateTime startSt = null, startEd = null, expirySt = null, expiryEd = null;
+            if(ft.getStartSt()!=null && ft.getStartEd()!=null){
+                startSt = timeUtils.htmlValueToLocalDateTime(ft.getStartSt());
+                startEd = timeUtils.htmlValueToLocalDateTime(ft.getStartEd());
+            }
+            if(ft.getExpiryEd()!=null && ft.getExpiryEd()!=null){
+                expirySt = timeUtils.htmlValueToLocalDateTime(ft.getExpirySt());
+                expiryEd = timeUtils.htmlValueToLocalDateTime(ft.getExpiryEd());
+            }
+            Pageable pageable = PageRequest.of(ft.getPageNumber() - 1, ft.getPageSize(), value);
+            Page<ShopVoucher> page = shopVoucherRepository.shopGetListVoucher(ft.getVoucherCode(),
+                    ft.getDiscountType(), startSt, startEd, expirySt, expiryEd, ft.getStatus(), pageable);
+            List<ShopVoucherDto> dtoList = page.stream().map(voucherMapper::shopVoucherToVoucherDto).collect(Collectors.toList());
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber() + 1)
+                    .pageSize(page.getSize())
+                    .data(dtoList)
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("get voucher dashboard failed! Error: " + e.getMessage());
             throw new RequestNotFoundException(e.getMessage());
@@ -335,7 +357,36 @@ public class IVoucherService implements VoucherService {
     @Override
     public ResponseBody adminVoucherDashboard(VoucherFilter ft) {
         try{
-            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+            Sort value = (ft.getSort() == null) ?
+                    Sort.by(Sort.Order.desc("id")) : switch (ft.getSort()) {
+                case "id-asc" -> Sort.by(Sort.Order.asc("id"));
+                case "started-desc" -> Sort.by(Sort.Order.desc("startedAt"));
+                case "started-asc" -> Sort.by(Sort.Order.asc("startedAt"));
+                case "expired-desc" -> Sort.by(Sort.Order.desc("expiredAt"));
+                case "expired-asc" -> Sort.by(Sort.Order.asc("expiredAt"));
+                default -> Sort.by(Sort.Order.desc("id"));
+            };
+            LocalDateTime startSt = null, startEd = null, expirySt = null, expiryEd = null;
+            if(ft.getStartSt()!=null && ft.getStartEd()!=null){
+                startSt = timeUtils.htmlValueToLocalDateTime(ft.getStartSt());
+                startEd = timeUtils.htmlValueToLocalDateTime(ft.getStartEd());
+            }
+            if(ft.getExpiryEd()!=null && ft.getExpiryEd()!=null){
+                expirySt = timeUtils.htmlValueToLocalDateTime(ft.getExpirySt());
+                expiryEd = timeUtils.htmlValueToLocalDateTime(ft.getExpiryEd());
+            }
+            Pageable pageable = PageRequest.of(ft.getPageNumber() - 1, ft.getPageSize(), value);
+            Page<Voucher> page = voucherRepository.adminGetListVoucher(ft.getVoucherCode(), ft.getType(),
+                    ft.getDiscountType(), startSt, startEd, expirySt, expiryEd, ft.getStatus(), pageable);
+            List<VoucherDto> dtoList = page.stream().map(voucherMapper::voucherToVoucherDto).collect(Collectors.toList());
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber() + 1)
+                    .pageSize(page.getSize())
+                    .data(dtoList)
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("get voucher dashboard failed! Error: " + e.getMessage());
             throw new RequestNotFoundException(e.getMessage());

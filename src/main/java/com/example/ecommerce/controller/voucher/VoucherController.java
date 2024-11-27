@@ -2,6 +2,7 @@ package com.example.ecommerce.controller.voucher;
 
 import com.example.ecommerce.entities.Voucher;
 import com.example.ecommerce.models.voucher.CreateVoucherRequest;
+import com.example.ecommerce.models.voucher.VoucherFilter;
 import com.example.ecommerce.service.VoucherService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -68,5 +69,15 @@ public class VoucherController {
     public ResponseEntity<?> shopChangeStatusVoucher(@RequestParam("voucher_code") String voucherCode,
                                                      @RequestParam("shop_amount") Double totalAmount){
         return ResponseEntity.ok(voucherService.customerCheckoutShopVoucher(voucherCode, totalAmount));
+    }
+
+    @PostMapping("/api/owner/voucher/dashboard")
+    public ResponseEntity<?> shopGetDashBoard(@RequestBody VoucherFilter filter){
+        return ResponseEntity.ok(voucherService.shopVoucherDashboard(filter));
+    }
+
+    @PostMapping("/api/admin/voucher/dashboard")
+    public ResponseEntity<?> adminGetDashBoard(@RequestBody VoucherFilter filter){
+        return ResponseEntity.ok(voucherService.adminVoucherDashboard(filter));
     }
 }

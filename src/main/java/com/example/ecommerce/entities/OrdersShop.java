@@ -52,6 +52,9 @@ public class OrdersShop extends BaseEntity{
     @JoinColumn(name = "main_orders_id")
     private Orders ordersOfOrdersShop;
 
+    @OneToOne(mappedBy = "ordersShopOfShipping", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private OrderShipping orderShippingOfShopOrder;
+
     @OneToMany(mappedBy = "ordersShopOfOrdersItems", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersItems> listOrdersItemsOfOrdersShop;
 

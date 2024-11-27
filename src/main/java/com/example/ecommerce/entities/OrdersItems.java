@@ -15,10 +15,16 @@ public class OrdersItems extends BaseEntity{
     private Long id;
 
     @Column(nullable = false)
-    private String productCode;
+    private Long productId;
+
+    @Column(nullable = false)
+    private Long variantId;
 
     @Column(nullable = false)
     private String productTitle;
+
+    @Column(nullable = false)
+    private String variantName;
 
     @Column(nullable = false)
     private String productImage;
@@ -35,4 +41,6 @@ public class OrdersItems extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orders_shop_id")
     private OrdersShop ordersShopOfOrdersItems;
+
+
 }

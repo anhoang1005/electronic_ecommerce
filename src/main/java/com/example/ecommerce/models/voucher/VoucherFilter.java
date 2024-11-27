@@ -10,9 +10,11 @@ public class VoucherFilter {
     private String voucherCode;
     private Voucher.Type type;
     private Voucher.DiscountType discountType;
-    private String createdAt;
-    private String startAt;
-    private String expiryAt;
+    private Voucher.Status status;
+    private String startSt;
+    private String startEd;
+    private String expirySt;
+    private String expiryEd;
     private String sort;
     private int pageNumber;
     private int pageSize;

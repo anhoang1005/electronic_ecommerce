@@ -32,7 +32,8 @@ public interface VoucherRepository extends JpaRepository<Voucher,Long> {
             "and (:type is null or v.type = :type) " +
             "and (:discountType is null or v.discountType = :discountType) " +
             "and ((:startSt is null or :startEd is null) or v.startedAt between :startSt and :startEd) " +
-            "and ((:expirySt is null or :expiryEd is null) or v.expiredAt between :expirySt and :expiryEd)")
+            "and ((:expirySt is null or :expiryEd is null) or v.expiredAt between :expirySt and :expiryEd)" +
+            "and (:status is null or v.status = :status)")
     Page<Voucher> adminGetListVoucher(@Param("voucherCode") String voucherCode,
                                       @Param("type") Voucher.Type type,
                                       @Param("discountType") Voucher.DiscountType discountType,
@@ -40,6 +41,7 @@ public interface VoucherRepository extends JpaRepository<Voucher,Long> {
                                       @Param("startEd") LocalDateTime startEd,
                                       @Param("expirySt") LocalDateTime expirySt,
                                       @Param("expiryEd") LocalDateTime expiryEd,
+                                      @Param("status") Voucher.Status status,
                                       Pageable pageable);
 
 }

@@ -1,5 +1,6 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.utils.RandomUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,9 @@ public class Orders extends BaseEntity{
     @Column(nullable = false)
     private Boolean isPayment;
 
+    @OneToMany(mappedBy = "orderOfOrderPayment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<OrderPayment> listOrderShipping;
+
     @OneToMany(mappedBy = "ordersOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrderShopOfOrders;
 
@@ -58,5 +62,10 @@ public class Orders extends BaseEntity{
         DANG_XU_LY,
         HOAN_THANH,
         DA_HUY
+    }
+
+    @PrePersist
+    public void onCreate(){
+        this.orderCode = RandomUtils.generateOrderCode("ORD");
     }
 }
