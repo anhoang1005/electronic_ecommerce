@@ -8,7 +8,9 @@ import com.example.ecommerce.entities.Shop;
 
 import com.example.ecommerce.entities.Variant;
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.ProductImageRepository;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ShopRepository;
@@ -40,6 +42,7 @@ public class IFileService implements FileService {
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
     private final ProductDocumentService productDocumentService;
+    private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override
@@ -119,14 +122,16 @@ public class IFileService implements FileService {
                 defaultImage.setProductOfProductImage(product);
                 productImageRepository.save(defaultImage);
             }
-        }).thenRunAsync(() -> {
-            try {
-                productDocumentService.saveProductToElasticSearch(product);
-                log.info("Product successfully saved to Elasticsearch.");
-            } catch (Exception e) {
-                log.error("Error saving product to Elasticsearch: " + e.getMessage());
-            }
-        });
+        })
+//                .thenRunAsync(() -> {
+//            try {
+//                productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+//                log.info("Product successfully saved to Elasticsearch.");
+//            } catch (Exception e) {
+//                log.error("Error saving product to Elasticsearch: " + e.getMessage());
+//            }
+//        })
+                ;
     }
 
     @Override

@@ -4,15 +4,20 @@ import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.entities.enums.ErrorMessage;
 import com.example.ecommerce.entities.enums.ProductState;
+import com.example.ecommerce.exceptions.BaseException;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.category.CategoryMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.product.ProductDTO;
+import com.example.ecommerce.models.product.ProductUpdateDTO;
 import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.*;
+import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
@@ -55,11 +60,9 @@ public class IProductService implements ProductService {
     private final AuthenticationUtils authenticationUtils;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final ShopCategoryRepository shopCategoryRepository;
+    private final ProductProducer productProducer;
+    private final ProductDocumentRepository productDocumentRepository;
 
-    @Override
-    public Product getProductById(Long id) {
-        return null;
-    }
 
     @Override
     @Transactional
@@ -99,6 +102,7 @@ public class IProductService implements ProductService {
             variant.setWidth(variant.getWidth());
 
             StringBuilder stringBuilder = new StringBuilder();
+
             for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
                 //
                 Attribute attribute = attributeRepository.findAttributeByAttributeName(attributeDTO.getName());
@@ -218,6 +222,82 @@ public class IProductService implements ProductService {
         ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
         return new ResponseBody(
                 productDocument,
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody findProductById(Long id) {
+        Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
+        if(ObjectUtils.isEmpty(product)){
+            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
+        }
+        return new ResponseBody(
+                ProductMapper.mapperProductToResponse(product),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody findProductHiddenById(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
+        );
+        return new ResponseBody(
+                ProductMapper.mapperProductToResponse(product),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody updateProduct(Long id, ProductUpdateDTO dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody checkProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(
+                        () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
+                );
+        product.setIsAccepted(true);
+        product.setIsHidden(true);
+        productRepository.save(product);
+        CompletableFuture.runAsync(
+                () -> productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product))
+        );
+        return new ResponseBody(
+                new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(
+                        () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
+                );
+        product.setIsDeleted(true);
+        productRepository.save(product);
+
+        CompletableFuture.runAsync(
+                () -> {
+                    ProductDocument productDocument = productDocumentRepository.findById(id)
+                            .orElseThrow(
+                                    () -> new RequestNotFoundException(ErrorMessage.PRODUCT_UNACTIVE.name())
+                            );
+
+                    productDocument.setIsDeleted(true);
+                    productDocumentRepository.save(productDocument);
+                }
+        );
+        return new ResponseBody(
+                new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );

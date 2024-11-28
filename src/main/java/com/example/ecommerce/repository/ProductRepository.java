@@ -5,7 +5,9 @@ import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
@@ -30,5 +32,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
         product.setRating(rating);
         save(product);
     }
+    @Query("select p from Product  p where p.id = :id and p.isAccepted =  true and p.isHidden = true")
+    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam Long id);
 
 }

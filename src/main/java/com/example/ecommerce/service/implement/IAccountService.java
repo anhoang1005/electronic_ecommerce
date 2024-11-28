@@ -62,7 +62,7 @@ public class IAccountService implements AccountService {
                 List<String> listRoleString = usersEntity.getListRolesOfUsers().stream()
                         .map(Roles::getRoleName)
                         .collect(Collectors.toList());
-                String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
+                String accessJws = jwtUtils.generateAccessTokens(username,usersEntity.getId(), listRoleString);
                 String refreshJws = jwtUtils.generateRefreshTokens(username, listRoleString);
                 Shop shop = usersEntity.getShopOfUsers();
                 return JwtData.builder()

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ public class ProductShopController {
     private final IProductService iProductService;
     private final ObjectMapper objectMapper;
     @PostMapping("/product")
+    @PreAuthorize("hasAuthority('CHUCUAHANG')")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
                                            @RequestParam("files") List<MultipartFile> files) {
         log.info("controller");
@@ -48,16 +50,16 @@ public class ProductShopController {
             return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
         }
     }
+    @GetMapping("/product/{id}")
+    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id) or hasAuthority('QUANLY')")
+    public ResponseEntity<?> findProduct(@PathVariable Long id){
+        return ResponseEntity.ok(iProductService.findProductHiddenById(id));
+    }
+
+    @DeleteMapping("/product/{id}")
+    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id)")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id){
+        return ResponseEntity.ok(iProductService.deleteProduct(id));
+    }
 }
 
-//for (int i = 0; i < productDTO.getVariantDTOS().size(); i++) {
-//        String variantImageKey = "variantDTOS[" + i + "].productImage";
-//        MultipartFile variantImage = files.get(variantImageKey);
-//        if (variantImage != null) {
-//        productDTO.getVariantDTOS().get(i).setProductImage(variantImage);
-//        log.info("Received image for variant {}: {}", i, variantImage.getOriginalFilename());
-//        } else {
-//        log.warn("No image received for variant {}", i);
-//        }
-//        }
-//
