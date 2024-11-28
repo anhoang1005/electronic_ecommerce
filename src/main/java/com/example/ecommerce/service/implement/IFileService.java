@@ -8,11 +8,12 @@ import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.models.post.MediaUrl;
 import com.example.ecommerce.mapper.product.ProductMapper;
+import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
-import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
@@ -45,6 +46,8 @@ public class IFileService implements FileService {
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final ProductProducer productProducer;
+    private final PostMapper postMapper;
+    private final PostRepository postRepository;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override
@@ -76,6 +79,23 @@ public class IFileService implements FileService {
             count++;
         }
         post.setMediaUrl(postMapper.convertToDatabaseColumn(listMedia));
+        postRepository.save(post);
+    }
+
+    @Async
+    @Override
+    public void uploadListFilePostToCloudinary(Post post, List<MultipartFile> listFile) {
+        List<String> listMedia = new ArrayList<>();
+        for(MultipartFile file : listFile){
+            try{
+                var data = this.cloudinary.uploader().upload(file.getBytes(), Map.of());
+                listMedia.add(data.get("url").toString());
+            } catch (Exception e){
+                log.info(e.getMessage());
+                throw new FileFailedUploadException("ERROR");
+            }
+        }
+        post.setMediaUrl(postMapper.convertToJson(listMedia));
         postRepository.save(post);
     }
 
@@ -133,7 +153,6 @@ public class IFileService implements FileService {
                     productImage.setActive(true);
                     productImage.setProductOfProductImage(product);
                     productImageRepository.save(productImage);
-
                 }
             } else {
                 ProductImage defaultImage = new ProductImage();

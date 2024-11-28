@@ -115,7 +115,7 @@ public class Shop extends BaseEntity{
 
     @PostPersist
     public void updateShopCode() {
-        this.shopCode = "SH" + String.format("%08d", this.id); // cap nhat vơi shopCode thuc te
+        this.shopCode = "SH" + String.format("%08d", this.id);
     }
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -137,11 +137,11 @@ public class Shop extends BaseEntity{
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
 
-    @OneToMany(mappedBy = "shopOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Post> listPostOfShop;
+    @OneToMany(mappedBy = "shopOfNotifyUsers", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotificationUsers> listNotifyUserOfShop;
 
-    @OneToMany(mappedBy = "shopOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PostComment> listPostCommentOfShop;
+    @OneToMany(mappedBy = "shopOfShopVoucher", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ShopVoucher> listVoucherOfShop;
 
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),

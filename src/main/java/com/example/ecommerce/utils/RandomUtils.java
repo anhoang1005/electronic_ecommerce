@@ -3,6 +3,8 @@ package com.example.ecommerce.utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 @Component
@@ -29,5 +31,21 @@ public class RandomUtils {
             code.append(index);
         }
         return code.toString();
+    }
+
+    private static String getRandomString(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            result.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return result.toString();
+    }
+
+    public static String generateOrderCode(String code){
+        String timeStamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String randomPart = getRandomString(8);
+        return code + "-" + String.format("%s-%s", timeStamp, randomPart);
     }
 }

@@ -1,11 +1,14 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "orders_shop")
 public class OrdersShop extends BaseEntity{
@@ -30,7 +33,7 @@ public class OrdersShop extends BaseEntity{
     private String paymentMethod;
 
     @Column(nullable = false)
-    private String isPayment;
+    private Boolean isPayment;
 
     @Column(nullable = false)
     private String clientAddress;
@@ -48,6 +51,9 @@ public class OrdersShop extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "main_orders_id")
     private Orders ordersOfOrdersShop;
+
+    @OneToOne(mappedBy = "ordersShopOfShipping", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private OrderShipping orderShippingOfShopOrder;
 
     @OneToMany(mappedBy = "ordersShopOfOrdersItems", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersItems> listOrdersItemsOfOrdersShop;
