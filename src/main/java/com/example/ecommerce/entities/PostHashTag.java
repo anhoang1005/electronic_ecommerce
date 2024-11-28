@@ -14,14 +14,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "post_hash_tag")
-public class PostHashTag extends BaseEntity{
-
+@Table(name = "post_hashtag", indexes = {
+        @Index(name = "idx_hashtag_name", columnList = "hash_tag_name", unique = true)
+})
+public class PostHashTag extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "hash_tag_name", nullable = false, unique = true, length = 50)
     private String hashTagName;
 
     @Column(nullable = false)
@@ -30,11 +31,12 @@ public class PostHashTag extends BaseEntity{
     @Column(nullable = false)
     private Boolean active;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "post_hashtag",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "hash_tag_id")
-    )
+    @ManyToMany(mappedBy = "listHashTagOfPost", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> listPostOfHashTag = new ArrayList<>();
+
+    @PrePersist
+    void onCreate() {
+        this.postCount = 0L;
+        this.active = true;
+    }
 }

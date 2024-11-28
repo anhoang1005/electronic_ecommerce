@@ -1,49 +1,50 @@
 version: '3.8'
 services:
-  docker-mysql:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: electronic_ecommerce
-    ports:
-      - "3307:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - app-network
+#  docker-mysql:
+#    image: mysql:latest
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 1234
+#      MYSQL_DATABASE: electronic_ecommerce
+#    ports:
+#      - "3307:3306"
+#    healthcheck:
+#      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+#      timeout: 20s
+#      retries: 10
+#    networks:
+#      - app-network
 
-  nginx:
-    image: nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app
-    networks:
-      - app-network
+#  nginx:
+#    image: nginx
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#    depends_on:
+#      - app
+#    networks:
+#      - app-network
+#
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    depends_on:
+#      docker-mysql:
+#        condition: service_healthy
+#      elasticsearch:
+#        condition: service_healthy
+#    volumes:
+#      - ./logs:/app/logs
+#      - ./src:/app/src
+#      - ./pom.xml:/app/pom.xml
+#    command: mvn spring-boot:run -Dspring-boot.devtools.restart.enabled=true
+#    ports:
+#      - "9000:9000"
+#    networks:
+#      - app-network
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      docker-mysql:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    volumes:
-      - ./logs:/app/logs
-      - ./src:/app/src
-      - ./pom.xml:/app/pom.xml
-    command: mvn spring-boot:run -Dspring-boot.devtools.restart.enabled=true
-    ports:
-      - "9000:9000"
-    networks:
-      - app-network
 
   redis:
     image: redis:latest
@@ -51,15 +52,13 @@ services:
       - "6379:6379"
     networks:
       - app-network
-
   mailpit:
-      image: axllent/mailpit
-      ports:
-        - "1025:1025"
-        - "8025:8025"
-      networks:
-        - app-network
-
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - app-network
   rabbitmq:
     image: rabbitmq:3-management
     ports:

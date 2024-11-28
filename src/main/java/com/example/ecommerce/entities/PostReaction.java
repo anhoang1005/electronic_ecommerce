@@ -19,6 +19,7 @@ public class PostReaction{
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Reaction reaction;
 
@@ -40,6 +41,7 @@ public class PostReaction{
     }
 
     public enum Reaction{
+        NONE,
         LIKE,
         LOVE,
         HAHA,

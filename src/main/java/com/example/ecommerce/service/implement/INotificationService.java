@@ -46,9 +46,10 @@ public class INotificationService implements NotificationService {
     private final DateTimeMapperUtils dateUtils;
     private final NotificationMapper notifyMapper;
 
+    @Async
     @Override
     @Transactional
-    public ResponseBody sendNotifyToOneUser(String userCode, SocketBody.Type type, NotificationData data) {
+    public void sendNotifyToOneUser(String userCode, SocketBody.Type type, NotificationData data) {
         try{
             String senderUserCode = authUtils.getUserFromAuthentication().getUserCode();
             System.out.println(userCode + " " + senderUserCode);
@@ -74,7 +75,6 @@ public class INotificationService implements NotificationService {
             notifyUserRepository.save(notifyUser);
             SocketBody socketBody = buildSocketBody(notify, type);
             messagingTemplate.convertAndSend("topic/customer/" + userCode, socketBody);
-            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Send notify error");
             e.printStackTrace();
@@ -82,9 +82,10 @@ public class INotificationService implements NotificationService {
         }
     }
 
+    @Async
     @Override
     @Transactional
-    public ResponseBody sendNotifyToAllUser(SocketBody.Type type, NotificationData data) {
+    public void sendNotifyToAllUser(SocketBody.Type type, NotificationData data) {
         try{
             String senderUserCode = authUtils.getUserFromAuthentication().getUserCode();
             Notification notify = new Notification();
@@ -102,7 +103,6 @@ public class INotificationService implements NotificationService {
             notifyUserRepository.save(notifyUser);
             SocketBody socketBody = buildSocketBody(notify, SocketBody.Type.SYSTEM_NOTIFY);
             messagingTemplate.convertAndSend("topic/system", socketBody);
-            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Send notify error! {}", e.getMessage());
             throw new RequestNotFoundException("ERROR");
@@ -112,7 +112,7 @@ public class INotificationService implements NotificationService {
     @Async
     @Override
     @Transactional
-    public ResponseBody shopSendNotifyToAllUserFollow(NotificationData data) {
+    public void shopSendNotifyToAllUserFollow(NotificationData data) {
         try{
             Shop shop = shopRepository.findShopByShopCode(authUtils.getUserFromAuthentication().getShopCode());
             List<Users> listUsers = shop.getListUsersFollowShop();
@@ -136,7 +136,6 @@ public class INotificationService implements NotificationService {
             }
             notify.setNotifyUserOfNotification(listNotifyUsers);
             notifyRepository.save(notify);
-            return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Shop send notify error! Error: {}", e.getMessage());
             throw new RequestNotFoundException("ERROR");
@@ -177,7 +176,6 @@ public class INotificationService implements NotificationService {
     @Override
     public ResponseBody customerGetNotificationDetail(Long notifyId) {
         try {
-            String userCode = authUtils.getUserFromAuthentication().getUserCode();
             Notification notification = notifyRepository.findById(notifyId)
                     .orElseThrow(() -> new RequestNotFoundException("ERROR"));
             return new ResponseBody(notifyMapper.entityToNotifyDto1(notification),

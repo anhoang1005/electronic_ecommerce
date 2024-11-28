@@ -7,10 +7,13 @@ import com.example.ecommerce.entities.*;
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.models.post.MediaUrl;
+import com.example.ecommerce.mapper.product.ProductMapper;
+import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.PostRepository;
+import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
-import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
@@ -39,9 +42,10 @@ public class IFileService implements FileService {
     private final Cloudinary cloudinary;
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
+    private final ProductDocumentService productDocumentService;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
-    private final ProductDocumentService productDocumentService;
+    private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override
@@ -57,22 +61,21 @@ public class IFileService implements FileService {
         }
     }
 
+
     @Async
     @Override
     public void uploadListFilePostToCloudinary(Post post, List<MultipartFile> listFile) {
-        List<MediaUrl> listMedia = new ArrayList<>();
-        int count = 1;
+        List<String> listMedia = new ArrayList<>();
         for(MultipartFile file : listFile){
             try{
                 var data = this.cloudinary.uploader().upload(file.getBytes(), Map.of());
-                listMedia.add(new MediaUrl(count, data.get("url").toString()));
+                listMedia.add(data.get("url").toString());
             } catch (Exception e){
                 log.info(e.getMessage());
                 throw new FileFailedUploadException("ERROR");
             }
-            count++;
         }
-        post.setMediaUrl(postMapper.convertToDatabaseColumn(listMedia));
+        post.setMediaUrl(postMapper.convertToJson(listMedia));
         postRepository.save(post);
     }
 
@@ -130,7 +133,6 @@ public class IFileService implements FileService {
                     productImage.setActive(true);
                     productImage.setProductOfProductImage(product);
                     productImageRepository.save(productImage);
-
                 }
             } else {
                 ProductImage defaultImage = new ProductImage();
@@ -140,14 +142,16 @@ public class IFileService implements FileService {
                 defaultImage.setProductOfProductImage(product);
                 productImageRepository.save(defaultImage);
             }
-        }).thenRunAsync(() -> {
-            try {
-                productDocumentService.saveProductToElasticSearch(product);
-                log.info("Product successfully saved to Elasticsearch.");
-            } catch (Exception e) {
-                log.error("Error saving product to Elasticsearch: " + e.getMessage());
-            }
-        });
+        })
+//                .thenRunAsync(() -> {
+//            try {
+//                productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+//                log.info("Product successfully saved to Elasticsearch.");
+//            } catch (Exception e) {
+//                log.error("Error saving product to Elasticsearch: " + e.getMessage());
+//            }
+//        })
+                ;
     }
 
     @Override

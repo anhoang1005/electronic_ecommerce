@@ -2,14 +2,14 @@ package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Product;
 import jakarta.persistence.LockModeType;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
-    Product findProductById(Long id);
+
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     default void findAndLockUpdateReview(Long productId, Integer oldStar, Integer newStar, String action){
@@ -31,4 +31,5 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
         save(product);
     }
 
+    Product findProductById(Long id);
 }

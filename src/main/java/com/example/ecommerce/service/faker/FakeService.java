@@ -28,10 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,7 +63,7 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
-
+    private final ProductDocumentService productDocumentService;
 
 
     //user - fake
@@ -279,7 +281,6 @@ public class FakeService {
             product.setRating(Double.parseDouble(String.format("%.1f", faker.number().randomDouble(1, 1, 5))));
 
 
-            List<BigDecimal> prices = new ArrayList<>();
 
             int countAttribute = 2;
             Map<Attribute, List<AttributeValue>> mapAttribute = new HashMap<>();
@@ -296,7 +297,7 @@ public class FakeService {
 
             Attribute attribute2 = attributes.get(1);
             List<AttributeValue> values2 = mapAttribute.get(attribute2);
-
+            List<BigDecimal> prices = new ArrayList<>();
             for (AttributeValue value1 : values1) {
                 for (AttributeValue value2 : values2) {
                     String pair = value1.getId() + "-" + value2.getId();
@@ -304,7 +305,8 @@ public class FakeService {
                         pairedCombinations.add(pair);
 
                         Variant variant = new Variant();
-                        BigDecimal price = new BigDecimal(String.format("%.2f", faker.number().randomDouble(2, 1, 1000)));
+                        double randomValue = 1000 + (10000000 - 1000) * random.nextDouble();
+                        BigDecimal price = new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
                         variant.setPrice(price);
                         prices.add(price);
                         variant.setQuantity(faker.number().randomDigit());
@@ -352,8 +354,10 @@ public class FakeService {
                 throw new RuntimeException(e);
             }
 
-            product.setMinInitialPrice(prices.stream().min(BigDecimal::compareTo).orElse(null));
-            product.setMaxInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
+            List<BigDecimal> validPrices = prices.stream().filter(Objects::nonNull).collect(Collectors.toList());
+
+            product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
+            product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
 
             productRepository.save(product);
             CategoryProduct categoryProduct = new CategoryProduct();
@@ -365,6 +369,7 @@ public class FakeService {
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             shopCategoryProduct.setProduct(product);
             shopCategoryProduct.setShopCategory(shopCategory);
+            product.getShopCategoryProducts().add(shopCategoryProduct);
             shopCategoryProductRepository.save(shopCategoryProduct);
 
             ///
@@ -379,6 +384,7 @@ public class FakeService {
             }
 
             return product;
+
         }catch (Exception e){
             if(transaction.isActive()){
                 transaction.rollback();

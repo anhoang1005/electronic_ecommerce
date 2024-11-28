@@ -1,5 +1,6 @@
 package com.example.ecommerce.service.implement;
 
+import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.Roles;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
@@ -62,7 +63,7 @@ public class IAccountService implements AccountService {
                 List<String> listRoleString = usersEntity.getListRolesOfUsers().stream()
                         .map(Roles::getRoleName)
                         .collect(Collectors.toList());
-                String accessJws = jwtUtils.generateAccessTokens(username, listRoleString);
+                String accessJws = jwtUtils.generateAccessTokens(username,usersEntity.getId(), listRoleString);
                 String refreshJws = jwtUtils.generateRefreshTokens(username, listRoleString);
                 Shop shop = usersEntity.getShopOfUsers();
                 return JwtData.builder()
@@ -118,7 +119,7 @@ public class IAccountService implements AccountService {
                 usersEntity.setUsername(user.getUsername());
                 usersEntity.setActive(true);
                 usersEntity.setListRolesOfUsers(roleEntityList);
-                usersEntity.setImageUrl("user.jpg");
+                usersEntity.setImageUrl(Constant.USER_IMAGE);
                 usersEntity.setVerifyCode(passwordEncoder.encode(verifyCode));
                 usersEntity.setPasswordHash(passwordEncoder.encode(user.getPassword()));
                 usersRepository.save(usersEntity);
@@ -139,6 +140,7 @@ public class IAccountService implements AccountService {
             if (passwordEncoder.matches(verifyCode, user.getVerifyCode())) {
                 user.setEnable(true);
                 user.setVerifyCode(null);
+                usersRepository.save(user);
                 return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
             } else {
                 return new ResponseBody("", ResponseBody.Status.SUCCESS, "VERIFY_CODE_ERROR", ResponseBody.Code.SUCCESS);
@@ -178,6 +180,7 @@ public class IAccountService implements AccountService {
         if(usersEntity != null){
             if(passwordEncoder.matches(verifyCode, usersEntity.getVerifyCode())){
                 usersEntity.setPasswordHash(passwordEncoder.encode(newPassword));
+                usersRepository.save(usersEntity);
                 return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
             } else{
                 return new ResponseBody("", ResponseBody.Status.SUCCESS, "VERIFY_CODE_ERROR", ResponseBody.Code.SUCCESS);

@@ -4,6 +4,7 @@ import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.ProductState;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Id;
@@ -25,6 +26,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Document(indexName = "product-document")
+@JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__type")
 public class ProductDocument {
     @Id
@@ -55,10 +57,12 @@ public class ProductDocument {
     private Shop shop;
     @Field(type = FieldType.Keyword)
     private Long categoryIds;
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Nested)
     private List<Long> shopCategoryIds;
     @Field(type = FieldType.Text)
     private String productUrl;
     @Field(type = FieldType.Date)
     private Date updatedAt;
+    @Field(type = FieldType.Boolean)
+    private Boolean isDeleted;
 }

@@ -2,14 +2,14 @@ package com.example.ecommerce.entities;
 
 import com.example.ecommerce.payload.socket_payload.SocketBody;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "notification")
 public class Notification extends BaseEntity{

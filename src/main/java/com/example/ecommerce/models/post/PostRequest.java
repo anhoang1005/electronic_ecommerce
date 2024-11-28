@@ -13,11 +13,10 @@ import java.util.List;
 @Builder
 public class PostRequest {
     private Long id;
+    private Long sharedId;
     private BaseRole postRole;
     private Post.Visibility visibility;
     private String content;
-    private Boolean isPrivate;
     private String location;
     private List<String> hashTag;
-    private String active;
 }

@@ -2,7 +2,7 @@ package com.example.ecommerce.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "shop", indexes = {
-        @Index(name = "idx_shop_shopCode", columnList = "shopCode")
+        @Index(name = "idx_shop_shopCode", columnList = "shop_code")
 })
 public class Shop extends BaseEntity{
 
@@ -20,7 +20,7 @@ public class Shop extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "VARCHAR(15)", unique = true)
+    @Column(name = "shop_code", columnDefinition = "VARCHAR(15)", unique = true)
     private String shopCode;
 
     @Enumerated(EnumType.STRING)
@@ -90,8 +90,8 @@ public class Shop extends BaseEntity{
     @Version
     private long version;
 
-    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<ShopCategoryProduct> shopCategoryProducts;
+//    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+//    private List<ShopCategoryProduct> shopCategoryProducts;
 
     @OneToMany(mappedBy = "shop")
     @JsonManagedReference("product-shop")
@@ -115,7 +115,7 @@ public class Shop extends BaseEntity{
 
     @PostPersist
     public void updateShopCode() {
-        this.shopCode = "SH" + String.format("%08d", this.id); // cap nhat vơi shopCode thuc te
+        this.shopCode = "SH" + String.format("%08d", this.id);
     }
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -137,11 +137,11 @@ public class Shop extends BaseEntity{
     @OneToMany(mappedBy = "shopOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrdersShopOfShop;
 
-    @OneToMany(mappedBy = "shopOfPost", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Post> listPostOfShop;
+    @OneToMany(mappedBy = "shopOfNotifyUsers", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotificationUsers> listNotifyUserOfShop;
 
-    @OneToMany(mappedBy = "shopOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PostComment> listPostCommentOfShop;
+    @OneToMany(mappedBy = "shopOfShopVoucher", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ShopVoucher> listVoucherOfShop;
 
     public enum BusinessType{
         CA_NHAN(1, "Cá nhân"),

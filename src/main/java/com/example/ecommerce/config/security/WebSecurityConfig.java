@@ -7,6 +7,7 @@ import com.example.ecommerce.exceptions.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 	private final CustomUserDetailService customUserDetailService;
 	private final CustomFilterJwt customFilterJwt;
@@ -68,7 +70,7 @@ public class WebSecurityConfig {
 								.requestMatchers(
 										"/api/all/**",
 										"/**")
-										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
+										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLY", "KHACHHANG", "CONGTACVIEN")
                                 .anyRequest().authenticated());
 		return http.build();
 	}

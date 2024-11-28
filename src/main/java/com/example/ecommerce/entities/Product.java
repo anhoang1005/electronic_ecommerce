@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "Product")
+@Where(clause = "is_deleted = false")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,6 +71,9 @@ public class Product extends BaseEntity{
 
     @Column(nullable = false, name = "is_accepted")
     private Boolean isAccepted;
+
+    @Column(nullable = false, name = "is_deleted")
+    private Boolean isDeleted;
 
     @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL)
     @JsonManagedReference("product-image")
@@ -127,6 +132,7 @@ public class Product extends BaseEntity{
         if (this.starCount == null) {
             this.starCount = 0L;
         }
+        this.isDeleted = false;
     }
 
 }
