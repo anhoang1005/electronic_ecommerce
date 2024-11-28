@@ -46,8 +46,6 @@ public class IFileService implements FileService {
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final ProductProducer productProducer;
-    private final PostMapper postMapper;
-    private final PostRepository postRepository;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override
@@ -63,24 +61,6 @@ public class IFileService implements FileService {
         }
     }
 
-    @Async
-    @Override
-    public void uploadListFilePostToCloudinary(Post post, List<MultipartFile> listFile) {
-        List<MediaUrl> listMedia = new ArrayList<>();
-        int count = 1;
-        for(MultipartFile file : listFile){
-            try{
-                var data = this.cloudinary.uploader().upload(file.getBytes(), Map.of());
-                listMedia.add(new MediaUrl(count, data.get("url").toString()));
-            } catch (Exception e){
-                log.info(e.getMessage());
-                throw new FileFailedUploadException("ERROR");
-            }
-            count++;
-        }
-        post.setMediaUrl(postMapper.convertToDatabaseColumn(listMedia));
-        postRepository.save(post);
-    }
 
     @Async
     @Override
