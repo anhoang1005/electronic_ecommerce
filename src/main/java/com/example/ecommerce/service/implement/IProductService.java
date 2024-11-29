@@ -229,16 +229,21 @@ public class IProductService implements ProductService {
 
     @Override
     public ResponseBody findProductById(Long id) {
-        Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
-        if(ObjectUtils.isEmpty(product)){
-            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
-        }
-        return new ResponseBody(
-                ProductMapper.mapperProductToResponse(product),
-                ResponseBody.Status.SUCCESS,
-                ResponseBody.Code.SUCCESS
-        );
+        return null;
     }
+
+//    @Override
+//    public ResponseBody findProductById(Long id) {
+//        Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
+//        if(ObjectUtils.isEmpty(product)){
+//            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
+//        }
+//        return new ResponseBody(
+//                ProductMapper.mapperProductToResponse(product),
+//                ResponseBody.Status.SUCCESS,
+//                ResponseBody.Code.SUCCESS
+//        );
+//    }
 
     @Override
     public ResponseBody findProductHiddenById(Long id) {
