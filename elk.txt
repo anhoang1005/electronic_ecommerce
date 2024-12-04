@@ -1,0 +1,197 @@
+GET product-document/_count
+GET product-document/_mapping
+GET product-document/_search
+{
+  "query": {
+    "term": {
+      "id": "1025"
+    }
+  }
+}
+GET /product-document/_settings
+
+DELETE product-document
+PUT /product-document
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "autocomplete_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 25,
+          "token_chars": ["letter", "digit"]
+        }
+      },
+      "analyzer": {
+        "autocomplete_analyzer": {
+          "type": "custom",
+          "tokenizer": "autocomplete_tokenizer",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer"
+      },
+      "slug": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer"
+      },
+      "minPrice": {
+        "type": "double"
+      },
+      "maxPrice": {
+        "type": "double"
+      },
+      "productCode": {
+        "type": "keyword"
+      },
+      "rating": {
+        "type": "double"
+      },
+      "state": {
+        "type": "text"
+      },
+      "shopCode": {
+        "type": "keyword"
+      },
+      "shopId" : {
+        "type" : "long"
+      },
+      "shopCategoryIds": {
+        "type": "long"
+      },
+      "productUrl": {
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "isDeleted": {
+        "type": "boolean"
+      },
+      "isAccepted": {
+        "type": "boolean"
+      },
+      "isRejected": {
+        "type": "boolean"
+      },
+      "isHidden": {
+        "type": "boolean"
+      },
+      "brandDocument": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "keyword"
+          },
+          "brandName": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer"
+          }
+        }
+      },
+      "categoryDocument": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "keyword"
+          },
+          "categoryName": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer"
+          }
+        }
+      },
+      "attributes": {
+        "type": "nested",
+        "properties": {
+          "attributeId": {
+            "type": "keyword"
+          },
+          "attributeName": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer"
+          },
+          "attributeValue": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer"
+          }
+        }
+      },
+      "score": {
+        "type": "double"
+      }
+    }
+  }
+}
+
+
+DELETE product-search-document
+GET /product-document/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "minPrice": {
+              "gte": 100
+            }
+          }
+        },
+        {
+          "range": {
+            "maxPrice": {
+              "lte": 900
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+GET /product-document/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+
+        {
+          "term": {
+            "shopCode": "SH00000002"
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET /product-document/_mapping
+GET /product-document/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "shopCode":  "s00000"
+          }
+        },
+        {
+          "term": {
+            "shopCategoryIds": 3
+          }
+        }
+      ]
+    }
+  }
+}
