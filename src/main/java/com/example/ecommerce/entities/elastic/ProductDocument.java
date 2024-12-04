@@ -57,7 +57,7 @@ public class ProductDocument {
     private Shop shop;
     @Field(type = FieldType.Keyword)
     private Long categoryIds;
-    @Field(type = FieldType.Nested)
+    @Field(type = FieldType.Long)
     private List<Long> shopCategoryIds;
     @Field(type = FieldType.Text)
     private String productUrl;
