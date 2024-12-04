@@ -12,21 +12,33 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
     private final NotificationService notifyService;
 
-    @PostMapping("/api/customer/notify/send-user/{userCode}")
-    public ResponseEntity<?> sendNotifyToUser(@PathVariable("userCode") String userCode,
+    @PostMapping("/api/customer/notify/send-user/{user_Code}")
+    public ResponseEntity<?> sendNotifyToUser(@PathVariable("user_Code") String userCode,
                                               @RequestBody NotificationData data){
-        return ResponseEntity.ok(notifyService.sendNotifyToOneUser(userCode,
-                SocketBody.Type.SYSTEM_NOTIFY, data));
+        notifyService.sendNotifyToOneUser(userCode, SocketBody.Type.SYSTEM_NOTIFY, data);
+        return ResponseEntity.ok("OK");
     }
 
     @PostMapping("/api/customer/notify/send-all")
-    public ResponseEntity<?> send1NotifyToUser(@RequestBody NotificationData data){
-        return ResponseEntity.ok(notifyService.sendNotifyToAllUser(SocketBody.Type.SYSTEM_NOTIFY, data));
+    public ResponseEntity<?> send1NotifyToAllUser(@RequestBody NotificationData data){
+        notifyService.sendNotifyToAllUser(SocketBody.Type.SYSTEM_NOTIFY, data);
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/api/owner/notify/send-follow")
+    public ResponseEntity<?> sendNotifyToFollowUser(@RequestBody NotificationData data){
+        notifyService.shopSendNotifyToAllUserFollow(data);
+        return ResponseEntity.ok("OK");
     }
 
     @PostMapping("/api/customer/notify/get-all")
     public ResponseEntity<?> getNotifyToUser(@RequestParam("page_number") int pageNumber,
                                              @RequestParam("page_size") int pageSize){
         return ResponseEntity.ok(notifyService.customerGetTheirNotification(pageNumber, pageSize));
+    }
+
+    @GetMapping("/api/customer/notify/get-detail")
+    public ResponseEntity<?> getNotifyDetail(@RequestParam("notify_id") Long notifyId){
+        return ResponseEntity.ok(notifyService.customerGetNotificationDetail(notifyId));
     }
 }

@@ -30,10 +30,10 @@ public class RoleUserRootInitializer implements CommandLineRunner {
                 roleEntity.setNote("Tài khoản gốc của hệ thống");
                 rolesRepository.save(roleEntity);
             }
-            if (!rolesRepository.existsByRoleName("QUANLI")) {
+            if (!rolesRepository.existsByRoleName("QUANLY")) {
                 Roles roleEntity = new Roles();
                 roleEntity.setRoleCode("QL");
-                roleEntity.setRoleName("QUANLI");
+                roleEntity.setRoleName("QUANLY");
                 roleEntity.setActive(true);
                 roleEntity.setNote("Tài khoản của quản lí hệ thống");
                 rolesRepository.save(roleEntity);

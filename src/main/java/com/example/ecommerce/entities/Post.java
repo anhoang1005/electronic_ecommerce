@@ -1,10 +1,12 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.entities.enums.BaseRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -38,6 +40,13 @@ public class Post extends BaseEntity{
     @Column(nullable = true, columnDefinition = "TEXT")
     private String hashtag;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BaseRole postRole;
+
+    @Column(nullable = false)
+    private Boolean isShared;
+    @Column(nullable = false)
     private Boolean active;
 
     @Column(nullable = false)
@@ -49,6 +58,7 @@ public class Post extends BaseEntity{
 
     @PrePersist
     public void onCreate(){
+        this.sharedCount = 0;
         this.commentCount = 0;
         this.likeCount = 0;
         this.commentCount = 0;
@@ -65,6 +75,9 @@ public class Post extends BaseEntity{
     @OneToMany(mappedBy = "postOfPostComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PostComment> listPostCommentOfPost;
 
+    @OneToMany(mappedBy = "postOfReaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PostReaction> listReactionOfPost;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
     private Users usersOfPost;
@@ -72,6 +85,14 @@ public class Post extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = true)
     private Shop shopOfPost;
+
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "post_hashtag_relation",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
+    )
+    private List<PostHashTag> listHashTagOfPost = new ArrayList<>();
 
     public enum Visibility{
         PUBLIC,

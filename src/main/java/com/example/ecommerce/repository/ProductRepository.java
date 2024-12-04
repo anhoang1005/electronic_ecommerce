@@ -2,16 +2,14 @@ package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Product;
 import jakarta.persistence.LockModeType;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
-    Product findProductById(Long id);
+
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     default void findAndLockUpdateReview(Long productId, Integer oldStar, Integer newStar, String action){
@@ -32,7 +30,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
         product.setRating(rating);
         save(product);
     }
-    @Query("select p from Product  p where p.id = :id and p.isAccepted =  true and p.isHidden = true")
-    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam Long id);
 
+    Product findProductById(Long id);
 }

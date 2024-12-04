@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.entities.Post;
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Variant;
@@ -13,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 public interface FileService {
 
     ResponseBody uploadToCloudinary(MultipartFile file);
+    void uploadListFilePostToCloudinary(Post post, List<MultipartFile> listFile);
     CompletableFuture<List<String>> uploadAndSaveImagesProductAsync(List<MultipartFile> file);
     CompletableFuture<Void> processImagesAndSaveAsync(Product product, CompletableFuture<List<String>> imagesUrlFuture);
     CompletableFuture<String> uploadImageVariantAsync(MultipartFile file);
