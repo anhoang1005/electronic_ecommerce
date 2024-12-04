@@ -17,7 +17,7 @@ public class UsersController {
 
     @GetMapping("/api/all/users/detail")
     public ResponseEntity<ResponseBody> userGetUserDetailApi(
-            @RequestParam("email") String email
+            @RequestParam(value = "email" , required = false) String email
     ){
         return ResponseEntity.ok(usersService.usersGetUsersDetailResponse(email));
     }

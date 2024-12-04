@@ -29,10 +29,12 @@ public class PostMapper {
             Shop shop = post.getShopOfPost();
             dto.setPostAvatar(shop.getShopLogo());
             dto.setPostName(shop.getShopName());
+            dto.setShopCode(shop.getShopCode());
         } else if(post.getPostRole()== BaseRole.QUANLY){
             Users users = post.getUsersOfPost();
             dto.setPostAvatar(users.getImageUrl());
             dto.setPostName("Admin: " + users.getUsername());
+            dto.setUserCode(users.getUserCode());
         } else if(post.getPostRole()== BaseRole.ROOT){
             dto.setPostAvatar("https://media.istockphoto.com/id/1416937202/vector/settings-or-gear-icon-cog-setting-vector-illustration.jpg?s=612x612&w=0&k=20&c=3vVNW4ssuNPwKUMT5HSMEbUlknZmp5FeEBF1eZTzJYA=");
             dto.setPostName("System");
@@ -40,8 +42,10 @@ public class PostMapper {
             Users users = post.getUsersOfPost();
             dto.setPostAvatar(users.getImageUrl());
             dto.setPostName(users.getUsername());
+            dto.setUserCode(users.getUserCode());
         }
         dto.setId(post.getId());
+
 
         dto.setContent(post.getContent()!=null ? post.getContent() : null);
         dto.setMediaUrl(post.getMediaUrl()!=null ?

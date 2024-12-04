@@ -20,6 +20,10 @@ public class PostDto {
     private String postRole;
     @JsonProperty("post_avatar")
     private String postAvatar;
+    @JsonProperty("post_shop_code")
+    private String shopCode;
+    @JsonProperty("post_user_code")
+    private String userCode;
     @JsonProperty("post_name")
     private String postName;
     @JsonProperty("content")

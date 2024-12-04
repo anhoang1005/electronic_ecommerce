@@ -62,7 +62,7 @@ public class Post extends BaseEntity{
         this.commentCount = 0;
         this.likeCount = 0;
         this.commentCount = 0;
-        this.active = false;
+        this.active = true;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
