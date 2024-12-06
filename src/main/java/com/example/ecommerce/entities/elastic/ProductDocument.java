@@ -49,12 +49,8 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     @JsonProperty("brand_id")
     private Long brandId;
-    @Transient
-    private Brand brand;
-    @JsonProperty("shop_id")
-    private Long shopId;
-    @Transient
-    private Shop shop;
+    @JsonProperty("shop_code")
+    private String shopCode;
     @Field(type = FieldType.Keyword)
     private Long categoryIds;
     @Field(type = FieldType.Long)

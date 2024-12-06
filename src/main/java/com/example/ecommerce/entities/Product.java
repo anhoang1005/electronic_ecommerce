@@ -75,9 +75,9 @@ public class Product extends BaseEntity{
     @Column(nullable = false, name = "is_deleted")
     private Boolean isDeleted;
 
-    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference("product-image")
-    private List<ProductImage> listImageOfProduct;
+    private List<ProductImage> listImageOfProduct = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "brand_id")

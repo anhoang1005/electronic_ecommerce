@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 public class CustomExpressionSecurity {
     private final JwtTokenUtils jwtTokenUtils;
     private final ProductRepository productRepository;
-    public boolean isShopAllowed(Long productId){
+    public boolean isShopAllowed(String productCode){
         String token = jwtTokenUtils.getToken();
         Long userId = jwtTokenUtils.extractUserId(token);
-        Product product = productRepository.findProductById(productId);
+        Product product = productRepository.findProductByProductCode(productCode);
         log.info(userId.toString());
         log.info(product.getShop().getUsersInShop().getId().toString());
         return userId.equals(product.getShop().getUsersInShop().getId());

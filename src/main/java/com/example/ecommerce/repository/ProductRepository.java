@@ -4,8 +4,10 @@ import com.example.ecommerce.entities.Product;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
@@ -32,4 +34,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     }
 
     Product findProductById(Long id);
+    @Query("select p from Product p  where p.isAccepted = true and p.isHidden = false and p.productCode = :code")
+    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam String code);
+    Product findProductByProductCode(String productCode);
 }

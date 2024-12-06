@@ -45,7 +45,6 @@ public class IFileService implements FileService {
     private final ProductDocumentService productDocumentService;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
-    private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override
@@ -94,7 +93,8 @@ public class IFileService implements FileService {
         List<File> savedFiles = new ArrayList<>();
         for(MultipartFile file : files){
             try {
-                File tempFile = new File(System.getProperty("java.io.tmpdir") + File.separator + file.getOriginalFilename());
+                String customTempDir = "src/main/resources/temp";
+                File tempFile = new File(System.getProperty(customTempDir) + File.separator + file.getOriginalFilename());
                 file.transferTo(tempFile);
                 savedFiles.add(tempFile);
                 logger.info("Saved file to temporary directory: {}", tempFile.getAbsolutePath());
@@ -133,6 +133,7 @@ public class IFileService implements FileService {
                     productImage.setActive(true);
                     productImage.setProductOfProductImage(product);
                     productImageRepository.save(productImage);
+                    product.getListImageOfProduct().add(productImage);
                 }
             } else {
                 ProductImage defaultImage = new ProductImage();
@@ -142,16 +143,7 @@ public class IFileService implements FileService {
                 defaultImage.setProductOfProductImage(product);
                 productImageRepository.save(defaultImage);
             }
-        })
-//                .thenRunAsync(() -> {
-//            try {
-//                productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
-//                log.info("Product successfully saved to Elasticsearch.");
-//            } catch (Exception e) {
-//                log.error("Error saving product to Elasticsearch: " + e.getMessage());
-//            }
-//        })
-                ;
+        });
     }
 
     @Override

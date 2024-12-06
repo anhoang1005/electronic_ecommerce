@@ -22,27 +22,12 @@ public class ProductShopController {
     private final IProductService iProductService;
     private final ObjectMapper objectMapper;
     @PostMapping("/product")
-    @PreAuthorize("hasAuthority('CHUCUAHANG')")
+    @PreAuthorize("hasRole('CHUCUAHANG')")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
                                            @RequestParam("files") List<MultipartFile> files) {
-        log.info("controller");
 
         try {
             ProductDTO productDTO = objectMapper.readValue(jsonDto, ProductDTO.class);
-            for(int i = 0 ; i < productDTO.getVariantDTOS().size() ;i++){
-                String variantImageKey = "variantDTOS[" + i + "].productImage"; // Key trong form-data
-                MultipartFile variantImage = files.stream()
-                        .filter(file -> variantImageKey.equals(file.getName())) // Tìm ảnh tương ứng
-                        .findFirst()
-                        .orElse(null);
-
-                if (variantImage != null) {
-                    productDTO.getVariantDTOS().get(i).setProductImage(variantImage);
-                    log.info("Received image for variant {}: {}", i, variantImage.getOriginalFilename());
-                } else {
-                    log.warn("No image received for variant {}", i);
-                }
-            }
             return ResponseEntity.ok(iProductService.createProduct(productDTO, files));
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().body("Invalid JSON input: " + e.getMessage());
@@ -50,16 +35,16 @@ public class ProductShopController {
             return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
         }
     }
-    @GetMapping("/product/{id}")
-    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id) or hasAuthority('QUANLY')")
-    public ResponseEntity<?> findProduct(@PathVariable Long id){
-        return ResponseEntity.ok(iProductService.findProductHiddenById(id));
+    @GetMapping("/product/{code}")
+    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#code) or hasAuthority('QUANLY')")
+    public ResponseEntity<?> findProduct(@PathVariable String code){
+        return ResponseEntity.ok(iProductService.findProductHiddenById(code));
     }
 
-    @DeleteMapping("/product/{id}")
-    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id)")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id){
-        return ResponseEntity.ok(iProductService.deleteProduct(id));
+    @DeleteMapping("/product/{code}")
+    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#code)")
+    public ResponseEntity<?> deleteProduct(@PathVariable String code){
+        return ResponseEntity.ok(iProductService.deleteProduct(code));
     }
 }
 

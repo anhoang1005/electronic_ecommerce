@@ -19,8 +19,8 @@ public class ProductController {
     private final ProductService productService;
     private final ProductDocumentService productDocumentService;
     @GetMapping("/product/{id}")
-    public ResponseBody getProduct(@PathVariable Long id){
-        return productService.findProductById(id);
+    public ResponseBody getProduct(@PathVariable String code){
+        return productService.findProductByCode(code);
     }
 
     @GetMapping("/filter")

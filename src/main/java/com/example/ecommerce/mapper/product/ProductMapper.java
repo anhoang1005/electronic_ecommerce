@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 
 public class ProductMapper {
     public static ProductDocument mapperProductToDocument(Product product) {
-        String url = GlobalUtils.DEFAULT_URL;
-//        if(product.getListImageOfProduct()!=null){
-//            url = String.valueOf(product.getListImageOfProduct()
-//                    .stream().filter(image -> image.getIsMainImage())
-//                    .map(image -> image.getImageUrl()).findFirst());
-//        }
+        String url = null;
+        if(product.getListImageOfProduct()!=null){
+            url = String.valueOf(product.getListImageOfProduct()
+                    .stream().filter(image -> image.getIsMainImage())
+                    .map(image -> image.getImageUrl()).findFirst().orElse(GlobalUtils.DEFAULT_URL));
+        }
         List<ShopCategoryProduct> shopCategoryProducts = product.getShopCategoryProducts();
         List<Long> shopCategoryIds = new ArrayList<>();
         shopCategoryProducts.forEach(shopCategoryProduct -> {
@@ -41,13 +41,18 @@ public class ProductMapper {
                 .updatedAt(Date.from(product.getModifiedAt().atZone(ZoneId.systemDefault()).toInstant()))
                 .shopCategoryIds(shopCategoryIds)
                 .categoryIds(product.getCategory().getId())
-                .shopId(product.getShop().getId())
+                .shopCode(product.getShop().getShopCode())
                 .productUrl(url)
                 .isDeleted(product.getIsDeleted())
                 .build();
     }
     public static ProductResponse mapperProductToResponse(Product product){
-
+        String url = null;
+        if(product.getListImageOfProduct()!=null){
+            url = String.valueOf(product.getListImageOfProduct()
+                    .stream().filter(image -> image.getIsMainImage())
+                    .map(image -> image.getImageUrl()).findFirst().orElse(GlobalUtils.DEFAULT_URL));
+        }
         return ProductResponse
                 .builder()
                 .productId(product.getId())
@@ -61,12 +66,10 @@ public class ProductMapper {
                 .minPrice(product.getMinInitialPrice())
                 .categoryId(product.getCategory().getId())
                 .brandId(product.getBrand().getId())
-
+                .productImageUrl(url)
                 .countComments(product.getReview())
-                .listImg(product.getListImageOfProduct().stream().map(
-                        img -> img.getImageUrl()
-                ).collect(Collectors.toList()))
                 .favoritesCount(product.getFavorite())
+                .productCode(product.getProductCode())
                 .build();
     }
 }

@@ -21,7 +21,6 @@ public class ProductResponse {
     private String breadcrumbs;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
-    private List<String> listImg;
     private Double rating;
     private Integer countComments;
     private List<VariantResponse> variant = new ArrayList<>();
@@ -30,4 +29,6 @@ public class ProductResponse {
     private Long categoryId;
     private String productSpecifications;
     private String productSlug;
+    private String productImageUrl;
+    private String productCode;
 }

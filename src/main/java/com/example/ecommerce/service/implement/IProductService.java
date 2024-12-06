@@ -21,13 +21,13 @@ import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
-import com.example.ecommerce.utils.AuthenticationUtils;
-import com.example.ecommerce.utils.JsonConvert;
-import com.example.ecommerce.utils.StringFormatUtils;
+import com.example.ecommerce.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.security.SecurityUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -62,12 +62,11 @@ public class IProductService implements ProductService {
     private final ShopCategoryRepository shopCategoryRepository;
     private final ProductProducer productProducer;
     private final ProductDocumentRepository productDocumentRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(IProductService.class);
 
     @Override
     @Transactional
     public ResponseBody createProduct(ProductDTO dto, List<MultipartFile> productFile) {
-        log.info(dto.toString());
         Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
                 () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId())
         );
@@ -84,6 +83,7 @@ public class IProductService implements ProductService {
         product.setIsHidden(dto.isHidden());
         product.setCategory(category);
         product.setBrand(brand);
+        product.setProductCode("PID" + RandomUtils.getRandomString(15));
         product.setShop(shop);
         List<BigDecimal> prices = new ArrayList<>();
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
@@ -198,9 +198,6 @@ public class IProductService implements ProductService {
         product.setMinInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
 
         productRepository.save(product);
-//        dto.getShopCategoryIds().parallelStream().forEach( id -> {
-//
-//        });
         for(Long id : dto.getShopCategoryIds()){
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             ShopCategory shopCategory = shopCategoryRepository.findById(id).orElseThrow(
@@ -218,33 +215,27 @@ public class IProductService implements ProductService {
         categoryProductRepository.save(categoryProduct);
         product.getCategoryProducts().add(categoryProduct);
 
-        CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product, imagesUrl);
-        ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
+        CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product, imagesUrl)
+                .thenAcceptAsync(ignored -> {
+
+                    ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
+                    productProducer.sendProductToQueue(productDocument);
+                })
+                .exceptionally(ex -> {
+                    logger.error("Error during image processing or sending to queue: " + ex.getMessage());
+                    return null;
+                });
+
         return new ResponseBody(
-                productDocument,
+                ProductMapper.mapperProductToDocument(product),
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );
     }
 
     @Override
-    public ResponseBody findProductById(Long id) {
-        Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
-        if(ObjectUtils.isEmpty(product)){
-            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
-        }
-        return new ResponseBody(
-                ProductMapper.mapperProductToResponse(product),
-                ResponseBody.Status.SUCCESS,
-                ResponseBody.Code.SUCCESS
-        );
-    }
-
-    @Override
-    public ResponseBody findProductHiddenById(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
-        );
+    public ResponseBody findProductByCode(String code) {
+        Product product = this.findProduct(code);
         return new ResponseBody(
                 ProductMapper.mapperProductToResponse(product),
                 ResponseBody.Status.SUCCESS,
@@ -253,16 +244,28 @@ public class IProductService implements ProductService {
     }
 
     @Override
-    public ResponseBody updateProduct(Long id, ProductUpdateDTO dto) {
+    public ResponseBody findProductHiddenById(String code) {
+        Product product = this.findProduct(code);
+        return new ResponseBody(
+                ProductMapper.mapperProductToResponse(product),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody updateProduct(String code, ProductUpdateDTO dto) {
         return null;
     }
 
     @Override
-    public ResponseBody checkProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(
-                        () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
-                );
+    public ResponseBody getEditProduct(String code) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody acceptProduct(String code) {
+        Product product = this.findProduct(code);
         product.setIsAccepted(true);
         product.setIsHidden(true);
         productRepository.save(product);
@@ -277,20 +280,17 @@ public class IProductService implements ProductService {
     }
 
     @Override
-    public ResponseBody deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(
-                        () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
-                );
+    public ResponseBody deleteProduct(String code) {
+        Product product =this.findProduct(code);
         product.setIsDeleted(true);
         productRepository.save(product);
 
         CompletableFuture.runAsync(
                 () -> {
-                    ProductDocument productDocument = productDocumentRepository.findById(id)
-                            .orElseThrow(
-                                    () -> new RequestNotFoundException(ErrorMessage.PRODUCT_UNACTIVE.name())
-                            );
+                    ProductDocument productDocument = productDocumentRepository.findProductDocumentByProductCode(code);
+                    if(ObjectUtils.isEmpty(productDocument)){
+                        throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
+                    }
 
                     productDocument.setIsDeleted(true);
                     productDocumentRepository.save(productDocument);
@@ -301,5 +301,14 @@ public class IProductService implements ProductService {
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );
+    }
+
+    //helper functions...
+    public Product findProduct(String code){
+        Product product = productRepository.findProductByProductCode(code);
+        if(ObjectUtils.isEmpty(product)){
+            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name());
+        }
+        return product;
     }
 }

@@ -33,7 +33,7 @@ public class RandomUtils {
         return code.toString();
     }
 
-    private static String getRandomString(int length) {
+    public static String getRandomString(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
         StringBuilder result = new StringBuilder();
