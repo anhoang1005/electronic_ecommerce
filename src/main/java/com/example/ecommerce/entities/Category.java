@@ -51,7 +51,7 @@ public class Category extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CategoryType categoryType;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @JsonManagedReference("product-category")
     private List<Product> products;
     @Column(nullable = false)

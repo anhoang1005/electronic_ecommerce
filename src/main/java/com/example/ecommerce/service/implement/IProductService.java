@@ -8,6 +8,7 @@ import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ProductUpdateDTO;
+import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
@@ -297,8 +298,8 @@ public class IProductService implements ProductService {
         try{
             Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("id")));
             Page<Product> page = productRepository.findAll(pageable);
-            List<ProductResponse> responses = page.stream()
-                    .map(ProductMapper::mapperProductToResponse)
+            List<ProductCard> responses = page.stream()
+                    .map(productMapper::entityToProductCard)
                     .collect(Collectors.toList());
             return new ResponseBody(responses, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         }catch (Exception e){

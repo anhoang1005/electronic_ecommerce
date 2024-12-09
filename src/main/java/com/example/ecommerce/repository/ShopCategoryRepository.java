@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ShopCategoryRepository extends JpaRepository<ShopCategory,Long> {
     ShopCategory findShopCategoriesById(Long id);
-    @Query("select sc from ShopCategory sc order by function('RAND') LIMIT 1")
+    @Query("SELECT sc FROM ShopCategory sc WHERE sc.categoryLevel > 1 ORDER BY function('RAND')")
     ShopCategory findRandomShopCategory();
+
 }

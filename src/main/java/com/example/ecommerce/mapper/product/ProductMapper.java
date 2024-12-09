@@ -1,6 +1,7 @@
 package com.example.ecommerce.mapper.product;
 
 import com.example.ecommerce.entities.*;
+import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
@@ -73,6 +74,27 @@ public class ProductMapper {
                 .listImg(product.getListImageOfProduct().stream().map(
                         ProductImage::getImageUrl
                 ).collect(Collectors.toList()))
+                .build();
+    }
+
+    public ProductCard entityToProductCard(Product product){
+        List<ProductImage> imageList = product.getListImageOfProduct();
+        ProductImage image = imageList.stream()
+                .filter(ProductImage::getIsMainImage)
+                .findFirst()
+                .orElse(null);
+        return ProductCard.builder()
+                .productId(product.getId())
+                .imageUrl(image!=null ? image.getImageUrl() : null)
+                .productSlug(product.getProductSlug())
+                .productCode(product.getProductCode())
+                .productTitle(product.getTitle())
+                .minPrice(product.getMinInitialPrice())
+                .maxPrice(product.getMaxInitialPrice())
+                .breadcrumbs(product.getBreadcrumb()!=null ? product.getBreadcrumb() : null)
+                .rating(4.6)
+                .soldCount(1000)
+                .brandId(product.getBrandOfProduct().getId())
                 .build();
     }
 }

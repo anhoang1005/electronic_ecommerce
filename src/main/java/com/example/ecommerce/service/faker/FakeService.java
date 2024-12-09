@@ -5,6 +5,7 @@ import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.mapper.category.CategoryMapper;
+import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.AccountService;
@@ -12,6 +13,7 @@ import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +56,7 @@ public class FakeService {
     private final ProductAttributeValueRepository productAttributeValueRepository;
     //private final ProductProducer productProducer;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
+    private final ObjectMapper objectMapper;
 
 
     //user - fake
@@ -236,7 +239,27 @@ public class FakeService {
             ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategory();
             Brand brand = brandRepository.findRandomBrand();
 
+            List<CategoryBreadcrumb> breadcrumbs = new ArrayList<>();
+            breadcrumbs.add(CategoryBreadcrumb.builder()
+                    .id(category.getId())
+                    .category(category.getCategoryName())
+                    .build());
+            if (category.getCategoryLevel() > 0) {
+                while (category != null && category.getCategoryLevel() > 0) {
+                    Category parent = category.getParentCategory();
+                    if (parent != null) {
+                        breadcrumbs.add(CategoryBreadcrumb.builder()
+                                .id(parent.getId())
+                                .category(parent.getCategoryName())
+                                .build());
+                    }
+                    category = parent;
+                }
+                Collections.reverse(breadcrumbs);
+            }
+
             Product product = new Product();
+            product.setBreadcrumb(objectMapper.writeValueAsString(breadcrumbs));
             String title = faker.funnyName().name();
             product.setTitle(title);
             product.setDescription(faker.lorem().toString());
@@ -249,6 +272,17 @@ public class FakeService {
             product.setProductCode("PID" + randomUtils.generateRandomString(15));
             product.setShopOfProduct(shop);
             product.setSoldCount(random.nextInt(100, 10000));
+
+            //Product image
+            ProductImage image = new ProductImage();
+            image.setImageUrl("https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lzd2qfj9xc99f4.webp");
+            image.setActive(true);
+            image.setIsMainImage(true);
+            image.setProductOfProductImage(product);
+            List<String> images = List.of(image).stream().map(ProductImage::getImageUrl).collect(Collectors.toList());
+            product.setListImageOfProduct(List.of(image));
+            product.setImageList(objectMapper.writeValueAsString(images));
+
 
             List<Attribute> attributes = randomAttributes(2);
             if (attributes.isEmpty()) {
@@ -283,7 +317,7 @@ public class FakeService {
                         long min = 50000;
                         long max = 20000000;
                         long randomValue = min + (long) (Math.random() * (max - min));
-                        randomValue = (randomValue / 100) * 100;
+                        randomValue = (randomValue / 100) * 500;
                         BigDecimal price = BigDecimal.valueOf(randomValue);
                         variant.setPrice(price);
                         prices.add(price);

@@ -6,6 +6,7 @@ import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.exceptions.users.UnauthorizedException;
+import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.models.category.CategoryDto;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -86,7 +88,26 @@ public class ICategoryService implements CategoryService {
 
     @Override
     public ResponseBody findCategoryById(Long id) {
-        return null;
+        Category category = categoryRepository.findCategoryById(id);
+        List<CategoryBreadcrumb> breadcrumbs = new ArrayList<>();
+        breadcrumbs.add(CategoryBreadcrumb.builder()
+                .id(category.getId())
+                .category(category.getCategoryName())
+                .build());
+        if (category.getCategoryLevel() > 0) {
+            while (category != null && category.getCategoryLevel() > 0) {
+                Category parent = category.getParentCategory();
+                if (parent != null) {
+                    breadcrumbs.add(CategoryBreadcrumb.builder()
+                            .id(parent.getId())
+                            .category(parent.getCategoryName())
+                            .build());
+                }
+                category = parent; // Cập nhật category để tiếp tục lên cấp cha
+            }
+            Collections.reverse(breadcrumbs); // Đảo ngược danh sách sau khi hoàn thành
+        }
+        return new ResponseBody(breadcrumbs, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
     }
 
     @Override
