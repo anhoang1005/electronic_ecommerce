@@ -1,10 +1,7 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
-import com.example.ecommerce.models.external.ghn.FeeRequest;
-import com.example.ecommerce.models.external.ghn.FeeResponse;
-import com.example.ecommerce.models.external.ghn.TimeRequest;
-import com.example.ecommerce.models.external.ghn.TimeResponse;
+import com.example.ecommerce.models.external.ghn.*;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.GHNService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -102,7 +99,7 @@ public class IGHNService implements GHNService {
 	}
 
 	@Override
-	public ResponseBody getService(Integer to_district) {
+	public ServiceResponse getService(Integer to_district) {
 		String urlWithParams = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services"
 				+ "?shop_id=" + shopId
 				+ "&from_district=" + shopDistrict
@@ -114,8 +111,7 @@ public class IGHNService implements GHNService {
 					new HttpEntity<>(headers), String.class);
 			if (response.getStatusCode() == HttpStatus.OK) {
 				ObjectMapper objectMapper = new ObjectMapper();
-				Object dataObject = objectMapper.readValue(response.getBody(), Object.class);
-				return new ResponseBody(dataObject, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+				return objectMapper.readValue(response.getBody(), ServiceResponse.class);
 			}
 		} catch (Exception e) {
 			throw new RequestNotFoundException("Request not found!");
@@ -124,7 +120,7 @@ public class IGHNService implements GHNService {
 	}
 
 	@Override
-	public FeeResponse getFee(FeeRequest req) {
+	public Double getFee(FeeRequest req) {
 		try {
 			String apiParam = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee" + "?service_id="
 					+ req.getService_id() + "&insurance_value=" + req.getInsurance_value()
@@ -136,7 +132,8 @@ public class IGHNService implements GHNService {
 			ResponseEntity<String> response = restTemplate.exchange(apiParam, HttpMethod.GET, new HttpEntity<>(headers),
 					String.class);
 			if (response.getStatusCode() == HttpStatus.OK) {
-				return objectMapper.readValue(response.getBody(), FeeResponse.class);
+				FeeResponse feeResponse = objectMapper.readValue(response.getBody(), FeeResponse.class);
+				return feeResponse.getData().getService_fee();
 			} else {
 				throw new RequestNotFoundException("ERROR");
 			}

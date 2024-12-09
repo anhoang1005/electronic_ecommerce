@@ -29,7 +29,6 @@ public class ProductDetail {
     private Long favoritesCount;
     private Map<String, String> productAttribute;
 
-
     @Getter
     @Setter
     @Builder

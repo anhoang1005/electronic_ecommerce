@@ -48,6 +48,7 @@ public class ProductMapper {
 
     public VariantDetail entityToVariantDetail(ProductVariant variant){
             return VariantDetail.builder()
+                    .variantId(variant.getId())
                     .variantName(variant.getProductVariation())
                     .soldCount(variant.getSoldQuantity())
                     .stockCount(variant.getStockQuantity())

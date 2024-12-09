@@ -10,6 +10,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class VariantDetail {
+    private Long variantId;
     private String variantName;
     private Map<String, String> attribute;
     private Integer soldCount;

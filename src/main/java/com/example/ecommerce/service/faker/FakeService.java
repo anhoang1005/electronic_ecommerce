@@ -15,13 +15,11 @@ import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -315,9 +313,9 @@ public class FakeService {
                         ProductVariant variant = new ProductVariant();
 
                         long min = 50000;
-                        long max = 20000000;
+                        long max = 10000000;
                         long randomValue = min + (long) (Math.random() * (max - min));
-                        randomValue = (randomValue / 100) * 500;
+                        randomValue = (randomValue / 1000) * 1000;
                         BigDecimal price = BigDecimal.valueOf(randomValue);
                         variant.setPrice(price);
                         prices.add(price);
@@ -332,26 +330,31 @@ public class FakeService {
                         variant.setStatus(ProductVariant.Status.CON_HANG);
                         variant.setProduct(product);
                         product.getVariants().add(variant);
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("defailt");
+                        addVariantAttributeValueAndProductAttributeValue(variant, attribute, value, product, stringBuilder);
+                    }
+                    // Neu khong tao bien the duoc, them bien the mac dinh
+                    if (product.getVariants().isEmpty()) {
+                        ProductVariant defaultVariant = new ProductVariant();
+                        defaultVariant.setPrice(BigDecimal.valueOf(100000));
+                        defaultVariant.setStockQuantity(10);
+                        defaultVariant.setSku("DEFAULT-SKU");
+                        defaultVariant.setVariantSlug("default-variant");
+                        defaultVariant.setHeight(10.0);
+                        defaultVariant.setWeight(1.0);
+                        defaultVariant.setLength(10.0);
+                        defaultVariant.setWidth(10.0);
+                        defaultVariant.setStatus(ProductVariant.Status.CON_HANG);
+
+                        defaultVariant.setProduct(product);
+                        product.getVariants().add(defaultVariant);
+                        prices.add(defaultVariant.getPrice());
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("defailt");
+                        addVariantAttributeValueAndProductAttributeValue(defaultVariant, attribute, value, product, stringBuilder);
                     }
                 }
-            }
-
-            // Neu khong tao bien the duoc, them bien the mac dinh
-            if (product.getVariants().isEmpty()) {
-                ProductVariant defaultVariant = new ProductVariant();
-                defaultVariant.setPrice(BigDecimal.valueOf(100000));
-                defaultVariant.setStockQuantity(10);
-                defaultVariant.setSku("DEFAULT-SKU");
-                defaultVariant.setVariantSlug("default-variant");
-                defaultVariant.setHeight(10.0);
-                defaultVariant.setWeight(1.0);
-                defaultVariant.setLength(10.0);
-                defaultVariant.setWidth(10.0);
-                defaultVariant.setStatus(ProductVariant.Status.CON_HANG);
-
-                defaultVariant.setProduct(product);
-                product.getVariants().add(defaultVariant);
-                prices.add(defaultVariant.getPrice());
             }
 
             List<BigDecimal> validPrices = prices.stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -386,6 +389,7 @@ public class FakeService {
         VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
         variantAttributeValue.setAttribute(attribute);
         variantAttributeValue.setAttributeValue(value);
+        variantAttributeValue.setVariant(variant);
         variant.getVariantAttributeValueList().add(variantAttributeValue);
 
         stringBuilder.append(attribute.getAttributeName().toLowerCase())
@@ -396,6 +400,7 @@ public class FakeService {
         ProductAttributeValue productAttributeValue = new ProductAttributeValue();
         productAttributeValue.setAttribute(attribute);
         productAttributeValue.setAttributeValue(value);
+        productAttributeValue.setProduct(product);
         product.getProductAttributeValues().add(productAttributeValue);
     }
 

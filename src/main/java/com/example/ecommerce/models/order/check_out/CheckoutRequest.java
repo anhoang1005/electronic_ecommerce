@@ -14,4 +14,13 @@ public class CheckoutRequest {
     private String discountVoucher;
     private String shippingVoucher;
     private Long addressId;
+    private List<ShopDiscount> shopDiscounts;
+
+    @Getter
+    @Setter
+    @Builder
+    public static class ShopDiscount{
+        private String shopCode;
+        private String voucherCode;
+    }
 }
