@@ -228,4 +228,9 @@ public class ICheckoutService implements CheckoutService {
             throw new RequestNotFoundException(e.getMessage());
         }
     }
+
+    @Override
+    public ResponseBody customerSubmitCheckOut(CheckoutRequest req) {
+        return null;
+    }
 }

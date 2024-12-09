@@ -1,9 +1,12 @@
 package com.example.ecommerce.service.implement;
 
+import com.example.ecommerce.entities.Product;
+import com.example.ecommerce.entities.ProductVariant;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.cart.CartItemsDto;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.ProductRepository;
+import com.example.ecommerce.repository.VariantRepository;
 import com.example.ecommerce.service.CartService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +14,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +28,17 @@ public class ICartService implements CartService {
     private final HashOperations<String, Long, Integer> hashOperations;
     private final AuthenticationUtils authUtils;
     private final ProductRepository productRepository;
+    private final VariantRepository variantRepository;
 
     public ICartService(RedisTemplate<String, Object> redisTemplate,
                         AuthenticationUtils authUtils,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        VariantRepository variantRepository) {
         this.redisTemplate = redisTemplate;
         this.hashOperations = redisTemplate.opsForHash();
         this.authUtils = authUtils;
         this.productRepository = productRepository;
+        this.variantRepository = variantRepository;
     }
 
     @Override
@@ -41,23 +48,21 @@ public class ICartService implements CartService {
             String cartKey = CART_KEY_PREFIX + userCode;
             Map<Long, Integer> cartItems = hashOperations.entries(cartKey);
             List<CartItemsDto> cartItemsDto = new ArrayList<>();
-            cartItems.forEach((productId, quantity) -> {
-                    CartItemsDto dto = CartItemsDto.builder()
-                            .productId(productId)
-                            .quantity(quantity)
-                            .build();
-                    cartItemsDto.add(dto);
-//                ProductVariants variants variants = productRepository.findById(productId)
-//                        .orElseThrow(()-> new RequestNotFoundException("ERROR"));
-//                if(variants.isActive()){
-//                    cartItemsDto.add(CartItemsDto.builder()
-//                            .title(variants.getTitle())
-//                            .thumbnail(variants.getThumbnail())
-//                            .productId(variants.getId())
-//                            .quantity(quantity)
-//                            .sellPrice(variants.getSellPrice())
-//                            .build());
-//                }
+            cartItems.forEach((variantId, quantity) -> {
+                ProductVariant variant = variantRepository.findById(variantId)
+                        .orElseThrow(()-> new RequestNotFoundException("ERROR"));
+                Product product = variant.getProduct();
+                CartItemsDto dto = CartItemsDto.builder()
+                        .productId(product.getId())
+                        .variantId(variantId)
+                        .productImage(product.getImageList())
+                        .title(product.getTitle())
+                        .variant(null)
+                        .sellPrice(variant.getPrice())
+                        .quantity(quantity)
+                        .totalAmount(variant.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                        .build();
+                cartItemsDto.add(dto);
             });
             return new ResponseBody(cartItemsDto, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){

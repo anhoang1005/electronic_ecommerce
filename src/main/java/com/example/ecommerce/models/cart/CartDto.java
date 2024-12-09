@@ -10,9 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CartDto {
-	private String emailUser;
-	private String fullName;
 	private Integer cartCount;
 	private Double totalPrice;
-	private List<CartItemsDto> listItemsDtos;
+	private List<CartItemsDto> listItemsDto;
 }
