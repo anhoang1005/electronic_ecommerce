@@ -1,15 +1,17 @@
 package com.example.ecommerce.models.variant;
 
-import com.example.ecommerce.entities.ProductImage;
 import com.example.ecommerce.models.attribute.AttributeDTO;
-import lombok.Data;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class VariantDTO {
     private List<AttributeDTO> attributeDTOList = new ArrayList<>();
     private BigDecimal price;

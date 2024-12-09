@@ -1,12 +1,15 @@
 package com.example.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "attribute_value")
-public class AttributeValue extends BaseEntity{
+public class AttributeValue{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

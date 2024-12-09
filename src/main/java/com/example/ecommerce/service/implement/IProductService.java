@@ -1,10 +1,7 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.*;
-import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.entities.enums.ErrorMessage;
-import com.example.ecommerce.entities.enums.ProductState;
-import com.example.ecommerce.exceptions.BaseException;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.category.CategoryMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
@@ -15,19 +12,20 @@ import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
-import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.payload.product.ProductResponse;
 import com.example.ecommerce.repository.*;
-import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.security.SecurityUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -53,46 +51,46 @@ public class IProductService implements ProductService {
     private final JsonConvert jsonConvert;
     private final CategoryMapper categoryMapper;
     private final FileService fileService;
-    private final ProductImageRepository productImageRepository;
     private final CategoryProductRepository categoryProductRepository;
     private final BrandRepository brandRepository;
     private final UsersRepository usersRepository;
     private final AuthenticationUtils authenticationUtils;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final ShopCategoryRepository shopCategoryRepository;
-    private final ProductProducer productProducer;
-    private final ProductDocumentRepository productDocumentRepository;
-
+    private final ProductMapper productMapper;
+//  private final ProductProducer productProducer;
 
     @Override
     @Transactional
     public ResponseBody createProduct(ProductDTO dto, List<MultipartFile> productFile) {
-        log.info(dto.toString());
         Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
-                () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId())
-        );
+                () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId()));
         Brand brand = brandRepository.findById(dto.getBrandId()).orElseThrow(
-                () -> new RequestNotFoundException("Brand not found")
-        );
+                () -> new RequestNotFoundException("Brand not found"));
         Shop shop = usersRepository.findUsersById(authenticationUtils.getUserIdFromAuthentication()).getShopOfUsers();
+
         Product product = new Product();
         product.setTitle(dto.getTitle());
         product.setDescription(dto.getDescription());
-        product.setProductState(ProductState.PENDING);
+        product.setProductState(Product.ProductState.PENDING);
         product.setProductSlug(StringFormatUtils.convertToSlug(dto.getTitle()));
         product.setCurrency(dto.getCurrency());
         product.setIsHidden(dto.isHidden());
         product.setCategory(category);
-        product.setBrand(brand);
-        product.setShop(shop);
+        product.setBrandOfProduct(brand);
+        product.setShopOfProduct(shop);
         List<BigDecimal> prices = new ArrayList<>();
+
+        //save anh product
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
+
+        //Tao bien the
         for(VariantDTO variantDTO : dto.getVariantDTOS()){
-            Variant variant = new Variant();
+            ProductVariant variant = new ProductVariant();
             BigDecimal price = variantDTO.getPrice();
             prices.add(price);
             variant.setPrice(price);
-            variant.setQuantity(variantDTO.getQuantity());
+            variant.setStockQuantity(variantDTO.getQuantity());
             variant.setSku(variantDTO.getSku());
             variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
             variant.setVariantSlug("demo_");
@@ -103,8 +101,8 @@ public class IProductService implements ProductService {
 
             StringBuilder stringBuilder = new StringBuilder();
 
+            //Tao attribute cua bien the
             for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
-                //
                 Attribute attribute = attributeRepository.findAttributeByAttributeName(attributeDTO.getName());
                 if(ObjectUtils.isEmpty(attribute)){
                     attribute = new Attribute();
@@ -112,6 +110,7 @@ public class IProductService implements ProductService {
                     attribute.setValueJson("[]");
                     attributeRepository.save(attribute);
                 }
+
                 //
                 AttributeValue attributeValue = attributeValueRepository.findAttributeValueByValueAndAttributeId(attribute.getId(),attributeDTO.getValue());
                 if(ObjectUtils.isEmpty(attributeValue)){
@@ -126,19 +125,15 @@ public class IProductService implements ProductService {
                         }
                         valueJson.add(attributeValue.getValue());
                         attribute.setValueJson(jsonConvert.convertListObjectToJson(valueJson));
-//                        attributeRepository.save(attribute);
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                //
                 stringBuilder.append(attribute.getAttributeName().toLowerCase())
                         .append("=")
                         .append(attributeValue.getValue().toLowerCase())
                         .append(";");
-                //
                 VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
-//                variantAttributeValue.setVariant(variant);
                 variantAttributeValue.setAttributeValue(attributeValue);
                 variantAttributeValue.setAttribute(attribute);
                 variantAttributeValueRepository.save(variantAttributeValue);
@@ -172,7 +167,7 @@ public class IProductService implements ProductService {
             productAttributeValueRepository.save(productAttributeValue);
         }
         //
-        for(Variant variant : product.getVariants()){
+        for(ProductVariant variant : product.getVariants()){
             variant.setProduct(product);
             variantRepository.save(variant);
         }
@@ -188,7 +183,7 @@ public class IProductService implements ProductService {
             }
             current = current.getParentCategory();
         }
-        List<Variant> variants = product.getVariants();
+        List<ProductVariant> variants = product.getVariants();
         try {
             product.setVariations(jsonConvert.convertListObjectToJson(variants));
         } catch (JsonProcessingException e) {
@@ -198,9 +193,7 @@ public class IProductService implements ProductService {
         product.setMinInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
 
         productRepository.save(product);
-//        dto.getShopCategoryIds().parallelStream().forEach( id -> {
-//
-//        });
+
         for(Long id : dto.getShopCategoryIds()){
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             ShopCategory shopCategory = shopCategoryRepository.findById(id).orElseThrow(
@@ -219,11 +212,7 @@ public class IProductService implements ProductService {
         product.getCategoryProducts().add(categoryProduct);
 
         CompletableFuture<Void> processImgs = fileService.processImagesAndSaveAsync(product, imagesUrl);
-        ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
-        return new ResponseBody(
-                productDocument,
-                ResponseBody.Status.SUCCESS,
-                ResponseBody.Code.SUCCESS
+        return new ResponseBody("OK", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS
         );
     }
 
@@ -266,9 +255,9 @@ public class IProductService implements ProductService {
         product.setIsAccepted(true);
         product.setIsHidden(true);
         productRepository.save(product);
-        CompletableFuture.runAsync(
-                () -> productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product))
-        );
+//        CompletableFuture.runAsync(
+//                () -> productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product))
+//        );
         return new ResponseBody(
                 new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
                 ResponseBody.Status.SUCCESS,
@@ -285,21 +274,48 @@ public class IProductService implements ProductService {
         product.setIsDeleted(true);
         productRepository.save(product);
 
-        CompletableFuture.runAsync(
-                () -> {
-                    ProductDocument productDocument = productDocumentRepository.findById(id)
-                            .orElseThrow(
-                                    () -> new RequestNotFoundException(ErrorMessage.PRODUCT_UNACTIVE.name())
-                            );
-
-                    productDocument.setIsDeleted(true);
-                    productDocumentRepository.save(productDocument);
-                }
-        );
+//        CompletableFuture.runAsync(
+//                () -> {
+//                    ProductDocument productDocument = productDocumentRepository.findById(id)
+//                            .orElseThrow(
+//                                    () -> new RequestNotFoundException(ErrorMessage.PRODUCT_UNACTIVE.name())
+//                            );
+//
+//                    productDocument.setIsDeleted(true);
+//                    productDocumentRepository.save(productDocument);
+//                }
+//        );
         return new ResponseBody(
                 new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );
+    }
+
+    @Override
+    public ResponseBody getProductHome(int pageNumber, int pageSize) {
+        try{
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Page<Product> page = productRepository.findAll(pageable);
+            List<ProductResponse> responses = page.stream()
+                    .map(ProductMapper::mapperProductToResponse)
+                    .collect(Collectors.toList());
+            return new ResponseBody(responses, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        }catch (Exception e){
+            log.error("Get product error!" + e.getMessage());
+            throw new RequestNotFoundException("Error " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBody getProductDetail(Long productId) {
+        try{
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new RequestNotFoundException("ERROR"));
+            return new ResponseBody(productMapper.entityToProductDetail(product), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        }catch (Exception e){
+            log.error("Get product error!" + e.getMessage());
+            throw new RequestNotFoundException("Error " + e.getMessage());
+        }
     }
 }

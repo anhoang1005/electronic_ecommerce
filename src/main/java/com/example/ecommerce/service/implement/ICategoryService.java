@@ -30,9 +30,11 @@ public class ICategoryService implements CategoryService {
     private final ShopRepository shopRepository;
     private final RandomUtils randomUtils;
     private final AuthenticationUtils authenticationUtils;
+
     @Override
     public ResponseBody createCategory(CategoryDto dto) {
         List<String> roles = authenticationUtils.getRoleFromAuthentication();
+
         if(roles.isEmpty()){
             throw new UnauthorizedException("Sth wrong");
         }

@@ -25,10 +25,6 @@ public class ShopCategoryProduct {
     @JsonBackReference("product-shop-category-product")
     private Product product;
 
-//    @ManyToOne
-//    @JoinColumn(name = "shop_id")
-//    private Shop shop;
-
     @Column(name = "is_active")
     private boolean isActive;
 

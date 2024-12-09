@@ -1,6 +1,5 @@
 package com.example.ecommerce.service;
 
-import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ProductUpdateDTO;
 import com.example.ecommerce.payload.ResponseBody;
@@ -16,4 +15,7 @@ public interface ProductService {
     ResponseBody updateProduct(Long id, ProductUpdateDTO dto);
     ResponseBody checkProduct(Long id);
     ResponseBody deleteProduct(Long id);
+
+    ResponseBody getProductHome(int pageNumber, int pageSize);
+    ResponseBody getProductDetail(Long productId);
 }

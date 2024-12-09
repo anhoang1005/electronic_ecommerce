@@ -1,53 +1,61 @@
 package com.example.ecommerce.mapper.product;
 
-import com.example.ecommerce.entities.Product;
-import com.example.ecommerce.entities.ShopCategoryProduct;
-import com.example.ecommerce.entities.elastic.ProductDocument;
+import com.example.ecommerce.entities.*;
+import com.example.ecommerce.models.product.detail.ProductDetail;
+import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
-import com.example.ecommerce.utils.GlobalUtils;
+import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class ProductMapper {
-    public static ProductDocument mapperProductToDocument(Product product) {
-        String url = GlobalUtils.DEFAULT_URL;
-//        if(product.getListImageOfProduct()!=null){
-//            url = String.valueOf(product.getListImageOfProduct()
-//                    .stream().filter(image -> image.getIsMainImage())
-//                    .map(image -> image.getImageUrl()).findFirst());
-//        }
-        List<ShopCategoryProduct> shopCategoryProducts = product.getShopCategoryProducts();
-        List<Long> shopCategoryIds = new ArrayList<>();
-        shopCategoryProducts.forEach(shopCategoryProduct -> {
-            shopCategoryIds.add(shopCategoryProduct.getShopCategory().getId());
-        });
-        return ProductDocument
-                .builder()
-                .id(product.getId())
-                .productCode(product.getProductCode())
-                .brandId(product.getBrand().getId())
+
+    public ProductDetail entityToProductDetail(Product product){
+        List<ProductImage> listImage = product.getListImageOfProduct();
+        List<String> imageString = new ArrayList<>();
+        for(ProductImage image : listImage){
+            imageString.add(image.getImageUrl());
+        }
+        Brand brand = product.getBrandOfProduct();
+        Category category = product.getCategory();
+        return ProductDetail.builder()
+                .productId(product.getId())
                 .title(product.getTitle())
-                .slug(product.getProductSlug())
-                .rating(product.getRating())
-                .maxPrice(product.getMaxInitialPrice())
+                .productSlug(product.getProductSlug())
+                .description(product.getDescription())
+                .breadcrumbs(product.getBreadcrumb()!=null ? product.getBreadcrumb() : null)
                 .minPrice(product.getMinInitialPrice())
-                .productState(product.getProductState())
-                .updatedAt(Date.from(product.getModifiedAt().atZone(ZoneId.systemDefault()).toInstant()))
-                .shopCategoryIds(shopCategoryIds)
-                .categoryIds(product.getCategory().getId())
-                .shopId(product.getShop().getId())
-                .productUrl(url)
-                .isDeleted(product.getIsDeleted())
+                .maxPrice(product.getMaxInitialPrice())
+                .listImg(imageString)
+                .rating(4.6)
+                .countComments(1000)
+                .productVariant(product.getVariants().stream()
+                        .map(this::entityToVariantDetail).collect(Collectors.toList()))
+                .favoritesCount(1000L)
+                .shopCode(product.getShopOfProduct().getShopCode())
+                .productBrand(ProductDetail.ProductBrand.builder()
+                        .id(brand.getId()).brand(brand.getBrandName())
+                        .build())
+                .productCategory(ProductDetail.ProductCategory.builder()
+                        .id(category.getId()).category(category.getCategoryName())
+                        .build())
                 .build();
     }
-    public static ProductResponse mapperProductToResponse(Product product){
 
+    public VariantDetail entityToVariantDetail(ProductVariant variant){
+            return VariantDetail.builder()
+                    .variantName(variant.getProductVariation())
+                    .soldCount(variant.getSoldQuantity())
+                    .stockCount(variant.getStockQuantity())
+                    .description(variant.getSku())
+                    .variantName(null)
+                    .build();
+    }
+
+    public static ProductResponse mapperProductToResponse(Product product){
         return ProductResponse
                 .builder()
                 .productId(product.getId())
@@ -60,13 +68,11 @@ public class ProductMapper {
                 .maxPrice(product.getMaxInitialPrice())
                 .minPrice(product.getMinInitialPrice())
                 .categoryId(product.getCategory().getId())
-                .brandId(product.getBrand().getId())
+                .brandId(product.getBrandOfProduct().getId())
 
-                .countComments(product.getReview())
                 .listImg(product.getListImageOfProduct().stream().map(
-                        img -> img.getImageUrl()
+                        ProductImage::getImageUrl
                 ).collect(Collectors.toList()))
-                .favoritesCount(product.getFavorite())
                 .build();
     }
 }

@@ -14,10 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/guest")
 public class ImportDataController {
     private final ImportService importService;
-    @PostMapping("/product")
-    public ImportResponse importBaseDataProduct(@RequestParam("file")MultipartFile file){
-        return importService.importBaseProductExcel(file);
-    }
+//    @PostMapping("/product")
+//    public ImportResponse importBaseDataProduct(@RequestParam("file")MultipartFile file){
+//        return importService.importBaseProductExcel(file);
+//    }
     @PostMapping("/categories/system")
     public ImportResponse importCategorySystem(@RequestParam("file")MultipartFile file){
         return importService.importCategoriesFromExcel(file);

@@ -1,25 +1,19 @@
 package com.example.ecommerce.service.faker;
 
+import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
-import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.mapper.category.CategoryMapper;
-import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.category.CategoryResponse;
-import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.*;
-import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.AccountService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.javafaker.Faker;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -41,7 +34,7 @@ import java.util.stream.Collectors;
 public class FakeService {
 
     private final UsersRepository usersRepository;
-    private final Faker faker;
+    private final Faker faker = new Faker(new Locale("vi"));
     private final PasswordEncoder passwordEncoder;
     private final RandomUtils randomUtils;
     private final RolesRepository rolesRepository;
@@ -59,11 +52,8 @@ public class FakeService {
     private final ProductRepository productRepository;
     private final CategoryProductRepository categoryProductRepository;
     private final ProductAttributeValueRepository productAttributeValueRepository;
-    private final VariantAttributeValueRepository variantAttributeValueRepository;
-    private final ProductProducer productProducer;
-    private final EntityManagerFactory entityManagerFactory;
+    //private final ProductProducer productProducer;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
-    private final ProductDocumentService productDocumentService;
 
 
     //user - fake
@@ -74,25 +64,23 @@ public class FakeService {
             Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
             List<Roles> roleEntityList = new ArrayList<>();
             roleOptional.ifPresent(roleEntityList::add);
-
             Users users = new Users();
             users.setFirstName(faker.name().firstName());
             users.setLastName(faker.name().lastName());
             users.setDob(generateFakeLocalDate());
-            users.setGender(randomGender());
+            users.setGender(faker.options().option(Users.Gender.class));
             users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
             users.setPasswordHash(passwordEncoder.encode("1234"));
             users.setActive(true);
-            users.setImageUrl("user.jpg");
-            users.setVerifyCode(randomUtils.generateRandomString(9));
+            users.setImageUrl(Constant.USER_IMAGE);
+            users.setVerifyCode(null);
             users.setListRolesOfUsers(roleEntityList);
             users.setEnable(true);
-            users.setUsername(faker.name().username());
+            users.setUsername("userkh" + i);
             String email;
             do {
                 email = faker.internet().emailAddress();
             } while (uniqueEmails.contains(email));
-
             uniqueEmails.add(email);
             users.setEmail(email);
             usersRepository.save(users);
@@ -103,30 +91,22 @@ public class FakeService {
         Date fakeDate = faker.date().birthday();
         return fakeDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
-    public Users.Gender randomGender(){
-        Users.Gender[] genders = Users.Gender.values();
-        int randomIndex = new Random().nextInt(genders.length);
-        return genders[randomIndex];
-    }
 
     public void createRootAccount(){
         Optional<Roles> root = rolesRepository.findByRoleName(BaseRole.ROOT.toString());
         List<Roles> roleEntityList = new ArrayList<>();
         root.ifPresent(roleEntityList::add);
-//        Optional<Roles> root = rolesRepository.findByRoleName("ROOT");
-//        List<Roles> roleEntityList = new ArrayList<>();
-//        root.ifPresent(roleEntityList::add);
 
         Users users = new Users();
         users.setFirstName(faker.name().firstName());
         users.setLastName(faker.name().lastName());
         users.setDob(generateFakeLocalDate());
-        users.setGender(randomGender());
+        users.setGender(faker.options().option(Users.Gender.class));
         users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
         users.setPasswordHash(passwordEncoder.encode("1234"));
         users.setActive(true);
-        users.setImageUrl("user.jpg");
-        users.setVerifyCode(randomUtils.generateRandomString(9));
+        users.setImageUrl(Constant.USER_IMAGE);
+        users.setVerifyCode(null);
         users.setListRolesOfUsers(roleEntityList);
         users.setEnable(true);
         users.setUsername("root");
@@ -141,9 +121,9 @@ public class FakeService {
         for(int i = 0 ; i < 100 ;i++){
             Users user = users.get(i);
             Shop shop = new Shop();
-            shop.setBusinessType(getRandomBusinessType());
+            shop.setBusinessType(faker.options().option(Shop.BusinessType.class));
             shop.setShopName(faker.name().username());
-            shop.setShopLogo("shop.png");
+            shop.setShopLogo(Constant.SHOP_IMAGE);
             shop.setShopHotLine(faker.phoneNumber().subscriberNumber(10));
             shop.setFullName(faker.name().fullName());
             shop.setTaxCode(faker.phoneNumber().subscriberNumber(8));
@@ -157,7 +137,6 @@ public class FakeService {
             shop.setUsersInShop(user);
             shopRepository.save(shop);
             accountService.changeRoleUsers(user.getUserCode(),BaseRole.CHUCUAHANG.toString(),true);
-
         }
     }
     private Shop.BusinessType getRandomBusinessType() {
@@ -166,7 +145,7 @@ public class FakeService {
     }
 
     @Transactional
-    public void generateAndInserFakeShopCategoryData(){
+    public void generateAndInsertFakeShopCategoryData(){
         List<Shop> shops = shopRepository.findAll();
         for(Shop shop : shops){
             int countCategory = random.nextInt(6);
@@ -174,7 +153,7 @@ public class FakeService {
                 ShopCategory shopCategory = new ShopCategory();
                 shopCategory.setShopOfCategory(shop);
                 shopCategory.setCategoryLevel(0);
-                shopCategory.setCategoryName(faker.name().firstName());
+                shopCategory.setCategoryName(faker.commerce().department());
                 shopCategory.setActive(true);
                 shopCategory.setDescription(faker.lorem().toString());
                 shopCategory.setCategoryType(CategoryType.SHOP);
@@ -188,7 +167,7 @@ public class FakeService {
     public void generateAndInsertFakeAttributeData(){
         for(int i = 0 ; i < 20 ; i ++){
             Attribute attribute = new Attribute();
-            attribute.setAttributeName(faker.name().firstName());
+            attribute.setAttributeName(faker.commerce().productName());
             attribute.setValueJson("[]");
             attributeRepository.save(attribute);
             int countAttValue = random.nextInt(3)+2;
@@ -224,10 +203,8 @@ public class FakeService {
     @Transactional
     public void generateAndInsertFakeProductData() {
         List<Shop> shops = shopRepository.findAll();
-
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
-
         try {
             for (Shop shop : shops) {
                 int countProduct = 5;
@@ -236,7 +213,8 @@ public class FakeService {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
                             .thenAcceptAsync(product -> {
                                 if (product != null) {
-                                    productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+                                    //productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+                                    log.info("create product success");
                                 }
                             }, rabbitMqExecutor);
 
@@ -251,20 +229,13 @@ public class FakeService {
         }
     }
 
-
-
     @Transactional
     public Product createProduct(Shop shop) {
-        EntityManager em = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        try{
-            transaction.begin();
+        try {
+            Category category = categoryRepository.findRandomCategory();
+            ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategory();
+            Brand brand = brandRepository.findRandomBrand();
 
-            Category category = em.merge(categoryRepository.findRandomCategory());
-            ShopCategory shopCategory = em.merge(shopCategoryRepository.findRandomShopCategory());
-            List<ShopCategory> shopCategories = new ArrayList<>();
-            shopCategories.add(shopCategory);
-            Brand brand = em.merge(brandRepository.findRandomBrand());
             Product product = new Product();
             String title = faker.funnyName().name();
             product.setTitle(title);
@@ -272,134 +243,111 @@ public class FakeService {
             product.setProductSlug(StringFormatUtils.convertToSlug(title));
             product.setCurrency("VND");
             product.setIsHidden(false);
-            product.setProductState(ProductState.ACTIVE);
+            product.setProductState(Product.ProductState.ACTIVE);
             product.setCategory(category);
-            product.setBrand(brand);
+            product.setBrandOfProduct(brand);
             product.setProductCode("PID" + randomUtils.generateRandomString(15));
-            product.setShop(shop);
-            product.setSold(random.nextInt(100,10000));
-            product.setRating(Double.parseDouble(String.format("%.1f", faker.number().randomDouble(1, 1, 5))));
+            product.setShopOfProduct(shop);
+            product.setSoldCount(random.nextInt(100, 10000));
 
+            List<Attribute> attributes = randomAttributes(2);
+            if (attributes.isEmpty()) {
+                // Tao thuoc tính mac dinh neu danh sach rong
+                Attribute defaultAttribute = new Attribute();
+                defaultAttribute.setAttributeName("Default Attribute" + UUID.randomUUID());
+                attributes.add(defaultAttribute);
+            }
 
-
-            int countAttribute = 2;
             Map<Attribute, List<AttributeValue>> mapAttribute = new HashMap<>();
-            List<Attribute> attributes = randomAttributes(countAttribute);
             for (Attribute attribute : attributes) {
-                int countAttributeValue = random.nextInt(attributeValueRepository.findAttributeValuesByAttributeId(attribute.getId()).size());
-                List<AttributeValue> attributeValues = randomAttributeValues(attribute, countAttributeValue);
+                List<AttributeValue> attributeValues = randomAttributeValues(attribute, 2); // 2 giá trị thuộc tính
+                if (attributeValues.isEmpty()) {
+                    // tao gia tri thuoc tính mac dinh neu rong
+                    AttributeValue defaultValue = new AttributeValue();
+                    defaultValue.setValue("Default Value");
+                    attributeValues.add(defaultValue);
+                }
                 mapAttribute.put(attribute, attributeValues);
             }
 
             Set<String> pairedCombinations = new HashSet<>();
-            Attribute attribute1 = attributes.get(0);
-            List<AttributeValue> values1 = mapAttribute.get(attribute1);
-
-            Attribute attribute2 = attributes.get(1);
-            List<AttributeValue> values2 = mapAttribute.get(attribute2);
             List<BigDecimal> prices = new ArrayList<>();
-            for (AttributeValue value1 : values1) {
-                for (AttributeValue value2 : values2) {
-                    String pair = value1.getId() + "-" + value2.getId();
+
+            for (Attribute attribute : attributes) {
+                for (AttributeValue value : mapAttribute.get(attribute)) {
+                    String pair = attribute.getId() + "-" + value.getId();
                     if (!pairedCombinations.contains(pair)) {
                         pairedCombinations.add(pair);
+                        ProductVariant variant = new ProductVariant();
 
-                        Variant variant = new Variant();
-                        double randomValue = 1000 + (10000000 - 1000) * random.nextDouble();
-                        BigDecimal price = new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
+                        long min = 50000;
+                        long max = 20000000;
+                        long randomValue = min + (long) (Math.random() * (max - min));
+                        randomValue = (randomValue / 100) * 100;
+                        BigDecimal price = BigDecimal.valueOf(randomValue);
                         variant.setPrice(price);
                         prices.add(price);
-                        variant.setQuantity(faker.number().randomDigit());
+
+                        variant.setStockQuantity(faker.number().randomDigitNotZero());
                         variant.setSku(faker.code().toString());
-                        variant.setVariantSlug("demo_");
-                        variant.setHeight(faker.number().randomDouble(1, 1, 10));
-                        variant.setWeight(faker.number().randomDouble(1, 1, 10));
-                        variant.setLength(faker.number().randomDouble(1, 1, 10));
-                        variant.setWidth(faker.number().randomDouble(1, 1, 10));
-
-                        StringBuilder stringBuilder = new StringBuilder();
-
-                        variant.setProductVariation(stringBuilder.toString());
-                        em.merge(variant);
-                        addVariantAttributeValueAndProductAttributeValue(variant, attribute1, value1, product, stringBuilder);
-                        addVariantAttributeValueAndProductAttributeValue(variant, attribute2, value2, product, stringBuilder);
-
-
-                        for (VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()) {
-                            variantAttributeValue.setVariant(variant);
-                            em.merge(variantAttributeValue);
-                        }
-
+                        variant.setVariantSlug("default-variant");
+                        variant.setHeight(10.0);
+                        variant.setWeight(1.0);
+                        variant.setLength(10.0);
+                        variant.setWidth(10.0);
+                        variant.setStatus(ProductVariant.Status.CON_HANG);
+                        variant.setProduct(product);
                         product.getVariants().add(variant);
                     }
                 }
             }
-            ///
-            List<CategoryResponse> categoryResponses = new ArrayList<>();
-            categoryResponses.add(categoryMapper.entityToCategoryResponse(category));
-            Category current = category;
-            while (!ObjectUtils.isEmpty(current.getParentCategory())) {
-                categoryResponses.add(categoryMapper.entityToCategoryResponse(category.getParentCategory()));
-                try {
-                    product.setBreadcrumb(jsonConvert.convertListObjectToJson(categoryResponses));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-                current = current.getParentCategory();
-            }
 
-            try {
-                product.setVariations(jsonConvert.convertListObjectToJson(product.getVariants()));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            // Neu khong tao bien the duoc, them bien the mac dinh
+            if (product.getVariants().isEmpty()) {
+                ProductVariant defaultVariant = new ProductVariant();
+                defaultVariant.setPrice(BigDecimal.valueOf(100000));
+                defaultVariant.setStockQuantity(10);
+                defaultVariant.setSku("DEFAULT-SKU");
+                defaultVariant.setVariantSlug("default-variant");
+                defaultVariant.setHeight(10.0);
+                defaultVariant.setWeight(1.0);
+                defaultVariant.setLength(10.0);
+                defaultVariant.setWidth(10.0);
+                defaultVariant.setStatus(ProductVariant.Status.CON_HANG);
+
+                defaultVariant.setProduct(product);
+                product.getVariants().add(defaultVariant);
+                prices.add(defaultVariant.getPrice());
             }
 
             List<BigDecimal> validPrices = prices.stream().filter(Objects::nonNull).collect(Collectors.toList());
-
             product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
             product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
 
-            productRepository.save(product);
+            product = productRepository.save(product);
+
+            //luu thong tin
             CategoryProduct categoryProduct = new CategoryProduct();
             categoryProduct.setCategory(category);
             categoryProduct.setProduct(product);
             categoryProductRepository.save(categoryProduct);
 
-            ///
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             shopCategoryProduct.setProduct(product);
             shopCategoryProduct.setShopCategory(shopCategory);
-            product.getShopCategoryProducts().add(shopCategoryProduct);
             shopCategoryProductRepository.save(shopCategoryProduct);
 
-            ///
-            for (ProductAttributeValue productAttributeValue : product.getProductAttributeValues()) {
-                productAttributeValue.setProduct(product);
-                productAttributeValueRepository.save(productAttributeValue);
-            }
-
-            for (Variant variant : product.getVariants()) {
-                variant.setProduct(product);
-                variantRepository.save(variant);
-            }
-
             return product;
-
-        }catch (Exception e){
-            if(transaction.isActive()){
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }finally {
-            if(em.isOpen()){
-                em.close();
-            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating product", e);
         }
     }
 
+
+
+
     // Helper method to add variant and product attribute values
-    private void addVariantAttributeValueAndProductAttributeValue(Variant variant, Attribute attribute,
+    private void addVariantAttributeValueAndProductAttributeValue(ProductVariant variant, Attribute attribute,
                                                                   AttributeValue value, Product product, StringBuilder stringBuilder) {
         VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
         variantAttributeValue.setAttribute(attribute);
@@ -417,16 +365,6 @@ public class FakeService {
         product.getProductAttributeValues().add(productAttributeValue);
     }
 
-    // Helper method to save product attributes and variants
-    private void saveProductAttributesAndVariants(Product product) {
-
-    }
-
-    // Helper method to save breadcrumb and variations
-    private void saveBreadcrumbAndProductDetails(Product product, Category category) {
-
-    }
-
     private List<Attribute> randomAttributes(int count){
         List<Attribute> attributes = attributeRepository.findAll();
         Collections.shuffle(attributes);
@@ -438,12 +376,4 @@ public class FakeService {
         return attributeValues.subList(0,count);
 
     }
-    private Category randomCategories(){
-        return categoryRepository.findRandomCategory();
-    }
-    private Brand randomBrand(){
-        return brandRepository.findRandomBrand();
-    }
-
-
 }

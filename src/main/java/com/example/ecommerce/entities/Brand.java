@@ -29,6 +29,6 @@ public class Brand extends BaseEntity{
     @Column(nullable = false)
     private Boolean active;
 
-//    @OneToMany(mappedBy = "brandInProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private List<Product> listProductInBrand;
+    @OneToMany(mappedBy = "brandOfProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Product> listProductInBrand;
 }

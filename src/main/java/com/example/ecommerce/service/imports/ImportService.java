@@ -30,53 +30,54 @@ public class ImportService {
     private final CategoryRepository categoryRepository;
     private final RandomUtils randomUtils;
 
-    public ImportResponse importBaseProductExcel(MultipartFile file){
-        int success = 0;
-        int failed = 0;
-        try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            var sheet = workbook.getSheetAt(0);
+//    public ImportResponse importBaseProductExcel(MultipartFile file){
+//        int success = 0;
+//        int failed = 0;
+//        try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
+//            var sheet = workbook.getSheetAt(0);
+//
+////            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+//            for (int i = 1; i <= 5; i++) {
+//                Row row = sheet.getRow(i);
+//                if (row == null) continue;
+//
+//                Product product = new Product();
+//                product.setTitle(getStringValue(row.getCell(2)));
+//                product.setProductCode(getStringValue(row.getCell(1)));
+////                product.setRating(getDoubleValue(row.getCell(4)));
+////                product.setReview(getIntValue(row.getCell(5)));
+//                product.setMaxInitialPrice(getLongValue(row.getCell(6)));
+//                product.setCurrency(getStringValue(row.getCell(8)));
+////                product.setStock(getIntValue(row.getCell(9)));
+//                product.setFavorite((long) row.getCell(10).getNumericCellValue());
+//                product.setBreadcrumb(getStringValue(row.getCell(15)));
+//                product.setProductSpecifications(getStringValue(row.getCell(16)));
+//                product.setDescription(getStringValue(row.getCell(17)));
+//                product.setVariations(getStringValue(row.getCell(24)));
+////                product.setBrand(getStringValue(row.getCell(26)));
+//                product.setProductSlug("demo");
+////                product.setIsAvailable(true);
+//                product.setProductRatings(getStringValue(row.getCell(36)));
+////                product.setProductVariation(getStringValue(row.getCell(30)));
+//
+//                productRepository.save(product);
+//
+//                if (!ObjectUtils.isEmpty(product)) {
+//                    success += 1;
+//                } else {
+//                    failed += 1;
+//                }
+//            }
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        ImportResponse response = new ImportResponse();
+//        response.setRecordSuccess(success);
+//        response.setRecordFailed(failed);
+//        return response;
+//    }
 
-//            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-            for (int i = 1; i <= 5; i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                Product product = new Product();
-                product.setTitle(getStringValue(row.getCell(2)));
-                product.setProductCode(getStringValue(row.getCell(1)));
-                product.setRating(getDoubleValue(row.getCell(4)));
-                product.setReview(getIntValue(row.getCell(5)));
-                product.setMaxInitialPrice(getLongValue(row.getCell(6)));
-                product.setCurrency(getStringValue(row.getCell(8)));
-//                product.setStock(getIntValue(row.getCell(9)));
-                product.setFavorite((long) row.getCell(10).getNumericCellValue());
-                product.setBreadcrumb(getStringValue(row.getCell(15)));
-                product.setProductSpecifications(getStringValue(row.getCell(16)));
-                product.setDescription(getStringValue(row.getCell(17)));
-                product.setVariations(getStringValue(row.getCell(24)));
-//                product.setBrand(getStringValue(row.getCell(26)));
-                product.setProductSlug("demo");
-//                product.setIsAvailable(true);
-                product.setProductRatings(getStringValue(row.getCell(36)));
-//                product.setProductVariation(getStringValue(row.getCell(30)));
-
-                productRepository.save(product);
-
-                if (!ObjectUtils.isEmpty(product)) {
-                    success += 1;
-                } else {
-                    failed += 1;
-                }
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        ImportResponse response = new ImportResponse();
-        response.setRecordSuccess(success);
-        response.setRecordFailed(failed);
-        return response;
-    }
     private String getStringValue(Cell cell) {
         if (cell != null && cell.getCellType() == CellType.STRING) {
             return cell.getStringCellValue();

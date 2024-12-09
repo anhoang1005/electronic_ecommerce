@@ -296,7 +296,7 @@ public class IPostService implements PostService {
             if(postReaction!=null){
                 if(reaction==PostReaction.Reaction.NONE){
                     postReactionRepository.delete(postReaction);
-                    postRepository.decrementLikeCount(postId);
+                    postRepository.updatePostLikeCount(postId, false);
                 } else {
                     postReaction.setReaction(reaction);
                     postReactionRepository.save(postReaction);
@@ -307,11 +307,12 @@ public class IPostService implements PostService {
                 postReaction.setUsersOfPostReaction(users);
                 postReaction.setReaction(reaction);
                 postReactionRepository.save(postReaction);
-                postRepository.incrementLikeCount(postId);
+                postRepository.updatePostLikeCount(postId, true);
             }
             return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         }catch (Exception e){
             log.error("reaction post error! Error: {}", e.getMessage());
+            e.printStackTrace();
             throw new RequestNotFoundException("ERROR");
         }
     }

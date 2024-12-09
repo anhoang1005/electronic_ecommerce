@@ -20,8 +20,9 @@ public class OrdersShop extends BaseEntity{
     @Column(nullable = false)
     private String orderShopCode;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String orderStatus;
+    private Status orderStatus;
 
     @Column(nullable = false)
     private String totalAmount;
@@ -61,4 +62,12 @@ public class OrdersShop extends BaseEntity{
     @OneToMany(mappedBy = "ordersShopPOfOrderHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersHistory> listOrderHistoryOfOrderShop;
 
+    public enum Status{
+        CHO_XAC_NHAN,
+        DANG_LAY_HANG,
+        DANG_GIAO_HANG,
+        GH_THANH_CONG,
+        DA_HUY,
+        TRA_HANG
+    }
 }
