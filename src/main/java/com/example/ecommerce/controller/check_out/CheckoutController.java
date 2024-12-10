@@ -17,4 +17,9 @@ public class CheckoutController {
     public ResponseEntity<?> customerCheckout(@RequestBody CheckoutRequest req){
         return ResponseEntity.ok(checkoutService.customerGetCheckOut(req));
     }
+
+    @PostMapping("/api/customer/checkout/submit")
+    public ResponseEntity<?> customerSubmitCheckout(@RequestBody CheckoutRequest req){
+        return ResponseEntity.ok(checkoutService.customerSubmitCheckOut(req));
+    }
 }

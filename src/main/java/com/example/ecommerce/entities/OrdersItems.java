@@ -3,6 +3,8 @@ package com.example.ecommerce.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,10 +32,10 @@ public class OrdersItems extends BaseEntity{
     private String productImage;
 
     @Column(nullable = false)
-    private String quantity;
+    private Long quantity;
 
     @Column(nullable = false)
-    private String price;
+    private BigDecimal price;
 
     @Column(nullable = false)
     private String description;

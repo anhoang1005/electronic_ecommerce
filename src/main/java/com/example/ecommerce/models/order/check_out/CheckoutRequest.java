@@ -1,5 +1,7 @@
 package com.example.ecommerce.models.order.check_out;
 
+import com.example.ecommerce.entities.OrderPayment;
+import com.example.ecommerce.entities.OrderShipping;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +16,8 @@ public class CheckoutRequest {
     private String discountVoucher;
     private String shippingVoucher;
     private Long addressId;
+    private OrderPayment.Method paymentMethod;
+    private OrderShipping.Method shippingMethod;
     private List<ShopDiscount> shopDiscounts;
 
     @Getter

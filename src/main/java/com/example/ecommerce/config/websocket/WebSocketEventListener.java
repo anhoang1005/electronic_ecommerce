@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 public class WebSocketEventListener {
 
     private final Set<String> onlineCustomer = ConcurrentHashMap.newKeySet();
-
     private final Set<String> onlineShop = ConcurrentHashMap.newKeySet();
+
     private final SimpMessageSendingOperations messagingTemplate;
     public WebSocketEventListener(SimpMessageSendingOperations messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
@@ -69,5 +69,14 @@ public class WebSocketEventListener {
             messagingTemplate.convertAndSend("/topic/customer/status", onlineCustomer);
             log.info("User disconnected: " + userCode);
         }
+    }
+
+
+    public boolean checkCustomerConnection(String userCode){
+        return onlineCustomer.contains(userCode);
+    }
+
+    public boolean checkShopConnection(String shopCode){
+        return onlineShop.contains(shopCode);
     }
 }

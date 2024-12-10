@@ -43,9 +43,13 @@ public class RandomUtils {
         return result.toString();
     }
 
-    public static String generateOrderCode(String code){
+    public static String generateOrderCode(String code, Long id){
         String timeStamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        String randomPart = getRandomString(8);
-        return code + "-" + String.format("%s-%s", timeStamp, randomPart);
+        String randomPart = getRandomString(4);
+        return code +"-"+ String.format("%s-%s-", timeStamp, randomPart) + String.format("%08d", id);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(generateOrderCode("SOD", 1L));
     }
 }

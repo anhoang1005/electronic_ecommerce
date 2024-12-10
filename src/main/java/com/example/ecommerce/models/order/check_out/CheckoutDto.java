@@ -18,6 +18,7 @@ public class CheckoutDto {
     private AddressDto addressDto;
     private Integer itemsCount;
     private BigDecimal productTotal;
+    private BigDecimal totalFee;
     private BigDecimal totalPrice;
     private BigDecimal voucherDiscount;
     private BigDecimal shippingDiscount;

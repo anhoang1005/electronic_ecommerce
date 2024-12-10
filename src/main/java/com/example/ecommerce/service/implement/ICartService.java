@@ -5,7 +5,6 @@ import com.example.ecommerce.entities.ProductVariant;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.cart.CartItemsDto;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.VariantRepository;
 import com.example.ecommerce.service.CartService;
 import com.example.ecommerce.utils.AuthenticationUtils;
@@ -27,17 +26,14 @@ public class ICartService implements CartService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final HashOperations<String, Long, Integer> hashOperations;
     private final AuthenticationUtils authUtils;
-    private final ProductRepository productRepository;
     private final VariantRepository variantRepository;
 
     public ICartService(RedisTemplate<String, Object> redisTemplate,
                         AuthenticationUtils authUtils,
-                        ProductRepository productRepository,
                         VariantRepository variantRepository) {
         this.redisTemplate = redisTemplate;
         this.hashOperations = redisTemplate.opsForHash();
         this.authUtils = authUtils;
-        this.productRepository = productRepository;
         this.variantRepository = variantRepository;
     }
 

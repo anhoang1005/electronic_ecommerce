@@ -1,8 +1,11 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.utils.RandomUtils;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -17,7 +20,7 @@ public class OrdersShop extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = true, unique = true)
     private String orderShopCode;
 
     @Enumerated(EnumType.STRING)
@@ -25,7 +28,22 @@ public class OrdersShop extends BaseEntity{
     private Status orderStatus;
 
     @Column(nullable = false)
-    private String totalAmount;
+    private BigDecimal totalProduct;
+
+    @Column(nullable = false)
+    private BigDecimal shopShippingFee;
+
+    @Column(nullable = false)
+    private BigDecimal shopDiscount;
+
+    @Column(nullable = false)
+    private BigDecimal serviceFee;
+
+    @Column(nullable = false)
+    private BigDecimal shopTotalAmount;
+
+    @Column(nullable = false)
+    private BigDecimal ecommerceTotalAmount;
 
     @Column(nullable = false)
     private String deliveryMethod;
@@ -35,15 +53,6 @@ public class OrdersShop extends BaseEntity{
 
     @Column(nullable = false)
     private Boolean isPayment;
-
-    @Column(nullable = false)
-    private String clientAddress;
-
-    @Column(nullable = false)
-    private String clientTelephone;
-
-    @Column(nullable = false)
-    private String clientName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
@@ -57,10 +66,10 @@ public class OrdersShop extends BaseEntity{
     private OrderShipping orderShippingOfShopOrder;
 
     @OneToMany(mappedBy = "ordersShopOfOrdersItems", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersItems> listOrdersItemsOfOrdersShop;
+    private List<OrdersItems> listOrdersItemsOfOrdersShop = new ArrayList<>();
 
     @OneToMany(mappedBy = "ordersShopPOfOrderHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersHistory> listOrderHistoryOfOrderShop;
+    private List<OrdersHistory> listOrderHistoryOfOrderShop = new ArrayList<>();
 
     public enum Status{
         CHO_XAC_NHAN,
@@ -69,5 +78,10 @@ public class OrdersShop extends BaseEntity{
         GH_THANH_CONG,
         DA_HUY,
         TRA_HANG
+    }
+
+    @PostPersist
+    public void update(){
+        this.orderShopCode = RandomUtils.generateOrderCode("SOR", this.id);
     }
 }

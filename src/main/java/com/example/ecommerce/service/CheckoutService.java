@@ -6,5 +6,6 @@ import com.example.ecommerce.payload.ResponseBody;
 public interface CheckoutService {
 
     ResponseBody customerGetCheckOut(CheckoutRequest req);
+
     ResponseBody customerSubmitCheckOut(CheckoutRequest req);
 }
