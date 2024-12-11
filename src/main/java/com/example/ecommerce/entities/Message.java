@@ -26,7 +26,7 @@ public class Message extends BaseEntity{
     @Column(nullable = true, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = true, columnDefinition = "TEXT")
+    @Column(nullable = true, columnDefinition = "MEDIUMTEXT")
     private String imageUrl;
 
     @Column(nullable = false)

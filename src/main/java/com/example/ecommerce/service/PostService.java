@@ -11,6 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface PostService {
+
+    ResponseBody userGetPostHome(String hashtag, int pageSize, int pageNumber);
+
     PostHashTag userCreateHashTag(String hashtag);
     ResponseBody userCreatePost(PostRequest req, List<MultipartFile> listFile);
     ResponseBody userUpdatePost(PostRequest req, List<MultipartFile> listFile);

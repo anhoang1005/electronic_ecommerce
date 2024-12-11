@@ -18,6 +18,15 @@ public class PostController {
     private final PostService postService;
     private final ObjectMapper objectMapper;
 
+    @GetMapping("/api/guest/post/new")
+    public ResponseEntity<?> userCreateHashtag(
+            @RequestParam(name = "hashTag", required = false) String hashTag,
+            @RequestParam("page_number") int pageNumber,
+            @RequestParam("page_size") int pageSize
+    ){
+        return ResponseEntity.ok(postService.userGetPostHome(hashTag, pageNumber, pageSize));
+    }
+
     @PostMapping("/api/guest/hashtag")
     public ResponseEntity<?> userCreateHashtag(
             @RequestParam("hashTag") String hashTag

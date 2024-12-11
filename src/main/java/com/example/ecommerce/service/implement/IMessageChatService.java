@@ -1,5 +1,6 @@
 package com.example.ecommerce.service.implement;
 
+import com.example.ecommerce.config.websocket.WebSocketEventListener;
 import com.example.ecommerce.entities.Message;
 import com.example.ecommerce.entities.MessageChat;
 import com.example.ecommerce.entities.Shop;
@@ -40,6 +41,7 @@ public class IMessageChatService implements MessageChatService {
     private final MessageChatRepository messageChatRepository;
     private final MessageChatMapper messageChatMapper;
     private final MessageRepository messageRepository;
+    private final WebSocketEventListener eventListener;
 
     @Override
     public ResponseBody shopOwnerGetAllMessageChat(MessageChatFilter filter) {
@@ -151,10 +153,12 @@ public class IMessageChatService implements MessageChatService {
             story.setActive(chat.getActive());
             story.setListMessage(listMessage);
             if(isShop){
+                story.setOnline(eventListener.checkCustomerConnection(users.getUserCode()));
                 story.setStoryName(users.getUsername());
                 story.setStoryAvatar(users.getImageUrl());
                 story.setUnreadMessageCount(chat.getShopUnReadCount());
             } else{
+                story.setOnline(eventListener.checkShopConnection(shop.getShopCode()));
                 story.setStoryName(shop.getShopName());
                 story.setStoryAvatar(shop.getShopLogo());
                 story.setUnreadMessageCount(chat.getCustomerUnreadCount());
