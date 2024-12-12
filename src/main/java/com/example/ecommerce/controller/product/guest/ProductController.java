@@ -16,7 +16,7 @@ public class ProductController {
         return productService.findProductById(id);
     }
 
-    @GetMapping("/api/guest/product/get-home")
+    @GetMapping("/api/guest/product/get-list-product")
     public ResponseEntity<?> getAll(@RequestParam("page_number") int pageNumber,
                                     @RequestParam("page_size") int pageSize){
         return ResponseEntity.ok(productService.getProductHome(pageNumber, pageSize));
