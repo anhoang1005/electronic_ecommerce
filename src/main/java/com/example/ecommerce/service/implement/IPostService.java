@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +44,34 @@ public class IPostService implements PostService {
     private final FileService fileService;
     private final ObjectMapper objectMapper;
     private final PostReactionRepository postReactionRepository;
+
+    @Override
+    public ResponseBody userGetPostHome(String hashtag, int pageNumber, int pageSize) {
+        try{
+            PostHashTag postHashTag;
+            if(hashtag!=null){
+                postHashTag = hashTagRepository.findByHashTagName(hashtag);
+            } else{
+                postHashTag = null;
+            }
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Page<Post> page = postRepository.userGetPostHome(postHashTag, pageable);
+            List<PostDto> listPost = page.stream()
+                    .map(postMapper::entityToPostDto)
+                    .collect(Collectors.toList());
+            PageData pageData = PageData.builder()
+                    .data(listPost)
+                    .pageSize(pageSize)
+                    .pageNumber(pageNumber)
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Get get post home error! " + e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
 
     @Override
     public PostHashTag userCreateHashTag(String hashtag) {

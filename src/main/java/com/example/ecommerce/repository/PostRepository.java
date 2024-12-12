@@ -19,6 +19,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "select p from Post p " +
             "where p.active = true " +
+            "and (:hashTag is null or :hashTag member of p.listHashTagOfPost)")
+    Page<Post> userGetPostHome(@Param("hashTag") PostHashTag hashtag,
+                               Pageable pageable);
+
+    @Query(value = "select p from Post p " +
+            "where p.active = true " +
             "and p.usersOfPost.id = :userId " +
             "and (:hashTag is null or :hashTag member of p.listHashTagOfPost) ")
     Page<Post> userGetTheirPostOneHashTag(@Param("userId") Long userId,

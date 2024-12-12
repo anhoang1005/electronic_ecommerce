@@ -14,4 +14,6 @@ public interface PostReactionRepository extends JpaRepository<PostReaction, Long
             "and r.postOfReaction.id = :postId ")
     PostReaction findPostReactionByPostIdAndUserId(@Param("userId") Long userId,
                                          @Param("postId") Long postId);
+
+
 }

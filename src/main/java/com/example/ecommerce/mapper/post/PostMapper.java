@@ -1,12 +1,15 @@
 package com.example.ecommerce.mapper.post;
 
 import com.example.ecommerce.entities.Post;
+import com.example.ecommerce.entities.PostReaction;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.post.PostDto;
 import com.example.ecommerce.models.post.SharedPostDto;
+import com.example.ecommerce.repository.PostReactionRepository;
+import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,6 +24,8 @@ import java.util.List;
 public class PostMapper {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeMapperUtils timeMapperUtils;
+    private final PostReactionRepository reactionRepository;
+    private final AuthenticationUtils authUtils;
 
     public PostDto entityToPostDto(Post post){
         PostDto dto = new PostDto();
@@ -60,6 +65,17 @@ public class PostMapper {
             dto.setSharedPost(entityToSharePostDto(post.getSharedPost()));
         } else{
             dto.setSharedPost(null);
+        }
+        if(authUtils.getUserIdFromAuthentication()!=null){
+            PostReaction reaction = reactionRepository.findPostReactionByPostIdAndUserId(
+                    authUtils.getUserIdFromAuthentication(), post.getId());
+            if(reaction!=null){
+                dto.setMyReaction(reaction.getReaction());
+            } else {
+                dto.setMyReaction(PostReaction.Reaction.NONE);
+            }
+        } else {
+            dto.setMyReaction(PostReaction.Reaction.NONE);
         }
         return dto;
     }
