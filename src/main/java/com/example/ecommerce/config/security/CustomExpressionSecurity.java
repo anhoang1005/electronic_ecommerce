@@ -19,8 +19,6 @@ public class CustomExpressionSecurity {
         String token = jwtTokenUtils.getToken();
         Long userId = jwtTokenUtils.extractUserId(token);
         Product product = productRepository.findProductByProductCode(productCode);
-        log.info(userId.toString());
-        log.info(product.getShop().getUsersInShop().getId().toString());
         return userId.equals(product.getShop().getUsersInShop().getId());
     }
 }

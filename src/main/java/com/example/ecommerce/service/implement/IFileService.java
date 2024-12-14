@@ -93,8 +93,9 @@ public class IFileService implements FileService {
         List<File> savedFiles = new ArrayList<>();
         for(MultipartFile file : files){
             try {
-                String customTempDir = "src/main/resources/temp";
-                File tempFile = new File(System.getProperty(customTempDir) + File.separator + file.getOriginalFilename());
+//                String customTempDir = "src/main/resources/temp";
+//                File tempFile = new File(System.getProperty(customTempDir) + File.separator + file.getOriginalFilename());
+                File tempFile = new File(System.getProperty("java.io.tmpdir") + File.separator + file.getOriginalFilename());
                 file.transferTo(tempFile);
                 savedFiles.add(tempFile);
                 logger.info("Saved file to temporary directory: {}", tempFile.getAbsolutePath());

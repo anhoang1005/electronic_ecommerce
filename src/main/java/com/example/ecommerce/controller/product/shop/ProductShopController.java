@@ -3,16 +3,19 @@ package com.example.ecommerce.controller.product.shop;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.implement.IProductService;
+import com.example.ecommerce.utils.AuthenticationUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/owner")
@@ -21,6 +24,7 @@ import java.util.List;
 public class ProductShopController {
     private final IProductService iProductService;
     private final ObjectMapper objectMapper;
+    private final AuthenticationUtils authenticationUtils;
     @PostMapping("/product")
     @PreAuthorize("hasRole('CHUCUAHANG')")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
@@ -36,7 +40,7 @@ public class ProductShopController {
         }
     }
     @GetMapping("/product/{code}")
-    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#code) or hasAuthority('QUANLY')")
+    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#code) or hasRole('QUANLI')")
     public ResponseEntity<?> findProduct(@PathVariable String code){
         return ResponseEntity.ok(iProductService.findProductHiddenById(code));
     }

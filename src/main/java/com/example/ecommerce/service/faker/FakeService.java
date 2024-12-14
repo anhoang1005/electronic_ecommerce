@@ -70,7 +70,7 @@ public class FakeService {
     @Transactional
     public void generateAndInsertFakeUserData(){
         Set<String> uniqueEmails = new HashSet<>();
-        for(int i = 0 ; i < 100 ; i++){
+        for(int i = 0 ; i < 500 ; i++){
             Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
             List<Roles> roleEntityList = new ArrayList<>();
             roleOptional.ifPresent(roleEntityList::add);
@@ -191,7 +191,7 @@ public class FakeService {
             attribute.setAttributeName(faker.name().firstName());
             attribute.setValueJson("[]");
             attributeRepository.save(attribute);
-            int countAttValue = random.nextInt(3)+2;
+            int countAttValue = random.nextInt(3)+4;
             for(int j = 0 ; j < countAttValue ; j++){
                 AttributeValue attributeValue = new AttributeValue();
                 attributeValue.setValue(faker.name().lastName());
@@ -287,6 +287,8 @@ public class FakeService {
             List<Attribute> attributes = randomAttributes(countAttribute);
             for (Attribute attribute : attributes) {
                 int countAttributeValue = random.nextInt(attributeValueRepository.findAttributeValuesByAttributeId(attribute.getId()).size());
+                countAttributeValue = countAttributeValue == 0 ? 1 : countAttributeValue;
+                log.info(String.valueOf(countAttributeValue));
                 List<AttributeValue> attributeValues = randomAttributeValues(attribute, countAttributeValue);
                 mapAttribute.put(attribute, attributeValues);
             }
@@ -339,15 +341,14 @@ public class FakeService {
             categoryResponses.add(categoryMapper.entityToCategoryResponse(category));
             Category current = category;
             while (!ObjectUtils.isEmpty(current.getParentCategory())) {
-                categoryResponses.add(categoryMapper.entityToCategoryResponse(category.getParentCategory()));
-                try {
-                    product.setBreadcrumb(jsonConvert.convertListObjectToJson(categoryResponses));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+                categoryResponses.add(categoryMapper.entityToCategoryResponse(current.getParentCategory()));
                 current = current.getParentCategory();
             }
-
+            try {
+                product.setBreadcrumb(jsonConvert.convertListObjectToJson(categoryResponses));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             try {
                 product.setVariations(jsonConvert.convertListObjectToJson(product.getVariants()));
             } catch (JsonProcessingException e) {

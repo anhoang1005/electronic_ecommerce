@@ -21,6 +21,7 @@ import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
 import com.example.ecommerce.service.elastic.ProductDocumentService;
+import com.example.ecommerce.service.websocket.NotificationService;
 import com.example.ecommerce.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,7 @@ public class IProductService implements ProductService {
     private final ShopCategoryRepository shopCategoryRepository;
     private final ProductProducer productProducer;
     private final ProductDocumentRepository productDocumentRepository;
+    private final NotificationService notificationService;
     private static final Logger logger = LoggerFactory.getLogger(IProductService.class);
 
     @Override
@@ -235,7 +237,10 @@ public class IProductService implements ProductService {
 
     @Override
     public ResponseBody findProductByCode(String code) {
-        Product product = this.findProduct(code);
+        Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(code);
+        if(ObjectUtils.isEmpty(product)){
+            throw new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.toString());
+        }
         return new ResponseBody(
                 ProductMapper.mapperProductToResponse(product),
                 ResponseBody.Status.SUCCESS,
@@ -267,10 +272,38 @@ public class IProductService implements ProductService {
     public ResponseBody acceptProduct(String code) {
         Product product = this.findProduct(code);
         product.setIsAccepted(true);
-        product.setIsHidden(true);
+        product.setIsHidden(false);
         productRepository.save(product);
+        String shopCode = product.getShop().getShopCode();
+        String message = "Sản phẩm của bạn (" + product.getProductCode() + ") đã được duyệt!";
+
+        // noti
         CompletableFuture.runAsync(
-                () -> productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product))
+                () -> {
+                    notificationService.sendNoticeProductByAdmin(shopCode, message);
+                }
+        );
+        return new ResponseBody(
+                new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody rejectProduct(String code) {
+        Product product = this.findProduct(code);
+        product.setIsAccepted(false);
+        product.setIsRejected(true);
+        productRepository.save(product);
+        String shopCode = product.getShop().getShopCode();
+        String message = "Sản phẩm của bạn (" + product.getProductCode() + ") không được duyệt!";
+
+        // noti
+        CompletableFuture.runAsync(
+                () -> {
+                    notificationService.sendNoticeProductByAdmin(shopCode, message);
+                }
         );
         return new ResponseBody(
                 new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),

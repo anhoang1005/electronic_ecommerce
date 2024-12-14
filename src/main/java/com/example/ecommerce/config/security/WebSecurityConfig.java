@@ -60,17 +60,17 @@ public class WebSecurityConfig {
 								.requestMatchers(
 										"/api/root/**").hasRole(BaseRole.ROOT.toString())
                                 .requestMatchers(
-                                		"/api/admin/**").hasAnyRole(BaseRole.QUANLY.toString(),BaseRole.ROOT.toString())
+                                		"/api/admin/**").hasAnyRole(BaseRole.QUANLI.toString(),BaseRole.ROOT.toString())
                                 .requestMatchers(
                                 		"/api/customer/**").hasRole(BaseRole.KHACHHANG.toString())
 								.requestMatchers(
-										"/api/owner/**").hasRole(BaseRole.CHUCUAHANG.toString())
+										"/api/owner/**").hasAnyRole(BaseRole.CHUCUAHANG.toString(),BaseRole.QUANLI.toString())
 								.requestMatchers(
 										"/api/staff/**").hasRole(BaseRole.CONGTACVIEN.toString())
 								.requestMatchers(
 										"/api/all/**",
 										"/**")
-										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLY", "KHACHHANG", "CONGTACVIEN")
+										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
                                 .anyRequest().authenticated());
 		return http.build();
 	}

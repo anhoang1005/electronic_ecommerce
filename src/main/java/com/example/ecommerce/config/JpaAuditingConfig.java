@@ -13,26 +13,26 @@ import java.util.Optional;
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class JpaAuditingConfig {
-	
-	@Bean
-    AuditorAware<String> auditorProvider() {
-        return new AuditorAwareImpl();
-    }
-
-	// Config de lay createdBy va ModifyBy trong Entity
-    public static class AuditorAwareImpl implements AuditorAware<String> {
-        @Override
-        public Optional<String> getCurrentAuditor() {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-            	return Optional.of("guest");
-            }
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetails) {
-                CustomUserDetails userDetails = (CustomUserDetails) principal;
-                return Optional.ofNullable(userDetails.getEmail());
-            }
-            return Optional.of("guest");
-        }
-    }
+//
+//	@Bean
+//    AuditorAware<String> auditorProvider() {
+//        return new AuditorAwareImpl();
+//    }
+//
+//	// Config de lay createdBy va ModifyBy trong Entity
+//    public static class AuditorAwareImpl implements AuditorAware<String> {
+//        @Override
+//        public Optional<String> getCurrentAuditor() {
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            if (authentication == null || !authentication.isAuthenticated()) {
+//            	return Optional.of("guest");
+//            }
+//            Object principal = authentication.getPrincipal();
+//            if (principal instanceof CustomUserDetails) {
+//                CustomUserDetails userDetails = (CustomUserDetails) principal;
+//                return Optional.ofNullable(userDetails.getEmail());
+//            }
+//            return Optional.of("guest");
+//        }
+//    }
 }

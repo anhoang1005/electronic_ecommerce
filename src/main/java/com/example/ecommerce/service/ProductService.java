@@ -15,6 +15,7 @@ public interface ProductService {
     ResponseBody findProductHiddenById(String code);
     ResponseBody updateProduct(String code, ProductUpdateDTO dto);
     ResponseBody acceptProduct(String code);
+    ResponseBody rejectProduct(String code);
     ResponseBody deleteProduct(String code);
     ResponseBody getEditProduct(String code);
 }

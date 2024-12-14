@@ -26,4 +26,6 @@ public interface ProductDocumentService {
            Pageable pageable,
            BigDecimal minPrice, BigDecimal maxPrice
     );
+    void fullAsync();
+    Page<ProductDocument> searchProductDocument(String searchText, Pageable pageable);
 }

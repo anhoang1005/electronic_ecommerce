@@ -75,6 +75,9 @@ public class Product extends BaseEntity{
     @Column(nullable = false, name = "is_deleted")
     private Boolean isDeleted;
 
+    @Column(nullable = false, name = "is_rejected")
+    private Boolean isRejected  ;
+
     @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference("product-image")
     private List<ProductImage> listImageOfProduct = new ArrayList<>();
@@ -132,7 +135,11 @@ public class Product extends BaseEntity{
         if (this.starCount == null) {
             this.starCount = 0L;
         }
+        if (this.isHidden == null) {
+            this.isHidden = false;
+        }
         this.isDeleted = false;
+        this.isRejected = false;
     }
 
 }

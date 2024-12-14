@@ -46,13 +46,8 @@ public class ProductDocument {
     @Field(type = FieldType.Text)
     @JsonProperty("state")
     private ProductState productState;
-    @Field(type = FieldType.Keyword)
-    @JsonProperty("brand_id")
-    private Long brandId;
     @JsonProperty("shop_code")
     private String shopCode;
-    @Field(type = FieldType.Keyword)
-    private Long categoryIds;
     @Field(type = FieldType.Long)
     private List<Long> shopCategoryIds;
     @Field(type = FieldType.Text)
@@ -61,4 +56,105 @@ public class ProductDocument {
     private Date updatedAt;
     @Field(type = FieldType.Boolean)
     private Boolean isDeleted;
+    @Field(type = FieldType.Boolean)
+    private Boolean isAccepted;
+    @Field(type = FieldType.Boolean)
+    private Boolean isRejected;
+    @Field(type = FieldType.Boolean)
+    private Boolean isHidden;
+
+    @Field(type = FieldType.Object)
+    private ProductDocument.BrandDocument brandDocument;
+
+    @Field(type = FieldType.Object)
+    private ProductDocument.CategoryDocument categoryDocument;
+
+
+    public static class BrandDocument{
+        @Field(type = FieldType.Keyword)
+        private Long brandId;
+
+        @Field(type = FieldType.Text)
+        private String brandName;
+
+        public String getBrandName() {
+            return brandName;
+        }
+
+        public void setBrandName(String brandName) {
+            this.brandName = brandName;
+        }
+
+        public Long getBrandId() {
+            return brandId;
+        }
+
+        public void setBrandId(Long brandId) {
+            this.brandId = brandId;
+        }
+    }
+
+    public static class CategoryDocument{
+        @Field(type = FieldType.Keyword)
+        private Long categoryId;
+
+        @Field(type = FieldType.Text)
+        private String categoryName;
+
+        public String getCategoryName() {
+            return categoryName;
+        }
+
+        public void setCategoryName(String categoryName) {
+            this.categoryName = categoryName;
+        }
+
+        public Long getCategoryId() {
+            return categoryId;
+        }
+
+        public void setCategoryId(Long categoryId) {
+            this.categoryId = categoryId;
+        }
+    }
+
+    @Field(type = FieldType.Nested)
+    private List<ProductDocument.AttributeDocument> attributes;
+    public static class AttributeDocument{
+        @Field(type = FieldType.Keyword)
+        private Long attributeId;
+
+        @Field(type = FieldType.Text)
+        private String attributeName;
+
+        @Field(type = FieldType.Text)
+        private String attributeValue;
+
+        public Long getAttributeId() {
+            return attributeId;
+        }
+
+        public void setAttributeId(Long attributeId) {
+            this.attributeId = attributeId;
+        }
+
+        public String getAttributeName() {
+            return attributeName;
+        }
+
+        public void setAttributeName(String attributeName) {
+            this.attributeName = attributeName;
+        }
+
+        public String getAttributeValue() {
+            return attributeValue;
+        }
+
+        public void setAttributeValue(String attributeValue) {
+            this.attributeValue = attributeValue;
+        }
+    }
+
+    @Field(type = FieldType.Double)
+    private Double score;
 }

@@ -1,6 +1,5 @@
 package com.example.ecommerce.controller.product.guest;
 
-import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.ProductService;
@@ -18,7 +17,8 @@ import java.math.BigDecimal;
 public class ProductController {
     private final ProductService productService;
     private final ProductDocumentService productDocumentService;
-    @GetMapping("/product/{id}")
+
+    @GetMapping("/product/{code}")
     public ResponseBody getProduct(@PathVariable String code){
         return productService.findProductByCode(code);
     }
@@ -47,4 +47,15 @@ public class ProductController {
         return ResponseEntity.ok(productDocumentService.filterAndSortProduct(shopId,shopCategoryId,sortField,pageable,minPrice,maxPrice));
     }
 
+    @PostMapping("/async")
+    public void asyncAddProduct(){
+        productDocumentService.fullAsync();
+        return;
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<?> searchProducts(@RequestParam String keyword,
+                                            Pageable pageable){
+        return ResponseEntity.ok(productDocumentService.searchProductDocument(keyword,pageable));
+    }
 }
