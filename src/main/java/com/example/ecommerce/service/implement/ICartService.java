@@ -82,6 +82,7 @@ public class ICartService implements CartService {
             redisTemplate.expire(cartKey, Duration.ofDays(3));
             return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
+            e.printStackTrace();
             log.error("save item to cart failed! " + e.getMessage());
             throw new RequestNotFoundException("ERROR");
         }

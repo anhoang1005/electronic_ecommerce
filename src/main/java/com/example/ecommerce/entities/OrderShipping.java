@@ -37,9 +37,11 @@ public class OrderShipping {
     @Column(nullable = true)
     private Long shippingId; // Ma van chuyen (Lay tu GIAOHANGNHANH)
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Method method;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
 

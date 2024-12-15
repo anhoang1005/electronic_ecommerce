@@ -66,10 +66,10 @@ public class OrdersShop extends BaseEntity{
     private OrderShipping orderShippingOfShopOrder;
 
     @OneToMany(mappedBy = "ordersShopOfOrdersItems", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersItems> listOrdersItemsOfOrdersShop = new ArrayList<>();
+    private List<OrdersItems> listOrdersItemsOfOrdersShop;
 
     @OneToMany(mappedBy = "ordersShopPOfOrderHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersHistory> listOrderHistoryOfOrderShop = new ArrayList<>();
+    private List<OrdersHistory> listOrderHistoryOfOrderShop;
 
     public enum Status{
         CHO_XAC_NHAN,

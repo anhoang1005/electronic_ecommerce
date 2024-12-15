@@ -41,6 +41,9 @@ public class Orders extends BaseEntity{
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
+    @Column(nullable = true)
+    private BigDecimal ecommerceServiceFee;
+
     @Column(nullable = false)
     private String deliveryMethod;
 
@@ -60,10 +63,10 @@ public class Orders extends BaseEntity{
     private Boolean isPayment;
 
     @OneToMany(mappedBy = "orderOfOrderPayment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrderPayment> listOrderPayment = new ArrayList<>();
+    private List<OrderPayment> listOrderPayment;
 
     @OneToMany(mappedBy = "ordersOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersShop> listOrderShopOfOrders = new ArrayList<>();
+    private List<OrdersShop> listOrderShopOfOrders;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -5,6 +5,9 @@ import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,13 +50,17 @@ public class ProductMapper {
     }
 
     public VariantDetail entityToVariantDetail(ProductVariant variant){
+            VariantAtt att = new VariantAtt("RAM", "124");
+            VariantAtt att1 = new VariantAtt("ROM", "124");
+            VariantAtt att2 = new VariantAtt("COLOR", "124");
+
+            List<VariantAtt> list = List.of(att, att1, att2);
             return VariantDetail.builder()
                     .variantId(variant.getId())
-                    .variantName(variant.getProductVariation())
+                    .variantName(list)
                     .soldCount(variant.getSoldQuantity())
                     .stockCount(variant.getStockQuantity())
                     .description(variant.getSku())
-                    .variantName(null)
                     .build();
     }
 
@@ -97,5 +104,14 @@ public class ProductMapper {
                 .soldCount(1000)
                 .brandId(product.getBrandOfProduct().getId())
                 .build();
+    }
+
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class VariantAtt{
+        private String name;
+        private String value;
     }
 }
