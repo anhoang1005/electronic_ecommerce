@@ -68,6 +68,7 @@ public class OrderShipping {
         PENDING,
         SHIPPED,
         DELiVERY,
+        CANCEL,
         RETURNED
     }
 }
