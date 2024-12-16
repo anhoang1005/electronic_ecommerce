@@ -51,17 +51,9 @@ public class Category extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CategoryType categoryType;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @JsonManagedReference("product-category")
     private List<Product> products;
     @Column(nullable = false)
     private Boolean active;
-
-//    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
-//    private List<CategoryProduct> categoryProducts;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "shop_id")
-//    private Shop shopOfCategory;
-
 }

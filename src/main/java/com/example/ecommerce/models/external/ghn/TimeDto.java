@@ -10,4 +10,5 @@ import lombok.*;
 public class TimeDto {
 	private Long leadtime;
 	private Long order_date;
+	private Object leadtime_order;
 }

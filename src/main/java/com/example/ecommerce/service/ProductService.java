@@ -18,4 +18,7 @@ public interface ProductService {
     ResponseBody rejectProduct(String code);
     ResponseBody deleteProduct(String code);
     ResponseBody getEditProduct(String code);
+
+    ResponseBody getProductHome(int pageNumber, int pageSize);
+    ResponseBody getProductDetail(Long productId);
 }

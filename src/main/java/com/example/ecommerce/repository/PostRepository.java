@@ -2,6 +2,7 @@ package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Post;
 import com.example.ecommerce.entities.PostHashTag;
+import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,10 +14,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
+
+    @Query(value = "select p from Post p " +
+            "where p.active = true " +
+            "and (:hashTag is null or :hashTag member of p.listHashTagOfPost)")
+    Page<Post> userGetPostHome(@Param("hashTag") PostHashTag hashtag,
+                               Pageable pageable);
 
     @Query(value = "select p from Post p " +
             "where p.active = true " +
@@ -36,16 +41,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                     @Param("visibility") Post.Visibility visibility,
                                     Pageable pageable);
 
-
     @Modifying
     @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = "UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
-    void incrementLikeCount(@Param("id") Long postId);
-
-    @Modifying
-    @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = "UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :id")
-    void decrementLikeCount(@Param("id") Long postId);
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    default void updatePostLikeCount(Long postId, boolean isAdd){
+        Post post = findById(postId).orElseThrow(() -> new RequestNotFoundException("ERROR"));
+        if(isAdd) post.setLikeCount(post.getLikeCount()+1);
+        else  post.setLikeCount(post.getLikeCount()-1);
+    }
 }

@@ -90,10 +90,7 @@ public class Shop extends BaseEntity{
     @Version
     private long version;
 
-//    @OneToMany(mappedBy = "shop",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-//    private List<ShopCategoryProduct> shopCategoryProducts;
-
-    @OneToMany
+    @OneToMany(mappedBy = "shopOfProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("product-shop")
     private List<Product> products;
     @PrePersist

@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class MessageChatDto {
     @JsonProperty("chat_id")
     private Long chatId;
+    @JsonProperty("online")
+    private boolean online;
     @JsonProperty("user_code")
     private String userCode;
     @JsonProperty("shop_code")

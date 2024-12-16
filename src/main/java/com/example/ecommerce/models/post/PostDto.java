@@ -1,6 +1,7 @@
 package com.example.ecommerce.models.post;
 
 import com.example.ecommerce.entities.Post;
+import com.example.ecommerce.entities.PostReaction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -36,8 +37,8 @@ public class PostDto {
     private Boolean active;
     @JsonProperty("shared_count")
     private Integer sharedCount;
-    @JsonProperty("is_my_like")
-    private Boolean isMyLike;
+    @JsonProperty("my_reaction")
+    private PostReaction.Reaction myReaction;
     @JsonProperty("like_count")
     private Integer likeCount;
     @JsonProperty("comment_count")

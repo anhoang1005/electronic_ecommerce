@@ -10,7 +10,8 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "product_image")
-public class ProductImage extends BaseEntity{
+public class ProductImage{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,12 +26,12 @@ public class ProductImage extends BaseEntity{
     private Boolean active;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id",nullable = true)
     @JsonBackReference("product-image")
     private Product productOfProductImage;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_id")
-    private Variant variant;
+    @JoinColumn(name = "variant_id", nullable = true)
+    private ProductVariant variant;
 
 }

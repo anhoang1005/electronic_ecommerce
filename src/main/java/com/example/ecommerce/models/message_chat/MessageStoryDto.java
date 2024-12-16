@@ -15,6 +15,8 @@ import java.util.List;
 public class MessageStoryDto {
     @JsonProperty("chat_id")
     private Long chatId;
+    @JsonProperty("online")
+    private Boolean online;
     @JsonProperty("user_code")
     private String userCode;
     @JsonProperty("shop_code")

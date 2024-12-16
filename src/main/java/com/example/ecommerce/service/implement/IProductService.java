@@ -1,7 +1,6 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.*;
-import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.entities.enums.ErrorMessage;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
@@ -36,6 +35,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,12 +21,14 @@ public class OrderPayment extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Method method;
 
     @Column(nullable = false)
-    private Double amount;
+    private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
 

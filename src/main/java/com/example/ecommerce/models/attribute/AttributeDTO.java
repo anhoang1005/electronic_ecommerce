@@ -1,8 +1,11 @@
 package com.example.ecommerce.models.attribute;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AttributeDTO {
     private String name;
     private String value;

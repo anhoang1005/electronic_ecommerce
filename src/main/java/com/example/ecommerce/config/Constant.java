@@ -10,5 +10,6 @@ public class Constant {
     public static final String LOGGING_LEVEL_ROOT = "WARN";
     public static final String JWT_SECRET_KEY = "CiLq3KRj2+Rx8Gjs4rSi/Cp+7vD+JtkspLFaVs8M9mE=";
     public static final Long JWT_EXPIRED_TIME = 604800L;
+    public static final String SHOP_IMAGE = "https://w7.pngwing.com/pngs/426/341/png-transparent-shopping-cart-e-commerce-online-shopping-logo-shopping-cart-blue-service-logo-thumbnail.png";
     public static final String USER_IMAGE = "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg";
 }

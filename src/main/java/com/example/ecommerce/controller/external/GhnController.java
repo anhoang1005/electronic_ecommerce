@@ -1,14 +1,13 @@
 package com.example.ecommerce.controller.external;
 
+import com.example.ecommerce.models.external.ghn.FeeRequest;
+import com.example.ecommerce.models.external.ghn.TimeRequest;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.GHNService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
@@ -35,8 +34,20 @@ public class GhnController {
     }
 
     @GetMapping("/api/guest/ghn/service")
-    public ResponseEntity<ResponseBody> getAllServiceApi(
+    public ResponseEntity<?> getAllServiceApi(
             @RequestParam("to_district") Integer districtId) {
         return new ResponseEntity<>(ghnService.getService(districtId), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/guest/ghn/fee")
+    public ResponseEntity<?> getFeeApi(
+            @RequestBody FeeRequest req) {
+        return new ResponseEntity<>(ghnService.getFee(req), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/guest/ghn/time")
+    public ResponseEntity<?> getTimeApi(
+            @RequestBody TimeRequest req) {
+        return new ResponseEntity<>(ghnService.getTime((req)), HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ecommerce.service.implement;
 
+import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
@@ -167,7 +168,7 @@ public class IShopService implements ShopService {
     private void updateShopInfo(SubscribeShopRequest req, Shop shop) {
         shop.setBusinessType(req.getBusinessType());
         shop.setShopName(req.getShopName());
-        shop.setShopLogo("shop.png");
+        shop.setShopLogo(Constant.SHOP_IMAGE);
         shop.setShopHotLine(req.getShopHotLine());
         shop.setFullName(req.getFullName());
         shop.setTaxCode(req.getTaxCode());

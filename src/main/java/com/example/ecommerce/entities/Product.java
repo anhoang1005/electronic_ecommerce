@@ -23,8 +23,7 @@ public class Product extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
-
-    @Column(name = "product_code")
+    @Column(nullable = false, unique = true)
     private String productCode;
 
     @Column(name = "product_slug")
@@ -113,7 +112,11 @@ public class Product extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     @JsonBackReference("product-shop")
-    private Shop shop;
+    private Shop shopOfProduct;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "brand_id")
+    private Brand brandOfProduct;
 
     private String variantIds;
     private String imageIds;

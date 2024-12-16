@@ -9,7 +9,9 @@ import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.rabbit.producer.ProductProducer;
 import com.example.ecommerce.repository.*;
+import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.AccountService;
+import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
@@ -61,14 +63,15 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
+    private final ProductDocumentService productDocumentService;
 
 
     //user - fake
     @Transactional
     public void generateAndInsertFakeUserData(){
         Set<String> uniqueEmails = new HashSet<>();
-        for(int i = 0 ; i < 5 ; i++){
-                Optional<Roles> roleOptional = rolesRepository.findByRoleName("QUANLY");
+        for(int i = 0 ; i < 100 ; i++){
+            Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
             List<Roles> roleEntityList = new ArrayList<>();
             roleOptional.ifPresent(roleEntityList::add);
 
@@ -80,8 +83,8 @@ public class FakeService {
             users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
             users.setPasswordHash(passwordEncoder.encode("1234"));
             users.setActive(true);
-            users.setImageUrl("user.jpg");
-            users.setVerifyCode(randomUtils.generateRandomString(9));
+            users.setImageUrl(Constant.USER_IMAGE);
+            users.setVerifyCode(null);
             users.setListRolesOfUsers(roleEntityList);
             users.setEnable(true);
             users.setUsername(faker.name().username());
@@ -122,8 +125,8 @@ public class FakeService {
         users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
         users.setPasswordHash(passwordEncoder.encode("1234"));
         users.setActive(true);
-        users.setImageUrl("user.jpg");
-        users.setVerifyCode(randomUtils.generateRandomString(9));
+        users.setImageUrl(Constant.USER_IMAGE);
+        users.setVerifyCode(null);
         users.setListRolesOfUsers(roleEntityList);
         users.setEnable(true);
         users.setUsername("root");
@@ -140,7 +143,7 @@ public class FakeService {
             Shop shop = new Shop();
             shop.setBusinessType(getRandomBusinessType());
             shop.setShopName(faker.name().username());
-            shop.setShopLogo("shop.png");
+            shop.setShopLogo(Constant.SHOP_IMAGE);
             shop.setShopHotLine(faker.phoneNumber().subscriberNumber(10));
             shop.setFullName(faker.name().fullName());
             shop.setTaxCode(faker.phoneNumber().subscriberNumber(8));
@@ -171,7 +174,7 @@ public class FakeService {
                 ShopCategory shopCategory = new ShopCategory();
                 shopCategory.setShopOfCategory(shop);
                 shopCategory.setCategoryLevel(0);
-                shopCategory.setCategoryName(faker.name().firstName());
+                shopCategory.setCategoryName(faker.commerce().department());
                 shopCategory.setActive(true);
                 shopCategory.setDescription(faker.lorem().toString());
                 shopCategory.setCategoryType(CategoryType.SHOP);
@@ -185,7 +188,7 @@ public class FakeService {
     public void generateAndInsertFakeAttributeData(){
         for(int i = 0 ; i < 20 ; i ++){
             Attribute attribute = new Attribute();
-            attribute.setAttributeName(faker.name().firstName());
+            attribute.setAttributeName(faker.commerce().productName());
             attribute.setValueJson("[]");
             attributeRepository.save(attribute);
             int countAttValue = random.nextInt(3)+4;
@@ -269,8 +272,6 @@ public class FakeService {
             product.setProductSlug(StringFormatUtils.convertToSlug(title));
             product.setCurrency("VND");
             product.setIsHidden(false);
-            product.setIsRejected(false);
-            product.setIsAccepted(true);
             product.setProductState(ProductState.ACTIVE);
             product.setCategory(category);
             product.setBrand(brand);

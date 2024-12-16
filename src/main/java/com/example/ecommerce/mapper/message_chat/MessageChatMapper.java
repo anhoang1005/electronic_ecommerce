@@ -1,5 +1,6 @@
 package com.example.ecommerce.mapper.message_chat;
 
+import com.example.ecommerce.config.websocket.WebSocketEventListener;
 import com.example.ecommerce.entities.Message;
 import com.example.ecommerce.entities.MessageChat;
 import com.example.ecommerce.entities.Shop;
@@ -16,11 +17,13 @@ import org.springframework.stereotype.Component;
 public class MessageChatMapper {
     private final DateTimeMapperUtils dateUtils;
     private final MessageRepository messageRepository;
+    private final WebSocketEventListener eventListener;
 
     public MessageChatDto entityToShopMessageChatDto(MessageChat chat){
         Users users = chat.getUsersOfMessageStory();
         return MessageChatDto.builder()
                 .chatId(chat.getId())
+                .online(eventListener.checkCustomerConnection(users.getUserCode()))
                 .storyAvatar(users.getImageUrl())
                 .storyName(users.getUsername())
                 .shopCode(chat.getShopOfMessageStory().getShopCode())
@@ -37,6 +40,7 @@ public class MessageChatMapper {
         Shop shop = chat.getShopOfMessageStory();
         return MessageChatDto.builder()
                 .chatId(chat.getId())
+                .online(eventListener.checkShopConnection(shop.getShopCode()))
                 .storyAvatar(shop.getShopLogo())
                 .storyName(shop.getShopName())
                 .shopCode(shop.getShopCode())

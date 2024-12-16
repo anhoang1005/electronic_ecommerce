@@ -10,5 +10,4 @@ import lombok.*;
 public class CheckoutItem {
     private Long variantId;
     private Integer quantity;
-    private String voucherCode;
 }

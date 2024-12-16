@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,7 +22,7 @@ public class Orders extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_code", nullable = false)
+    @Column(nullable = true, unique = true)
     private String orderCode;
 
     @Enumerated(EnumType.STRING)
@@ -28,7 +30,19 @@ public class Orders extends BaseEntity{
     private Status status;
 
     @Column(nullable = false)
-    private Double totalAmount;
+    private BigDecimal totalFee;
+
+    @Column(nullable = false)
+    private BigDecimal totalShipping;
+
+    @Column(nullable = false)
+    private BigDecimal totalDiscount;
+
+    @Column(nullable = false)
+    private BigDecimal totalAmount;
+
+    @Column(nullable = true)
+    private BigDecimal ecommerceServiceFee;
 
     @Column(nullable = false)
     private String deliveryMethod;
@@ -49,7 +63,7 @@ public class Orders extends BaseEntity{
     private Boolean isPayment;
 
     @OneToMany(mappedBy = "orderOfOrderPayment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrderPayment> listOrderShipping;
+    private List<OrderPayment> listOrderPayment;
 
     @OneToMany(mappedBy = "ordersOfOrdersShop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersShop> listOrderShopOfOrders;
@@ -59,13 +73,14 @@ public class Orders extends BaseEntity{
     private Users usersOfOrder;
 
     public enum Status{
+        CHO_THANH_TOAN,
         DANG_XU_LY,
         HOAN_THANH,
         DA_HUY
     }
 
-    @PrePersist
+    @PostPersist
     public void onCreate(){
-        this.orderCode = RandomUtils.generateOrderCode("ORD");
+        this.orderCode = RandomUtils.generateOrderCode("EOR", this.id);
     }
 }

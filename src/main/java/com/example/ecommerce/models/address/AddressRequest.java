@@ -1,9 +1,11 @@
 package com.example.ecommerce.models.address;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class AddressRequest {
     private Long addressId;
