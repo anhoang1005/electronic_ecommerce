@@ -18,6 +18,7 @@ public class ProductDTO {
     private String description;
 
     private String currency;
+    private String productState;
     private boolean isHidden;
 
     private List<VariantDTO> variantDTOS = new ArrayList<>();

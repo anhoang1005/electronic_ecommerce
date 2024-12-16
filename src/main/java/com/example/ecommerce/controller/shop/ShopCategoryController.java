@@ -34,4 +34,11 @@ public class ShopCategoryController {
                                   ){
         return iShopCategoryService.removeProduct(id,idProduct);
     }
+    @GetMapping("/by-shop/{shopId}")
+    public ResponseBody getByShopId(@PathVariable("shopId") Long shopId,
+                                    @RequestParam(value = "categoryParentId", required = false) Long categoryParentId,
+                                    @RequestParam(value = "categoryLevel", required = false) Integer categoryLevel
+   ){
+        return iShopCategoryService.getListCategories(shopId,categoryParentId,categoryLevel);
+    }
 }

@@ -15,4 +15,5 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     List<Category> findCategoriesByCategoryLevelAndParentCategory(Integer level, Category parent);
     @Query("SELECT cr  from Category cr order by function('RAND') LIMIT 1")
     Category findRandomCategory();
+
 }

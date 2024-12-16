@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ProductUpdateDTO;
 import com.example.ecommerce.payload.ResponseBody;
@@ -9,12 +10,14 @@ import java.util.List;
 
 public interface ProductService {
 
-    ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles);
-    ResponseBody findProductById(Long id);
-    ResponseBody findProductHiddenById(Long id);
-    ResponseBody updateProduct(Long id, ProductUpdateDTO dto);
-    ResponseBody checkProduct(Long id);
-    ResponseBody deleteProduct(Long id);
+    ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles, boolean isDev);
+    ResponseBody findProductByCode(String code);
+    ResponseBody findProductHiddenById(String code);
+    ResponseBody updateProduct(String code, ProductUpdateDTO dto, List<MultipartFile> productFile);
+    ResponseBody acceptProduct(String code);
+    ResponseBody rejectProduct(String code);
+    ResponseBody deleteProduct(String code);
+    ResponseBody getEditProduct(String code);
 
     ResponseBody getProductHome(int pageNumber, int pageSize);
     ResponseBody getProductDetail(Long productId);

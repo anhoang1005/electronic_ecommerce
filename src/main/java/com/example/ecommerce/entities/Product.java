@@ -1,9 +1,11 @@
 package com.example.ecommerce.entities;
 
+import com.example.ecommerce.entities.enums.ProductState;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,79 +16,93 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Product")
+@Table(name = "product")
+@Where(clause = "is_deleted = false and is_hidden = false")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
     @Column(nullable = false, unique = true)
     private String productCode;
 
-    @Column(nullable = false)
+    @Column(name = "product_slug")
     private String productSlug;
+
     private String title;
-    @Column
+    private Integer sold;
+    private Integer review;
+
+    @Column(name = "min_initial_price")
     private BigDecimal minInitialPrice;
 
-    @Column
+    @Column(name = "max_initital_price")
     private BigDecimal maxInitialPrice;
 
     private String currency;
-    private Integer soldCount;
+    private Long favorite;
+    private Long starCount;
+    private Long reviewCount;
+    private Double rating;
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
     private String breadcrumb;
 
     @Lob
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(name = "product_specifications", columnDefinition = "MEDIUMTEXT")
     private String productSpecifications;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "product_description",columnDefinition = "TEXT")
     private String description;
-
-    @Lob
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String detail;
-
-    @Lob
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String imageList;
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
     private String variations;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(name = "product_ratings", columnDefinition = "MEDIUMTEXT")
+    private String productRatings;
+
+    @Column(nullable = false, name = "is_hidden")
     private Boolean isHidden;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_accepted")
     private Boolean isAccepted;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_rejected")
+    private Boolean isRejected  ;
+
+    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonManagedReference("product-image")
+    private List<ProductImage> listImageOfProduct = new ArrayList<>();
+
+//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+//    @JoinColumn(name = "brand_id")
+//    private Brand brand;
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String imageList;
+    @Column(name = "product_state")
     @Enumerated(EnumType.STRING)
     private ProductState productState;
 
-    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("product-image")
-    private List<ProductImage> listImageOfProduct;
+    @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Variant> variants = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductVariant> variants = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonManagedReference("product-attribute-value-product")
     private List<ProductAttributeValue> productAttributeValues = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product")
     @JsonManagedReference("product-category-product")
     private List<CategoryProduct> categoryProducts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     @JsonManagedReference("product-shop-category-product")
     private List<ShopCategoryProduct> shopCategoryProducts = new ArrayList<>();
 
@@ -104,22 +120,34 @@ public class Product extends BaseEntity{
     @JoinColumn(name = "brand_id")
     private Brand brandOfProduct;
 
+    private String variantIds;
+    private String imageIds;
+
     @PrePersist
     public void onCreate() {
+        if (this.sold == null) {
+            this.sold = 0;
+        }
+        if (this.favorite == null) {
+            this.favorite = 0L;
+        }
         if (this.isAccepted == null) {
             this.isAccepted = false;
         }
-        if(this.soldCount == null){
-            this.soldCount = 0;
+        if (this.rating == null) {
+            this.rating = 0.0;
+        }
+        if (this.reviewCount == null) {
+            this.reviewCount = 0L;
+        }
+        if (this.starCount == null) {
+            this.starCount = 0L;
+        }
+        if (this.isHidden == null) {
+            this.isHidden = false;
         }
         this.isDeleted = false;
-    }
-
-    public enum ProductState {
-        ACTIVE,
-        UN_ACTIVE,
-        OUT_OF_STOCK,
-        PENDING
+        this.isRejected = false;
     }
 
 }

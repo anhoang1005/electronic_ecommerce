@@ -18,7 +18,33 @@ import org.springframework.web.multipart.MultipartFile;
 public class FakerController {
     private final FakeService fakeService;
     private final ImportService importService;
+    @PostMapping("/users")
+    public String fakerUser(){
+        fakeService.generateAndInsertFakeUserData();
 
+        return "done";
+    }
+    @PostMapping("/shops")
+    public String fakerShop(){
+        fakeService.generateAndInsertFakeShopDate();
+        return "done";
+    }
+    @PostMapping("/roots")
+    public String createRoot(){
+        fakeService.createRootAccount();
+        return "done";
+    }
+    @PostMapping("/shop-categories")
+    public String fakerShopCategory(){
+        fakeService.generateAndInserFakeShopCategoryData();
+        return "done";
+    }
+
+    @PostMapping("/attributes")
+    public String fakerAttributes(){
+        fakeService.generateAndInsertFakeAttributeData();
+        return "done";
+    }
     @PostMapping("/brands")
     public String fakerBrand(){
         fakeService.generateAndInsertFakeBrand();
@@ -26,13 +52,13 @@ public class FakerController {
     }
     @PostMapping("/products")
     public String fakeProduct(@RequestParam("file") MultipartFile file){
-        fakeService.createRootAccount();
-        fakeService.generateAndInsertFakeUserData();
-        importService.importCategoriesFromExcel(file);
-        fakeService.generateAndInsertFakeShopDate();
-        fakeService.generateAndInsertFakeShopCategoryData();
-        fakeService.generateAndInsertFakeAttributeData();
-        fakeService.generateAndInsertFakeBrand();
+//        fakeService.createRootAccount();
+//        fakeService.generateAndInsertFakeUserData();
+//        importService.importCategoriesFromExcel(file);
+//        fakeService.generateAndInsertFakeShopDate();
+//        fakeService.generateAndInserFakeShopCategoryData();
+//        fakeService.generateAndInsertFakeAttributeData();
+//        fakeService.generateAndInsertFakeBrand();
         fakeService.generateAndInsertFakeProductData();
         return "done";
     }

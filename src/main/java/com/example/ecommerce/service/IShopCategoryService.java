@@ -8,4 +8,5 @@ public interface IShopCategoryService {
     ResponseBody unActiveCategory(Long id);
     ResponseBody addProduct(Long id, Long shopId);
     ResponseBody removeProduct(Long id, Long shopId);
+    ResponseBody getListCategories(Long shopId,Long parentId, Integer level);
 }

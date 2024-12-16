@@ -13,7 +13,7 @@ import java.util.Map;
 @Builder
 public class VariantDetail {
     private Long variantId;
-    private List<ProductMapper.VariantAtt> variantName;
+//    private List<ProductMapper.VariantAtt> variantName;
     private Map<String, String> attribute;
     private Integer soldCount;
     private Integer stockCount;

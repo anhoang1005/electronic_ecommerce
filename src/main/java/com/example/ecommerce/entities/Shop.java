@@ -93,7 +93,6 @@ public class Shop extends BaseEntity{
     @OneToMany(mappedBy = "shopOfProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference("product-shop")
     private List<Product> products;
-
     @PrePersist
     public void initializeDefaultValues() {
         this.totalReview = 0L;

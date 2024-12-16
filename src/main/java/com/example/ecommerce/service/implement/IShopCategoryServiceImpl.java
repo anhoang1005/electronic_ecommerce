@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -169,5 +170,32 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
                 ResponseBody.Status.SUCCESS,
                 ResponseBody.Code.SUCCESS
         );
+    }
+
+    @Override
+    public ResponseBody getListCategories(Long shopId,Long parentId, Integer level) {
+        List<CategoryResponse> categoryResponses = new ArrayList<>();
+        if(ObjectUtils.isEmpty(parentId)){
+            List<ShopCategory> categories = shopCategoryRepository.findShopCategoriesByShopOfCategoryIdAndActiveAndCategoryLevel(shopId,true,level);
+            for(ShopCategory category : categories){
+                CategoryResponse response = new CategoryResponse();
+                response.setCategoryId(category.getId());
+                response.setCategoryName(category.getCategoryName());
+                categoryResponses.add(response);
+            }
+        }else{
+//            ShopCategory parent = shopCategoryRepository.findById(parentId).orElseThrow(
+//                    () -> new RequestNotFoundException("Category parent not found")
+//            );
+//            List<ShopCategory> categories = shopCategoryRepository.findShopCategoriesByShopOfCategoryIdAndActiveAndCategoryLevelAndParentCategory(shopId,true,level,parentId);
+//            for(ShopCategory category : categories){
+//                CategoryResponse response = new CategoryResponse();
+//                response.setCategoryId(category.getId());
+//                response.setCategoryName(category.getCategoryName());
+//                categoryResponses.add(response);
+//            }
+        }
+
+        return new ResponseBody(categoryResponses, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
     }
 }

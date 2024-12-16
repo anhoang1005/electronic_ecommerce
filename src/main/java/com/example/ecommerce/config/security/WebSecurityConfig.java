@@ -64,13 +64,13 @@ public class WebSecurityConfig {
                                 .requestMatchers(
                                 		"/api/customer/**").hasRole(BaseRole.KHACHHANG.toString())
 								.requestMatchers(
-										"/api/owner/**").hasRole(BaseRole.CHUCUAHANG.toString())
+										"/api/owner/**").hasAnyRole(BaseRole.CHUCUAHANG.toString(),BaseRole.QUANLY.toString())
 								.requestMatchers(
 										"/api/staff/**").hasRole(BaseRole.CONGTACVIEN.toString())
 								.requestMatchers(
 										"/api/all/**",
 										"/**")
-										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLY", "KHACHHANG", "CONGTACVIEN")
+										.hasAnyRole("ROOT", "CHUCUAHANG", "QUANLI", "KHACHHANG", "CONGTACVIEN")
                                 .anyRequest().authenticated());
 		return http.build();
 	}
