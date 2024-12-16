@@ -14,6 +14,7 @@ import lombok.Setter;
 public class OrderFilter {
     private String orderCode;
     private Orders.Status status;
+    private String sort;
     private OrderPayment.Method paymentMethod;
     private Boolean isPayment;
     private String startDate;

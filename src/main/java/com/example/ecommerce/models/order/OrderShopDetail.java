@@ -24,6 +24,7 @@ public class OrderShopDetail {
     private String deliveryMethod;
     private String paymentMethod;
     private Boolean isPayment;
+    private String createdAt;
     private OrderShippingDto shippingDto;
     private List<OrderItemDto> itemDtoList;
     private List<OrderHistoryDto> historyDtoList;

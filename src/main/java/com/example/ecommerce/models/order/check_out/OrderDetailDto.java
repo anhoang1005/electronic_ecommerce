@@ -26,6 +26,7 @@ public class OrderDetailDto {
     private String clientInfo;
     private String paymentMethod;
     private Boolean isPayment;
+    private String createdAt;
     private List<OrderPaymentDto> listOrderPayment;
     private List<OrderShopDto> listOrderShop;
 }

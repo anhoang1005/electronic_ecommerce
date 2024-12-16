@@ -27,4 +27,5 @@ public class OrderDto {
     private String clientInfo;
     private String paymentMethod;
     private Boolean isPayment;
+    private String createdAt;
 }

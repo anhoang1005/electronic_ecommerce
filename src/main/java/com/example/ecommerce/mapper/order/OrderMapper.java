@@ -30,6 +30,7 @@ public class OrderMapper {
                         " - " + order.getClientAddress())
                 .paymentMethod(order.getPaymentMethod())
                 .isPayment(order.getIsPayment())
+                .createdAt(timeUtils.localDateTimeToString(order.getCreatedAt()))
                 .build();
     }
 
@@ -49,6 +50,7 @@ public class OrderMapper {
                 .clientInfo(order.getClientName() + " - " + order.getClientTelephone() +
                         " - " + order.getClientAddress())
                 .paymentMethod(order.getPaymentMethod())
+                .createdAt(timeUtils.localDateTimeToString(order.getCreatedAt()))
                 .isPayment(order.getIsPayment())
                 .listOrderPayment(paymentList.stream().map(this::entityToPaymentDto).collect(Collectors.toList()))
                 .listOrderShop(ordersShopList.stream().map(this::entityToOrderShopDto).collect(Collectors.toList()))
@@ -76,10 +78,11 @@ public class OrderMapper {
                 .isPayment(order.getIsPayment())
                 .clientInfo(shipping.getClientName() + "-" + shipping.getClientTelephone() +
                         "-" + shipping.getClientAddress())
+                .createdAt(timeUtils.localDateTimeToString(order.getCreatedAt()))
                 .build();
     }
 
-    public OrderShopDetail entityToOrderDetailDto(OrdersShop order) {
+    public OrderShopDetail entityToOrderShopDetailDto(OrdersShop order) {
         OrderShipping shipping = order.getOrderShippingOfShopOrder();
         List<OrdersHistory> historyList = order.getListOrderHistoryOfOrderShop();
         List<OrdersItems> itemsList = order.getListOrdersItemsOfOrdersShop();
@@ -96,6 +99,7 @@ public class OrderMapper {
                 .deliveryMethod(order.getDeliveryMethod())
                 .paymentMethod(order.getPaymentMethod())
                 .isPayment(order.getIsPayment())
+                .createdAt(timeUtils.localDateTimeToString(order.getCreatedAt()))
                 .shippingDto(entityToShippingDto(shipping))
                 .itemDtoList(itemsList.stream().map(this::entityToItemDto).collect(Collectors.toList()))
                 .historyDtoList(historyList.stream().map(this::entityToHistoryDto).collect(Collectors.toList()))

@@ -17,7 +17,7 @@ public interface OrderRepository extends JpaRepository<Orders,Long> {
     Optional<Orders> findByOrderCode(String orderCode);
 
     @Query(value = "select o from Orders o " +
-            "where (:code is null or o.orderCode = :orderCode) " +
+            "where (:code is null or o.orderCode = :code) " +
             "and (:status is null or o.status = :status) " +
             "and (:payment is null or o.paymentMethod = :payment) " +
             "and (:isPayment is null or o.isPayment = :isPayment) " +
@@ -25,6 +25,7 @@ public interface OrderRepository extends JpaRepository<Orders,Long> {
     Page<Orders> adminGetDashboard(@Param("code") String orderCode,
                                    @Param("status") Orders.Status status,
                                    @Param("payment") String payment,
+                                   @Param("isPayment") Boolean isPayment,
                                    @Param("start")LocalDateTime start,
                                    @Param("end")LocalDateTime end,
                                    Pageable pageable);

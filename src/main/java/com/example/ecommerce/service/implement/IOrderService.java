@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public class IOrderService implements OrderService {
     private final OrderPaymentRepository paymentRepository;
 
     @Override
+    @Transactional
     public ResponseBody shopUpdateOrder(String orderCode, OrdersShop.Status status) {
         try{
             OrdersShop ordersShop = orderShopRepository.findByOrderShopCode(orderCode)
@@ -48,7 +50,10 @@ public class IOrderService implements OrderService {
 
                 OrdersHistory history = new OrdersHistory();
                 history.setOrdersShopPOfOrderHistory(ordersShop);
-                if(status== OrdersShop.Status.DANG_LAY_HANG){
+                if (status== OrdersShop.Status.CHO_XAC_NHAN){
+                    history.setEvent("Chờ xác nhận xác nhận");
+                    history.setDescription("Đơn hàng đang chờ được xác nhận xác nhận vào " + timeUtils.localDateTimeToString(LocalDateTime.now()));
+                } else if(status== OrdersShop.Status.DANG_LAY_HANG){
                     history.setEvent("Đã xác nhận");
                     history.setDescription("Đơn hàng đã được xác nhận vào " + timeUtils.localDateTimeToString(LocalDateTime.now()));
                 } else if(status== OrdersShop.Status.DANG_GIAO_HANG){
@@ -73,6 +78,7 @@ public class IOrderService implements OrderService {
     @Override
     public ResponseBody shopGetDashboard(OrderShopFilter filter) {
         try{
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
             LocalDateTime startDate = null, endDate = null;
             if(filter.getStartDate()!=null && filter.getEndDate()!=null){
                 startDate = timeUtils.htmlValueToLocalDateTime(filter.getStartDate());
@@ -81,6 +87,7 @@ public class IOrderService implements OrderService {
             Sort sort = Sort.by(Sort.Order.desc("id"));
             Pageable pageable = PageRequest.of(filter.getPageNumber()-1, filter.getPageSize(), sort);
             Page<OrdersShop> page = orderShopRepository.shopGetDashboard(
+                    shopCode,
                     filter.getOrderCode(),
                     filter.getOrderStatus(),
                     filter.getUserFullName(),
@@ -99,6 +106,23 @@ public class IOrderService implements OrderService {
             return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Shop get order error! Error: " + e.getMessage());
+            throw new RequestNotFoundException("Get order error!");
+        }
+    }
+
+    @Override
+    public ResponseBody shopGetOrderDetail(String orderCode) {
+        try{
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            OrdersShop ordersShop = orderShopRepository.findByOrderShopCode(orderCode)
+                    .orElseThrow(()-> new RequestNotFoundException("order not existed!"));
+            if(!ordersShop.getShopOfOrdersShop().getShopCode().equals(shopCode)){
+                throw new UnauthorizedException("ERROR");
+            }
+            return new ResponseBody(orderMapper.entityToOrderShopDetailDto(ordersShop),
+                    ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Shop get order detail error! Error: " + e.getMessage());
             throw new RequestNotFoundException("Get order error!");
         }
     }
@@ -130,6 +154,7 @@ public class IOrderService implements OrderService {
     }
 
     @Override
+    @Transactional
     public ResponseBody customerCancelOrder(String orderCode) {
         try{
             Long userId = authUtils.getUserFromAuthentication().getId();
@@ -145,13 +170,13 @@ public class IOrderService implements OrderService {
                     ordersShop = orderShopRepository.save(ordersShop);
 
                     OrderShipping shipping = ordersShop.getOrderShippingOfShopOrder();
-                    shipping.setStatus(OrderShipping.Status.CANCEL);
+                    shipping.setStatus(OrderShipping.Status.RETURNED);
                     shippingRepository.save(shipping);
 
                     OrdersHistory history = new OrdersHistory();
                     history.setOrdersShopPOfOrderHistory(ordersShop);
                     history.setEvent("Hủy đơn hàng");
-                    history.setEvent("Bạn đã hủy đơn hàng vào lúc " + timeUtils.localDateTimeToString(LocalDateTime.now()));
+                    history.setDescription("Bạn đã hủy đơn hàng vào lúc " + timeUtils.localDateTimeToString(LocalDateTime.now()));
                     historyRepository.save(history);
 
                     orders.setEcommerceServiceFee(orders.getEcommerceServiceFee().subtract(ordersShop.getServiceFee()));
@@ -172,6 +197,24 @@ public class IOrderService implements OrderService {
     }
 
     @Override
+    public ResponseBody customerGetOrderDetail(String orderCode) {
+        try{
+            Long userId = authUtils.getUserFromAuthentication().getId();
+            OrdersShop ordersShop = orderShopRepository.findByOrderShopCode(orderCode)
+                    .orElseThrow(()-> new RequestNotFoundException("order not existed!"));
+            if(!ordersShop.getOrdersOfOrdersShop().getUsersOfOrder().getId().equals(userId)){
+                throw new UnauthorizedException("ERROR");
+            }
+            return new ResponseBody(orderMapper.entityToOrderShopDetailDto(ordersShop),
+                    ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            e.printStackTrace();
+            log.error("Shop get order detail error! Error: " + e.getMessage());
+            throw new RequestNotFoundException("Get order error!");
+        }
+    }
+
+    @Override
     public ResponseBody adminGetDashBoard(OrderFilter filter) {
         try {
             LocalDateTime startDate = null, endDate = null;
@@ -179,12 +222,14 @@ public class IOrderService implements OrderService {
                 startDate = timeUtils.htmlValueToLocalDateTime(filter.getStartDate());
                 endDate = timeUtils.htmlValueToLocalDateTime(filter.getEndDate());
             }
+            String paymentMethod = filter.getPaymentMethod()!=null ? filter.getPaymentMethod().name() : null;
             Sort sort = Sort.by(Sort.Order.desc("id"));
             Pageable pageable = PageRequest.of(filter.getPageNumber() - 1, filter.getPageSize(), sort);
             Page<Orders> page = orderRepository.adminGetDashboard(
                     filter.getOrderCode(),
                     filter.getStatus(),
-                    filter.getPaymentMethod().name(),
+                    paymentMethod,
+                    filter.getIsPayment(),
                     startDate,
                     endDate,
                     pageable);
@@ -203,6 +248,7 @@ public class IOrderService implements OrderService {
     }
 
     @Override
+    @Transactional
     public ResponseBody adminUpdateOrder(String orderCode, Orders.Status status) {
         try{
             Orders orders = orderRepository.findByOrderCode(orderCode)
@@ -213,6 +259,19 @@ public class IOrderService implements OrderService {
         }catch (Exception e){
             log.error("Admin update order error! Error: " + e.getMessage());
             throw new RequestNotFoundException("Update order error!");
+        }
+    }
+
+    @Override
+    public ResponseBody adminGetOrderDetail(String orderCode) {
+        try{
+            Orders orders = orderRepository.findByOrderCode(orderCode)
+                    .orElseThrow(()-> new RequestNotFoundException("order not existed!"));
+            return new ResponseBody(orderMapper.entityToOrderDetailDto(orders),
+                    ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("Shop get order detail error! Error: " + e.getMessage());
+            throw new RequestNotFoundException("Get order error!");
         }
     }
 

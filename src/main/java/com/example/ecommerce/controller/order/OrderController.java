@@ -20,8 +20,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.adminGetDashBoard(filter));
     }
 
-    @PutMapping("/api/admin/order/update")
-    public ResponseEntity<?> adminUpdateOrder(@RequestParam("orderCode") String orderCode,
+    @GetMapping("/api/admin/order/detail/{order_code}")
+    public ResponseEntity<?> adminGetDashBoard(@PathVariable("order_code") String orderCode){
+        return ResponseEntity.ok(orderService.adminGetOrderDetail(orderCode));
+    }
+
+    @PutMapping("/api/admin/order/update/{order_code}")
+    public ResponseEntity<?> adminUpdateOrder(@PathVariable("order_code") String orderCode,
                                               @RequestParam("status")Orders.Status status){
         return ResponseEntity.ok(orderService.adminUpdateOrder(orderCode, status));
     }
@@ -31,8 +36,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.shopGetDashboard(filter));
     }
 
-    @PutMapping("/api/owner/order/update")
-    public ResponseEntity<?> shopUpdateOrder(@RequestParam("orderCode") String orderCode,
+    @GetMapping("/api/owner/order/detail/{order_code}")
+    public ResponseEntity<?> shopGetOrderDetail(@PathVariable("order_code") String orderCode){
+        return ResponseEntity.ok(orderService.shopGetOrderDetail(orderCode));
+    }
+
+    @PutMapping("/api/owner/order/update/{order_code}")
+    public ResponseEntity<?> shopUpdateOrder(@PathVariable("order_code") String orderCode,
                                              @RequestParam("status")OrdersShop.Status status){
         return ResponseEntity.ok(orderService.shopUpdateOrder(orderCode, status));
     }
@@ -42,8 +52,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.customerGetTheirOrder(filter));
     }
 
-    @PutMapping("/api/customer/order/cancel")
-    public ResponseEntity<?> customerCancelDashboard(@RequestParam("orderCode") String orderCode){
+    @GetMapping("/api/customer/order/detail/{order_code}")
+    public ResponseEntity<?> customerGetDashBoard(@PathVariable("order_code") String orderCode){
+        return ResponseEntity.ok(orderService.customerGetOrderDetail(orderCode));
+    }
+
+    @PutMapping("/api/customer/order/cancel/{order_code}")
+    public ResponseEntity<?> customerCancelDashboard(@PathVariable("order_code") String orderCode){
         return ResponseEntity.ok(orderService.customerCancelOrder(orderCode));
     }
 }
