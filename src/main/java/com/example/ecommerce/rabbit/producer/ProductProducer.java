@@ -1,6 +1,5 @@
-package com.example.ecommerce.rabbit;
+package com.example.ecommerce.rabbit.producer;
 
-import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.elastic.ProductDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpTemplate;

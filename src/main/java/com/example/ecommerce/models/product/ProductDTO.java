@@ -13,6 +13,7 @@ public class ProductDTO {
     private String title;
     private String description;
     private String currency;
+    private String productState;
     private boolean isHidden;
     private List<VariantDTO> variantDTOS = new ArrayList<>();
     private List<Long> shopCategoryIds = new ArrayList<>();

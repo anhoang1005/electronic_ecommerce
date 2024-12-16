@@ -26,7 +26,7 @@ public class PostCommentMapper {
             dto.setUserAvatar(shop.getShopLogo());
             dto.setUsername(shop.getShopName());
             dto.setShopCode(shop.getShopCode());
-        } else if(comment.getCommentRole()== BaseRole.QUANLI || comment.getCommentRole()== BaseRole.ROOT){
+        } else if(comment.getCommentRole()== BaseRole.QUANLY || comment.getCommentRole()== BaseRole.ROOT){
             dto.setUserCode(users.getUserCode());
             dto.setUserAvatar(users.getImageUrl());
             dto.setUsername("ELECTROHUB ADMIN");

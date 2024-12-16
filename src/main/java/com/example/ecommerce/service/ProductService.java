@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface ProductService {
 
-    ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles);
+    ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles, boolean isDev);
     ResponseBody findProductByCode(String code);
     ResponseBody findProductHiddenById(String code);
-    ResponseBody updateProduct(String code, ProductUpdateDTO dto);
+    ResponseBody updateProduct(String code, ProductUpdateDTO dto, List<MultipartFile> productFile);
     ResponseBody acceptProduct(String code);
     ResponseBody rejectProduct(String code);
     ResponseBody deleteProduct(String code);

@@ -29,7 +29,7 @@ public class PostMapper {
             Shop shop = post.getShopOfPost();
             dto.setPostAvatar(shop.getShopLogo());
             dto.setPostName(shop.getShopName());
-        } else if(post.getPostRole()== BaseRole.QUANLI){
+        } else if(post.getPostRole()== BaseRole.QUANLY){
             Users users = post.getUsersOfPost();
             dto.setPostAvatar(users.getImageUrl());
             dto.setPostName("Admin: " + users.getUsername());
@@ -77,7 +77,7 @@ public class PostMapper {
             Shop shop = post.getShopOfPost();
             dto.setSharedPostAvatar(shop.getShopLogo());
             dto.setSharedPostName(shop.getShopName());
-        } else if(post.getPostRole()== BaseRole.QUANLI){
+        } else if(post.getPostRole()== BaseRole.QUANLY){
             Users users = post.getUsersOfPost();
             dto.setSharedPostAvatar(users.getImageUrl());
             dto.setSharedPostName("Admin: " + users.getUsername());

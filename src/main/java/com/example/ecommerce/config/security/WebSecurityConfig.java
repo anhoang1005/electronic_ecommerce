@@ -60,11 +60,11 @@ public class WebSecurityConfig {
 								.requestMatchers(
 										"/api/root/**").hasRole(BaseRole.ROOT.toString())
                                 .requestMatchers(
-                                		"/api/admin/**").hasAnyRole(BaseRole.QUANLI.toString(),BaseRole.ROOT.toString())
+                                		"/api/admin/**").hasAnyRole(BaseRole.QUANLY.toString(),BaseRole.ROOT.toString())
                                 .requestMatchers(
                                 		"/api/customer/**").hasRole(BaseRole.KHACHHANG.toString())
 								.requestMatchers(
-										"/api/owner/**").hasAnyRole(BaseRole.CHUCUAHANG.toString(),BaseRole.QUANLI.toString())
+										"/api/owner/**").hasAnyRole(BaseRole.CHUCUAHANG.toString(),BaseRole.QUANLY.toString())
 								.requestMatchers(
 										"/api/staff/**").hasRole(BaseRole.CONGTACVIEN.toString())
 								.requestMatchers(

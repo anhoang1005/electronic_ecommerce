@@ -6,17 +6,11 @@ import com.example.ecommerce.entities.*;
 
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.mapper.post.PostMapper;
-import com.example.ecommerce.models.post.MediaUrl;
-import com.example.ecommerce.mapper.product.ProductMapper;
-import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.repository.PostRepository;
-import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.GlobalUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +36,6 @@ public class IFileService implements FileService {
     private final Cloudinary cloudinary;
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductDocumentService productDocumentService;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
@@ -127,6 +120,7 @@ public class IFileService implements FileService {
     public CompletableFuture<Void> processImagesAndSaveAsync(Product product, CompletableFuture<List<String>> imagesUrlFuture) {
         return imagesUrlFuture.thenAcceptAsync(imageUrls -> {
             if (imageUrls != null && !imageUrls.isEmpty()) {
+                List<Long> imgIds = new ArrayList<>();
                 for (int i = 0; i < imageUrls.size(); i++) {
                     ProductImage productImage = new ProductImage();
                     productImage.setImageUrl(imageUrls.get(i));
@@ -136,6 +130,7 @@ public class IFileService implements FileService {
                     productImageRepository.save(productImage);
                     product.getListImageOfProduct().add(productImage);
                 }
+
             } else {
                 ProductImage defaultImage = new ProductImage();
                 defaultImage.setImageUrl(GlobalUtils.DEFAULT_URL);

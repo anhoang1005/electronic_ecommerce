@@ -38,7 +38,7 @@ public class ICategoryService implements CategoryService {
         }
         log.info(roles.toString());
         Category category = new Category();
-        if(roles.contains(BaseRole.ROLE_QUANLI.toString()) || roles.contains(BaseRole.ROLE_ROOT.toString())){
+        if(roles.contains(BaseRole.ROLE_QUANLY.toString()) || roles.contains(BaseRole.ROLE_ROOT.toString())){
             category.setCategoryType(CategoryType.SYSTEM);
             category.setActive(true);
         }else{

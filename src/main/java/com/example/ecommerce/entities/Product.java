@@ -16,8 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Product")
-@Where(clause = "is_deleted = false")
+@Table(name = "product")
+@Where(clause = "is_deleted = false and is_hidden = false")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -114,6 +114,9 @@ public class Product extends BaseEntity{
     @JoinColumn(name = "shop_id")
     @JsonBackReference("product-shop")
     private Shop shop;
+
+    private String variantIds;
+    private String imageIds;
 
     @PrePersist
     public void onCreate() {

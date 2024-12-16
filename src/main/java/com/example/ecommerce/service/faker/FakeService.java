@@ -7,11 +7,9 @@ import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.mapper.category.CategoryMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.category.CategoryResponse;
-import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.rabbit.producer.ProductProducer;
 import com.example.ecommerce.repository.*;
-import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
 import com.example.ecommerce.service.AccountService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
@@ -63,15 +61,14 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
-    private final ProductDocumentService productDocumentService;
 
 
     //user - fake
     @Transactional
     public void generateAndInsertFakeUserData(){
         Set<String> uniqueEmails = new HashSet<>();
-        for(int i = 0 ; i < 500 ; i++){
-            Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
+        for(int i = 0 ; i < 5 ; i++){
+                Optional<Roles> roleOptional = rolesRepository.findByRoleName("QUANLY");
             List<Roles> roleEntityList = new ArrayList<>();
             roleOptional.ifPresent(roleEntityList::add);
 
@@ -272,6 +269,8 @@ public class FakeService {
             product.setProductSlug(StringFormatUtils.convertToSlug(title));
             product.setCurrency("VND");
             product.setIsHidden(false);
+            product.setIsRejected(false);
+            product.setIsAccepted(true);
             product.setProductState(ProductState.ACTIVE);
             product.setCategory(category);
             product.setBrand(brand);
