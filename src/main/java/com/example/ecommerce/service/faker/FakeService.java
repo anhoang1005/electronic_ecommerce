@@ -1,5 +1,6 @@
 package com.example.ecommerce.service.faker;
 
+import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
@@ -9,9 +10,9 @@ import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.rabbit.producer.ProductProducer;
 import com.example.ecommerce.repository.*;
-import com.example.ecommerce.repository.elastic.ProductDocumentRepository;
+
 import com.example.ecommerce.service.AccountService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
+
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
@@ -63,7 +64,7 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
-    private final ProductDocumentService productDocumentService;
+
 
 
     //user - fake
@@ -274,9 +275,9 @@ public class FakeService {
             product.setIsHidden(false);
             product.setProductState(ProductState.ACTIVE);
             product.setCategory(category);
-            product.setBrand(brand);
+            product.setBrandOfProduct(brand);
             product.setProductCode("PID" + randomUtils.generateRandomString(15));
-            product.setShop(shop);
+            product.setShopOfProduct(shop);
             product.setSold(random.nextInt(100,10000));
             product.setRating(Double.parseDouble(String.format("%.1f", faker.number().randomDouble(1, 1, 5))));
 
@@ -318,7 +319,7 @@ public class FakeService {
                         variant.setWeight(faker.number().randomDouble(1, 1, 10));
                         variant.setLength(faker.number().randomDouble(1, 1, 10));
                         variant.setWidth(faker.number().randomDouble(1, 1, 10));
-
+                        variant.setStockQuantity(100);
                         StringBuilder stringBuilder = new StringBuilder();
 
                         variant.setProductVariation(stringBuilder.toString());

@@ -33,23 +33,25 @@ public class ProductDocument {
     public static class BrandDocument{
         private Long brandId;
         private String brandName;
+
         public String getBrandName() {
             return brandName;
         }
-        public void setBrandName(String brandName) {
-            this.brandName = brandName;
-        }
+
         public Long getBrandId() {
             return brandId;
         }
+
+        public void setBrandName(String brandName) {
+            this.brandName = brandName;
+        }
+
         public void setBrandId(Long brandId) {
             this.brandId = brandId;
         }
     }
-
     public static class CategoryDocument{
         private Long categoryId;
-
         private String categoryName;
 
         public String getCategoryName() {
@@ -68,18 +70,11 @@ public class ProductDocument {
             this.categoryId = categoryId;
         }
     }
-
-
     private List<ProductDocument.AttributeDocument> attributes;
     public static class AttributeDocument{
-
         private Long attributeId;
-
         private String attributeName;
-
-
         private String attributeValue;
-
         public Long getAttributeId() {
             return attributeId;
         }
@@ -105,6 +100,4 @@ public class ProductDocument {
         }
     }
 
-
-    private Double score;
 }

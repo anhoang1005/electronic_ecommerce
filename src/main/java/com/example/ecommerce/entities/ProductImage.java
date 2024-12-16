@@ -32,6 +32,6 @@ public class ProductImage{
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_id", nullable = true)
-    private ProductVariant variant;
+    private Variant variant;
 
 }

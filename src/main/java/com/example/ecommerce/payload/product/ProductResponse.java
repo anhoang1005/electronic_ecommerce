@@ -48,13 +48,13 @@ public class ProductResponse {
     public static class BrandDocument{
         private Long brandId;
         private String brandName;
-        public String getBrandName() {
+        public String getBrandOfProductName() {
             return brandName;
         }
         public void setBrandName(String brandName) {
             this.brandName = brandName;
         }
-        public Long getBrandId() {
+        public Long getBrandOfProductId() {
             return brandId;
         }
         public void setBrandId(Long brandId) {

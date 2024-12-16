@@ -96,7 +96,7 @@ public class ICheckoutService implements CheckoutService {
 
             //Tinh toan tung item cua tung shop
             for (CheckoutItem item : req.getItems()) {
-                ProductVariant variant = variantRepository.findById(item.getVariantId())
+                Variant variant = variantRepository.findById(item.getVariantId())
                         .orElseThrow(() -> new RequestNotFoundException("ERROR"));
                 if (variant.getStockQuantity() - item.getQuantity() < 0) {
                     return new ResponseBody("", ResponseBody.Status.SUCCESS,
@@ -244,6 +244,7 @@ public class ICheckoutService implements CheckoutService {
 
             return new ResponseBody(checkoutDto, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Checkout error! " + e.getMessage());
             throw new RequestNotFoundException(e.getMessage());
         }

@@ -1,6 +1,7 @@
 package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.*;
+import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.entities.enums.ErrorMessage;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
@@ -13,9 +14,7 @@ import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
-import com.example.ecommerce.rabbit.messageTemplate.ProductTemplate;
 import com.example.ecommerce.rabbit.producer.ProductProducer;
-import com.example.ecommerce.rabbit.state.ProductElkState;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
@@ -24,6 +23,7 @@ import com.example.ecommerce.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -79,9 +79,9 @@ public class IProductService implements ProductService {
         product.setCurrency(dto.getCurrency());
         product.setIsHidden(dto.isHidden());
         product.setCategory(category);
-        product.setBrand(brand);
+        product.setBrandOfProduct(brand);
         product.setProductCode("PID" + RandomUtils.getRandomString(15));
-        product.setShop(shop);
+        product.setShopOfProduct(shop);
         List<BigDecimal> prices = new ArrayList<>();
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
         for(VariantDTO variantDTO : dto.getVariantDTOS()){
@@ -96,7 +96,7 @@ public class IProductService implements ProductService {
             variant.setWeight(variantDTO.getWeight());
             variant.setLength(variantDTO.getLength());
             variant.setWidth(variantDTO.getWidth());
-
+            variant.setStockQuantity(100);
             StringBuilder stringBuilder = new StringBuilder();
 
             for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
@@ -241,7 +241,7 @@ public class IProductService implements ProductService {
         product.setProductSlug(StringFormatUtils.convertToSlug(dto.getTitle()));
         product.setIsHidden(dto.isHidden());
         product.setCategory(category);
-        product.setBrand(brand);
+        product.setBrandOfProduct(brand);
         List<BigDecimal> prices = new ArrayList<>();
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
         for(VariantDTO variantDTO : dto.getVariantDTOS()){
@@ -256,7 +256,7 @@ public class IProductService implements ProductService {
             variant.setWeight(variantDTO.getWeight());
             variant.setLength(variantDTO.getLength());
             variant.setWidth(variantDTO.getWidth());
-
+            variant.setStockQuantity(100);
             StringBuilder stringBuilder = new StringBuilder();
 
             for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
@@ -370,12 +370,22 @@ public class IProductService implements ProductService {
     }
 
     @Override
+    public ResponseBody getProductHome(int pageNumber, int pageSize) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody getProductDetail(Long productId) {
+        return null;
+    }
+
+    @Override
     public ResponseBody acceptProduct(String code) {
         Product product = this.findProduct(code);
         product.setIsAccepted(true);
         product.setIsHidden(false);
         productRepository.save(product);
-        String shopCode = product.getShop().getShopCode();
+        String shopCode = product.getShopOfProduct().getShopCode();
         String message = "Sản phẩm của bạn (" + product.getProductCode() + ") đã được duyệt!";
 
         // noti
@@ -395,7 +405,7 @@ public class IProductService implements ProductService {
         product.setIsAccepted(false);
         product.setIsRejected(true);
         productRepository.save(product);
-        String shopCode = product.getShop().getShopCode();
+        String shopCode = product.getShopOfProduct().getShopCode();
         String message = "Sản phẩm của bạn (" + product.getProductCode() + ") không được duyệt!";
 
         // noti

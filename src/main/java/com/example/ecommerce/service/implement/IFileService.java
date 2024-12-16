@@ -11,12 +11,12 @@ import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.PostRepository;
-import com.example.ecommerce.rabbit.ProductProducer;
+
 import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
-import com.example.ecommerce.service.elastic.ProductDocumentService;
+
 import com.example.ecommerce.utils.GlobalUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +42,10 @@ public class IFileService implements FileService {
     private final Cloudinary cloudinary;
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductDocumentService productDocumentService;
+
     private final PostMapper postMapper;
     private final PostRepository postRepository;
-    private final ProductProducer productProducer;
+
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
     @Override

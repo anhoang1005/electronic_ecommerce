@@ -15,7 +15,7 @@ import java.util.List;
 public class BrandController {
     private final BrandService brandService;
     @GetMapping("/owner/brand")
-    public ResponseEntity<List<?>> getBrands(){
+    public ResponseEntity<List<?>> getBrandOfProducts(){
         return ResponseEntity.ok(brandService.getAllBrands());
     }
 }

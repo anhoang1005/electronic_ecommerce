@@ -15,26 +15,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
 
-    @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    default void findAndLockUpdateReview(Long productId, Integer oldStar, Integer newStar, String action){
-        Product product = findById(productId).orElseThrow(()-> new IllegalArgumentException("ERROR"));
-        switch (action) {
-            case "INSERT" -> {
-                product.setReviewCount(product.getReviewCount() + 1);
-                product.setStarCount(product.getStarCount() + newStar);
-            }
-            case "UPDATE" -> product.setStarCount(product.getStarCount() - oldStar + newStar);
-            case "DELETE" -> {
-                product.setReviewCount(product.getReviewCount() - 1);
-                product.setStarCount(product.getStarCount() - oldStar);
-            }
-        }
-        double rating = (product.getReviewCount() > 0) ?
-                (double) product.getStarCount() / product.getReviewCount() : 0.0;
-        product.setRating(rating);
-        save(product);
-    }
+//    @Transactional
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    default void findAndLockUpdateReview(Long productId, Integer oldStar, Integer newStar, String action){
+//        Product product = findById(productId).orElseThrow(()-> new IllegalArgumentException("ERROR"));
+//        switch (action) {
+//            case "INSERT" -> {
+//                product.setReviewCount(product.getReviewCount() + 1);
+//                product.setStarCount(product.getStarCount() + newStar);
+//            }
+//            case "UPDATE" -> product.setStarCount(product.getStarCount() - oldStar + newStar);
+//            case "DELETE" -> {
+//                product.setReviewCount(product.getReviewCount() - 1);
+//                product.setStarCount(product.getStarCount() - oldStar);
+//            }
+//        }
+//        double rating = (product.getReviewCount() > 0) ?
+//                (double) product.getStarCount() / product.getReviewCount() : 0.0;
+//        product.setRating(rating);
+//        save(product);
+//    }
 
     Product findProductById(Long id);
     @Query("select p from Product p  where p.isAccepted = true and p.isHidden = false and p.productCode = :code")

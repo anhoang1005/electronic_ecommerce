@@ -81,10 +81,12 @@ public class Product extends BaseEntity{
     @JsonManagedReference("product-image")
     private List<ProductImage> listImageOfProduct = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "brand_id")
-    private Brand brand;
-
+//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+//    @JoinColumn(name = "brand_id")
+//    private Brand brand;
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String imageList;
     @Column(name = "product_state")
     @Enumerated(EnumType.STRING)
     private ProductState productState;
