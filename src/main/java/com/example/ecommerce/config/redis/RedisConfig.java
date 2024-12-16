@@ -1,5 +1,6 @@
 package com.example.ecommerce.config.redis;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -11,12 +12,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.data.redis.host}")
+    private String redisHostName;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        // Chỉ định host và port cho Redis
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("10.0.0.51");
-        config.setPort(6379);
+        config.setHostName(redisHostName);
+        config.setPort(redisPort);
         return new LettuceConnectionFactory(config);
     }
 
