@@ -21,8 +21,8 @@ import java.util.List;
 public class ProductShopController {
     private final IProductService iProductService;
     private final ObjectMapper objectMapper;
+
     @PostMapping("/product")
-    @PreAuthorize("hasAuthority('CHUCUAHANG')")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
                                            @RequestParam("files") List<MultipartFile> files) {
         log.info("controller");

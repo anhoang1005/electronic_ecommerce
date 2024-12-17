@@ -1,6 +1,7 @@
 package com.example.ecommerce.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +20,8 @@ public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
+
+    @Column(nullable = true, unique = true)
     private String productCode;
 
     @Column(nullable = false)
@@ -68,6 +70,9 @@ public class Product extends BaseEntity{
     private Boolean isDeleted;
 
     @Column(nullable = false)
+    private Boolean isReject;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProductState productState;
 
@@ -75,6 +80,7 @@ public class Product extends BaseEntity{
     @JsonManagedReference("product-image")
     private List<ProductImage> listImageOfProduct;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductVariant> variants = new ArrayList<>();
 
@@ -113,6 +119,7 @@ public class Product extends BaseEntity{
             this.soldCount = 0;
         }
         this.isDeleted = false;
+        this.isReject = true;
     }
 
     public enum ProductState {
@@ -120,6 +127,11 @@ public class Product extends BaseEntity{
         UN_ACTIVE,
         OUT_OF_STOCK,
         PENDING
+    }
+
+    @PostPersist
+    public void update(){
+        this.productCode = "PD" + String.format("%08d", this.id);
     }
 
 }

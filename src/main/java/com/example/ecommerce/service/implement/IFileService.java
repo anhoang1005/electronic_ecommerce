@@ -9,6 +9,7 @@ import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
+import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.utils.GlobalUtils;
@@ -38,6 +39,7 @@ public class IFileService implements FileService {
     private final ProductImageRepository productImageRepository;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
+    private final ProductRepository productRepository;
 //    private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     //upload file len cloud
@@ -118,6 +120,7 @@ public class IFileService implements FileService {
     @Override
     public CompletableFuture<Void> processImagesAndSaveAsync(Product product, CompletableFuture<List<String>> imagesUrlFuture) {
         return imagesUrlFuture.thenAcceptAsync(imageUrls -> {
+            List<ProductImage> imageList = new ArrayList<>();
             if (imageUrls != null && !imageUrls.isEmpty()) {
                 for (int i = 0; i < imageUrls.size(); i++) {
                     ProductImage productImage = new ProductImage();
@@ -125,7 +128,7 @@ public class IFileService implements FileService {
                     productImage.setIsMainImage(i == 0);
                     productImage.setActive(true);
                     productImage.setProductOfProductImage(product);
-                    productImageRepository.save(productImage);
+                    imageList.add(productImage);
                 }
             } else {
                 ProductImage defaultImage = new ProductImage();
@@ -133,8 +136,12 @@ public class IFileService implements FileService {
                 defaultImage.setIsMainImage(true);
                 defaultImage.setActive(true);
                 defaultImage.setProductOfProductImage(product);
-                productImageRepository.save(defaultImage);
+                imageList.add(defaultImage);
+                product.setImageList(defaultImage.getImageUrl());
             }
+            product.setImageList(imageList.get(0).getImageUrl());
+            product.setListImageOfProduct(imageList);
+            productRepository.save(product);
         })
 //                .thenRunAsync(() -> {
 //            try {

@@ -20,6 +20,6 @@ public class ProductCard {
     private BigDecimal maxPrice;
     private Double rating;
     private Integer soldCount;
-    private Long brandId;
-    private Long categoryId;
+    private String brand;
+    private String category;
 }
