@@ -6,7 +6,9 @@ import com.example.ecommerce.entities.*;
 
 import com.example.ecommerce.exceptions.external.FileFailedUploadException;
 import com.example.ecommerce.mapper.post.PostMapper;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.repository.ProductImageRepository;
 import com.example.ecommerce.repository.ProductRepository;
@@ -40,8 +42,9 @@ public class IFileService implements FileService {
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final ProductRepository productRepository;
-//    private final ProductProducer productProducer;
+    private final ProductProducer productProducer;
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+
     //upload file len cloud
     @Override
     public ResponseBody uploadToCloudinary(MultipartFile file)  {
@@ -141,7 +144,9 @@ public class IFileService implements FileService {
             }
             product.setImageList(imageList.get(0).getImageUrl());
             product.setListImageOfProduct(imageList);
-            productRepository.save(product);
+            Product product1 = productRepository.save(product);
+            //productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product1));
+
         })
 //                .thenRunAsync(() -> {
 //            try {

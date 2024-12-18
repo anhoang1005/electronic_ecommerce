@@ -12,6 +12,7 @@ import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductService;
@@ -56,7 +57,7 @@ public class IProductService implements ProductService {
     private final ShopCategoryRepository shopCategoryRepository;
     private final ProductMapper productMapper;
     private final ShopRepository shopRepository;
-//  private final ProductProducer productProducer;
+    private final ProductProducer productProducer;
 
     @Override
     @Transactional
@@ -212,7 +213,8 @@ public class IProductService implements ProductService {
 
             ObjectMapper objectMapper = new ObjectMapper();
             product.setProductSpecifications(objectMapper.writeValueAsString(productAttributeValues));
-            productRepository.save(product);
+            product = productRepository.save(product);
+            productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
 
             for(Long id : dto.getShopCategoryIds()){
                 ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();

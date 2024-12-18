@@ -1,7 +1,7 @@
 package com.example.ecommerce.mapper.product;
 
 import com.example.ecommerce.entities.*;
-import com.example.ecommerce.entities.elastic.ProductDocument;
+import com.example.ecommerce.rabbit.elastic.ProductDocument;
 import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;

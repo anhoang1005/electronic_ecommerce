@@ -1,7 +1,7 @@
 package com.example.ecommerce.rabbit;
 
 
-import com.example.ecommerce.entities.elastic.ProductDocument;
+import com.example.ecommerce.rabbit.elastic.ProductDocument;
 import lombok.*;
 
 @Getter

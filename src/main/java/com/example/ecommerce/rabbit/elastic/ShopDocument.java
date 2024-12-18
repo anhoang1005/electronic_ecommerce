@@ -1,4 +1,4 @@
-package com.example.ecommerce.entities.elastic;
+package com.example.ecommerce.rabbit.elastic;
 
 import lombok.*;
 
