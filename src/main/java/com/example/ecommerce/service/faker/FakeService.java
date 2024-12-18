@@ -7,6 +7,7 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.mapper.category.CategoryMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
+import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.rabbit.producer.ProductProducer;
 import com.example.ecommerce.repository.*;
@@ -17,6 +18,7 @@ import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -64,7 +66,7 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
-
+    private final ObjectMapper objectMapper;
 
 
     //user - fake
@@ -234,7 +236,7 @@ public class FakeService {
                 int countProduct = 5;
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < countProduct; i++) {
-                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProductV2(shop), executorService)
                             .thenAcceptAsync(product -> {
                                 if (product != null) {
                                     productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
@@ -252,7 +254,154 @@ public class FakeService {
         }
     }
 
+    @Transactional
+    public Product createProductV2(Shop shop) {
+        try {
+            Category category = categoryRepository.findRandomCategory();
+            ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategory();
+            Brand brand = brandRepository.findRandomBrand();
 
+            List<CategoryBreadcrumb> breadcrumbs = new ArrayList<>();
+            breadcrumbs.add(CategoryBreadcrumb.builder()
+                    .id(category.getId())
+                    .category(category.getCategoryName())
+                    .build());
+            if (category.getCategoryLevel() > 0) {
+                while (category != null && category.getCategoryLevel() > 0) {
+                    Category parent = category.getParentCategory();
+                    if (parent != null) {
+                        breadcrumbs.add(CategoryBreadcrumb.builder()
+                                .id(parent.getId())
+                                .category(parent.getCategoryName())
+                                .build());
+                    }
+                    category = parent;
+                }
+                Collections.reverse(breadcrumbs);
+            }
+
+            Product product = new Product();
+            product.setBreadcrumb(objectMapper.writeValueAsString(breadcrumbs));
+            String title = faker.funnyName().name();
+            product.setTitle(title);
+            product.setDescription(faker.lorem().toString());
+            product.setProductSlug(StringFormatUtils.convertToSlug(title));
+            product.setCurrency("VND");
+            product.setIsHidden(false);
+            product.setProductState(ProductState.ACTIVE);
+            product.setCategory(category);
+            product.setBrandOfProduct(brand);
+            product.setProductCode("PID" + randomUtils.generateRandomString(15));
+            product.setShopOfProduct(shop);
+            product.setSold(random.nextInt(100, 10000));
+
+            //Product image
+            ProductImage image = new ProductImage();
+            image.setImageUrl("https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lzd2qfj9xc99f4.webp");
+            image.setActive(true);
+            image.setIsMainImage(true);
+            image.setProductOfProductImage(product);
+            List<String> images = List.of(image).stream().map(ProductImage::getImageUrl).collect(Collectors.toList());
+            product.setListImageOfProduct(List.of(image));
+            product.setImageList(objectMapper.writeValueAsString(images));
+
+
+            List<Attribute> attributes = randomAttributes(2);
+            if (attributes.isEmpty()) {
+                // Tao thuoc tính mac dinh neu danh sach rong
+                Attribute defaultAttribute = new Attribute();
+                defaultAttribute.setAttributeName("Default Attribute" + UUID.randomUUID());
+                attributes.add(defaultAttribute);
+            }
+
+            Map<Attribute, List<AttributeValue>> mapAttribute = new HashMap<>();
+            for (Attribute attribute : attributes) {
+                List<AttributeValue> attributeValues = randomAttributeValues(attribute, 2); // 2 giá trị thuộc tính
+                if (attributeValues.isEmpty()) {
+                    // tao gia tri thuoc tính mac dinh neu rong
+                    AttributeValue defaultValue = new AttributeValue();
+                    defaultValue.setValue("Default Value");
+                    attributeValues.add(defaultValue);
+                }
+                mapAttribute.put(attribute, attributeValues);
+            }
+
+            Set<String> pairedCombinations = new HashSet<>();
+            List<BigDecimal> prices = new ArrayList<>();
+
+            for (Attribute attribute : attributes) {
+                for (AttributeValue value : mapAttribute.get(attribute)) {
+                    String pair = attribute.getId() + "-" + value.getId();
+                    if (!pairedCombinations.contains(pair)) {
+                        pairedCombinations.add(pair);
+                        Variant variant = new Variant();
+
+                        long min = 50000;
+                        long max = 10000000;
+                        long randomValue = min + (long) (Math.random() * (max - min));
+                        randomValue = (randomValue / 1000) * 1000;
+                        BigDecimal price = BigDecimal.valueOf(randomValue);
+                        variant.setPrice(price);
+                        prices.add(price);
+
+                        variant.setStockQuantity(faker.number().randomDigitNotZero());
+                        variant.setSku(faker.code().toString());
+                        variant.setVariantSlug("default-variant");
+                        variant.setHeight(10.0);
+                        variant.setWeight(1.0);
+                        variant.setLength(10.0);
+                        variant.setWidth(10.0);
+//                        variant.se(ProductVariant.Status.CON_HANG);
+                        variant.setProduct(product);
+                        product.getVariants().add(variant);
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("defailt");
+                        addVariantAttributeValueAndProductAttributeValue(variant, attribute, value, product, stringBuilder);
+                    }
+                    // Neu khong tao bien the duoc, them bien the mac dinh
+                    if (product.getVariants().isEmpty()) {
+                        Variant defaultVariant = new Variant();
+                        defaultVariant.setPrice(BigDecimal.valueOf(100000));
+                        defaultVariant.setStockQuantity(10);
+                        defaultVariant.setSku("DEFAULT-SKU");
+                        defaultVariant.setVariantSlug("default-variant");
+                        defaultVariant.setHeight(10.0);
+                        defaultVariant.setWeight(1.0);
+                        defaultVariant.setLength(10.0);
+                        defaultVariant.setWidth(10.0);
+//                        defaultVariant.setStatus(ProductVariant.Status.CON_HANG);
+
+                        defaultVariant.setProduct(product);
+                        product.getVariants().add(defaultVariant);
+                        prices.add(defaultVariant.getPrice());
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("defailt");
+                        addVariantAttributeValueAndProductAttributeValue(defaultVariant, attribute, value, product, stringBuilder);
+                    }
+                }
+            }
+
+            List<BigDecimal> validPrices = prices.stream().filter(Objects::nonNull).collect(Collectors.toList());
+            product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
+            product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
+
+            product = productRepository.save(product);
+
+            //luu thong tin
+            CategoryProduct categoryProduct = new CategoryProduct();
+            categoryProduct.setCategory(category);
+            categoryProduct.setProduct(product);
+            categoryProductRepository.save(categoryProduct);
+
+            ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
+            shopCategoryProduct.setProduct(product);
+            shopCategoryProduct.setShopCategory(shopCategory);
+            shopCategoryProductRepository.save(shopCategoryProduct);
+            return product;
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating product", e);
+        }
+    }
 
     @Transactional
     public Product createProduct(Shop shop) {
