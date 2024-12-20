@@ -4,9 +4,9 @@ import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
-import com.example.ecommerce.mapper.category.CategoryMapper;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
-import com.example.ecommerce.payload.category.CategoryResponse;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.AccountService;
 import com.example.ecommerce.utils.JsonConvert;
@@ -47,12 +47,10 @@ public class FakeService {
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
     private final Random random;
-    private final CategoryMapper categoryMapper;
-    private final VariantRepository variantRepository;
     private final ProductRepository productRepository;
     private final CategoryProductRepository categoryProductRepository;
     private final ProductAttributeValueRepository productAttributeValueRepository;
-    //private final ProductProducer productProducer;
+    private final ProductProducer productProducer;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final ObjectMapper objectMapper;
 
@@ -214,8 +212,8 @@ public class FakeService {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
                             .thenAcceptAsync(product -> {
                                 if (product != null) {
-                                    //productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
                                     log.info("create product success");
+                                    productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
                                 }
                             }, rabbitMqExecutor);
 
@@ -373,7 +371,6 @@ public class FakeService {
             shopCategoryProduct.setProduct(product);
             shopCategoryProduct.setShopCategory(shopCategory);
             shopCategoryProductRepository.save(shopCategoryProduct);
-
             return product;
         } catch (Exception e) {
             throw new RuntimeException("Error while creating product", e);

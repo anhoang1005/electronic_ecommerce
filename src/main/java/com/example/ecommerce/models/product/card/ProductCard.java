@@ -23,4 +23,6 @@ public class ProductCard {
     private Long brandId;
     private Long categoryId;
     private String brandName;
+    private String brand;
+    private String category;
 }

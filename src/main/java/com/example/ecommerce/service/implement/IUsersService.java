@@ -102,13 +102,13 @@ public class IUsersService implements UsersService {
             List<Roles> rolesUsers = users.getListRolesOfUsers();
 
             //Kiem tra nguoi dung co quyen quan li hay khong
-            boolean hasQuanLiRole = rolesUsers.stream().anyMatch(role -> role.getRoleName().equals("QUANLI"));
+            boolean hasQuanLiRole = rolesUsers.stream().anyMatch(role -> role.getRoleName().equals("QUANLY"));
 
             if (isAdmin && !hasQuanLiRole) {
-                rolesRepository.findByRoleName("QUANLI")
+                rolesRepository.findByRoleName("QUANLY")
                         .ifPresent(rolesUsers::add);
             } else if (!isAdmin && hasQuanLiRole) {
-                rolesUsers.removeIf(role -> role.getRoleName().equals("QUANLI"));
+                rolesUsers.removeIf(role -> role.getRoleName().equals("QUANLY"));
             }
             users.setListRolesOfUsers(rolesUsers);
             usersRepository.save(users);

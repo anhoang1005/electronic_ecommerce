@@ -1,18 +1,88 @@
 package com.example.ecommerce.mapper.product;
 
 import com.example.ecommerce.entities.*;
+import com.example.ecommerce.rabbit.elastic.ProductDocument;
 import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
+import com.example.ecommerce.utils.GlobalUtils;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ProductMapper {
+
+    public static String handleGetImgProduct(Product product){
+        String url = null;
+        if(product.getListImageOfProduct()!=null){
+            url = product.getListImageOfProduct()
+                    .stream().filter(ProductImage::getIsMainImage)
+                    .map(ProductImage::getImageUrl).findFirst().orElse(GlobalUtils.DEFAULT_URL);
+        }
+        return url;
+    }
+    public static List<Long> handleGetListShopCategories(Product product){
+        List<ShopCategoryProduct> shopCategoryProducts = product.getShopCategoryProducts();
+        List<Long> shopCategoryIds = new ArrayList<>();
+        shopCategoryProducts.forEach(shopCategoryProduct -> {
+            shopCategoryIds.add(shopCategoryProduct.getShopCategory().getId());
+        });
+        return shopCategoryIds;
+    }
+
+    public static ProductDocument mapperProductToDocument(Product product) {
+        ProductDocument productDocument = new ProductDocument();
+        productDocument.setId(product.getId());
+        productDocument.setProductCode(product.getProductCode());
+        productDocument.setTitle(product.getTitle());
+        productDocument.setSlug(product.getProductSlug());
+        productDocument.setRating(0.0);
+        productDocument.setMaxPrice(product.getMaxInitialPrice());
+        productDocument.setMinPrice(product.getMinInitialPrice());
+        productDocument.setUpdatedAt(Timestamp.from(Instant.now()));
+        productDocument.setProductState(product.getProductState());
+
+        productDocument.setProductUrl(handleGetImgProduct(product));
+        productDocument.setShopCategoryIds(handleGetListShopCategories(product));
+
+        productDocument.setIsDeleted(product.getIsDeleted());
+        productDocument.setIsAccepted(product.getIsAccepted());
+        productDocument.setIsHidden(product.getIsHidden());
+        productDocument.setShopCode(product.getShopOfProduct().getShopCode());
+        productDocument.setShopId(product.getShopOfProduct().getId());
+
+        ProductDocument.CategoryDocument categoryDocument = new ProductDocument.CategoryDocument();
+        categoryDocument.setCategoryId(product.getCategory().getId());
+        categoryDocument.setCategoryName(product.getCategory().getCategoryName());
+        productDocument.setCategoryDocument(categoryDocument);
+
+        ProductDocument.BrandDocument brandDocument = new ProductDocument.BrandDocument();
+        brandDocument.setBrandId(product.getBrandOfProduct().getId());
+        brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
+        productDocument.setBrandDocument(brandDocument);
+
+        List<ProductDocument.AttributeDocument> attributeDocuments = new ArrayList<>();
+        List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
+        for(ProductAttributeValue productAttributeValue : productAttributeValues){
+            ProductDocument.AttributeDocument attributeDocument = new ProductDocument.AttributeDocument();
+            attributeDocument.setAttributeId(productAttributeValue.getId());
+            attributeDocument.setAttributeName(productAttributeValue.getAttribute().getAttributeName());
+            attributeDocument.setAttributeValue(productAttributeValue.getAttributeValue().getValue());
+            attributeDocuments.add(attributeDocument);
+        }
+
+        productDocument.setAttributes(attributeDocuments);
+        return productDocument;
+    }
 
     public ProductDetail entityToProductDetail(Product product){
         List<ProductImage> listImage = product.getListImageOfProduct();
@@ -47,13 +117,21 @@ public class ProductMapper {
     }
 
     public VariantDetail entityToVariantDetail(ProductVariant variant){
+            List<VariantAttributeValue> valueList = variant.getVariantAttributeValueList();
+            List<VariantDetail.VariantAtt> variantAttList = new ArrayList<>();
+            for(VariantAttributeValue value : valueList){
+                variantAttList.add(VariantDetail.VariantAtt.builder()
+                        .name(value.getAttribute().getAttributeName())
+                        .value(value.getAttributeValue().getValue())
+                        .build());
+            }
             return VariantDetail.builder()
                     .variantId(variant.getId())
-                    .variantName(variant.getProductVariation())
+                    .attribute(variantAttList)
+                    .status(variant.getStatus())
                     .soldCount(variant.getSoldQuantity())
                     .stockCount(variant.getStockQuantity())
                     .description(variant.getSku())
-                    .variantName(null)
                     .build();
     }
 
@@ -95,9 +173,18 @@ public class ProductMapper {
                 .maxPrice(product.getMaxInitialPrice())
                 .breadcrumbs(product.getBreadcrumb()!=null ? product.getBreadcrumb() : null)
                 .rating(4.6)
-                .soldCount(1000)
-                .brandId(product.getBrandOfProduct().getId())
-                .brandName(product.getBrandOfProduct().getBrandName())
+                .soldCount(product.getSoldCount()!=null ? product.getSoldCount() : null)
+                .brand(product.getBrandOfProduct().getBrandName())
+                .category(product.getCategory().getCategoryName())
                 .build();
+    }
+
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class VariantAtt{
+        private String name;
+        private String value;
     }
 }

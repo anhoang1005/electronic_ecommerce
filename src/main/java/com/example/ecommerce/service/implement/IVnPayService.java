@@ -31,7 +31,7 @@ public class IVnPayService implements VnPayService {
         vnp_Params.put("vnp_TmnCode", VnPayConfig.vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode", "VND");
-        // vnp_Params.put("vnp_BankCode", bankCode);
+        vnp_Params.put("vnp_BankCode", "NCB");
         vnp_Params.put("vnp_TxnRef", VnPayConfig.getRandomNumber(8));
         vnp_Params.put("vnp_OrderInfo", orderType);
         vnp_Params.put("vnp_OrderType", orderType);

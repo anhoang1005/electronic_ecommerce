@@ -32,8 +32,6 @@ public class AspectUserAccess {
         String token = jwtTokenUtils.getToken();
         Long userId = jwtTokenUtils.extractUserId(token);
 
-//        if(isAdmin(userId)) return;
-
         Object[] args = joinPoint.getArgs();
         for(Object arg : args){
             if(arg instanceof Long id){

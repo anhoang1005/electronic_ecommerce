@@ -2,9 +2,12 @@ package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.ProductVariant;
+import com.example.ecommerce.entities.VariantAttributeValue;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.cart.CartItemsDto;
+import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.rabbit.ProductProducer;
 import com.example.ecommerce.repository.VariantRepository;
 import com.example.ecommerce.service.CartService;
 import com.example.ecommerce.utils.AuthenticationUtils;
@@ -27,14 +30,16 @@ public class ICartService implements CartService {
     private final HashOperations<String, Long, Integer> hashOperations;
     private final AuthenticationUtils authUtils;
     private final VariantRepository variantRepository;
+    private final ProductProducer productProducer;
 
     public ICartService(RedisTemplate<String, Object> redisTemplate,
                         AuthenticationUtils authUtils,
-                        VariantRepository variantRepository) {
+                        VariantRepository variantRepository, ProductProducer productProducer) {
         this.redisTemplate = redisTemplate;
         this.hashOperations = redisTemplate.opsForHash();
         this.authUtils = authUtils;
         this.variantRepository = variantRepository;
+        this.productProducer = productProducer;
     }
 
     @Override
@@ -48,12 +53,19 @@ public class ICartService implements CartService {
                 ProductVariant variant = variantRepository.findById(variantId)
                         .orElseThrow(()-> new RequestNotFoundException("ERROR"));
                 Product product = variant.getProduct();
+                List<VariantDetail.VariantAtt> variantAttList = new ArrayList<>();
+                for(VariantAttributeValue value : variant.getVariantAttributeValueList()){
+                    variantAttList.add(VariantDetail.VariantAtt.builder()
+                            .name(value.getAttribute().getAttributeName())
+                            .value(value.getAttributeValue().getValue())
+                            .build());
+                }
                 CartItemsDto dto = CartItemsDto.builder()
                         .productId(product.getId())
                         .variantId(variantId)
+                        .variant(variantAttList)
                         .productImage(product.getImageList())
                         .title(product.getTitle())
-                        .variant(null)
                         .sellPrice(variant.getPrice())
                         .quantity(quantity)
                         .totalAmount(variant.getPrice().multiply(BigDecimal.valueOf(quantity)))
@@ -82,6 +94,7 @@ public class ICartService implements CartService {
             redisTemplate.expire(cartKey, Duration.ofDays(3));
             return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
+            e.printStackTrace();
             log.error("save item to cart failed! " + e.getMessage());
             throw new RequestNotFoundException("ERROR");
         }

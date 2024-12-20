@@ -23,12 +23,14 @@ import com.example.ecommerce.utils.DateTimeMapperUtils;
 import com.example.ecommerce.utils.MoneyUtils;
 import com.example.ecommerce.utils.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.dfp.DfpField;
 import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,7 +127,6 @@ public class ICheckoutService implements CheckoutService {
                         newCheckout.setTotalHeight(variant.getHeight());
                         newCheckout.setTotalWeight(variant.getWeight());
                         shopCheckout.put(shopCode, newCheckout);
-                        allProductTotal = allProductTotal.add(newCheckout.getProductTotal());
                     } else {
                         ShopCheckoutDto existed = shopCheckout.get(shopCode);
                         existed.setProductTotal(existed.getProductTotal()
@@ -136,13 +137,15 @@ public class ICheckoutService implements CheckoutService {
                         existed.setTotalLength(existed.getTotalLength() + variant.getLength());
                         existed.setTotalHeight(existed.getTotalHeight() + variant.getHeight());
                         existed.setTotalWeight(existed.getTotalWeight() + variant.getWeight());
-                        allProductTotal = allProductTotal.add(existed.getProductTotal());
                     }
+                    allProductTotal = allProductTotal.add(
+                            variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                    );
                 }
             }
 
             //Tinh toan voucher cua tung shop
-            BigDecimal discountVoucher = BigDecimal.ZERO;
+            BigDecimal allShopDiscount = BigDecimal.ZERO;
             if (req.getShopDiscounts() != null) {
                 for (CheckoutRequest.ShopDiscount discount : req.getShopDiscounts()) {
                     if (!shopCheckout.containsKey(discount.getShopCode())) {
@@ -155,7 +158,7 @@ public class ICheckoutService implements CheckoutService {
                         existed.setVoucher(voucherCheckout.getShopVoucherDto());
                         existed.setDiscount(BigDecimal.valueOf(voucherCheckout.getDiscount()));
                         existed.setTotalAmount(existed.getProductTotal().subtract(existed.getDiscount()));
-                        discountVoucher = discountVoucher.add(existed.getDiscount());
+                        allShopDiscount = allShopDiscount.add(existed.getDiscount());
                     }
                 }
             }
@@ -220,7 +223,7 @@ public class ICheckoutService implements CheckoutService {
 
             //TInh toan so tien cuoi cung
             BigDecimal totalPrice = allProductTotal //Tong tien hang(chua tinh voucher)
-                    .subtract(discountVoucher) //Voucher shop
+                    .subtract(allShopDiscount) //Voucher shop
                     .subtract(ecommerceDiscount).subtract(ecommerceShipping) //Voucher san
                     .add(totalFee); //Tien ship
 
@@ -230,11 +233,12 @@ public class ICheckoutService implements CheckoutService {
                     .itemsCount(req.getItems().size())
                     .productTotal(allProductTotal)
                     .totalFee(totalFee)
-                    .voucherDiscount(discountVoucher)
-                    .shippingDiscount(BigDecimal.ZERO)
+                    .shopDiscount(allShopDiscount)
+                    .ecommerceDiscount(ecommerceDiscount)
+                    .ecommerceShipping(ecommerceShipping)
                     .discountVoucher(sanDiscountVoucher)
                     .shippingVoucher(sanShippingVoucher)
-                    .totalPrice(totalPrice)
+                    .totalAmount(totalPrice)
                     .shopBill(shopCheckoutList)
                     .build();
 
@@ -266,10 +270,10 @@ public class ICheckoutService implements CheckoutService {
             orders.setPaymentMethod(req.getPaymentMethod().name());
             orders.setUsersOfOrder(users);
 
-            orders.setTotalDiscount(checkoutDto.getVoucherDiscount());
-            orders.setTotalShipping(checkoutDto.getShippingDiscount());
+            orders.setTotalDiscount(checkoutDto.getEcommerceDiscount());
+            orders.setTotalShipping(checkoutDto.getEcommerceShipping());
             orders.setTotalFee(checkoutDto.getTotalFee());
-            orders.setTotalAmount(checkoutDto.getTotalPrice());
+            orders.setTotalAmount(checkoutDto.getTotalAmount());
 
             if(req.getPaymentMethod()== OrderPayment.Method.VNPAY ||
                     req.getPaymentMethod()== OrderPayment.Method.MOMO) {
@@ -288,7 +292,6 @@ public class ICheckoutService implements CheckoutService {
             orderPayment.setStartDate(LocalDateTime.now());
             orderPayment.setAmount(orders.getTotalAmount());
             orderPayment.setTransactionCode(RandomUtils.generateOrderCode("TRC", 1L));
-            orderPayment.setTransactionCode(RandomUtils.generateOrderCode("TRC", 1L));
             orderPayment.setOrderOfOrderPayment(orders);
             orders.setListOrderPayment(List.of(orderPayment)); //Chu y
 
@@ -296,6 +299,7 @@ public class ICheckoutService implements CheckoutService {
 
             //Tao shop order
 //            List<OrdersShop> listOrderShop = new ArrayList<>();
+            BigDecimal allServiceFee = BigDecimal.ZERO;
             for(ShopCheckoutDto dto : shopBill) {
                 Shop shop = shopRepository.findShopByShopCode(dto.getShopCode());
                 OrdersShop ordersShop = new OrdersShop();
@@ -314,15 +318,15 @@ public class ICheckoutService implements CheckoutService {
 
                 ordersShop.setServiceFee(moneyUtils.calculatorServiceFee(dto.getProductTotal()));
 
+                BigDecimal allEcommerceDiscount = checkoutDto.getEcommerceShipping().add(checkoutDto.getEcommerceDiscount());
+                BigDecimal allEcommerceCost = checkoutDto.getTotalAmount().subtract(allEcommerceDiscount);
+                BigDecimal result = allEcommerceDiscount.multiply(dto.getTotalAmount().divide(allEcommerceCost, MathContext.DECIMAL128));
+                BigDecimal roundedResult = result.add(new BigDecimal("0.5")).setScale(0, BigDecimal.ROUND_DOWN);
+                ordersShop.setEcommerceTotalAmount(dto.getTotalAmount().subtract(roundedResult));
+
                 ordersShop.setShopTotalAmount(
                         dto.getProductTotal().subtract(dto.getDiscount()).subtract(ordersShop.getServiceFee()));
-
-                BigDecimal allShopCost = dto.getProductTotal().add(dto.getFee());
-                BigDecimal result = (checkoutDto.getProductTotal().add(checkoutDto.getTotalFee()))
-                        .multiply(allShopCost)
-                        .divide(new BigDecimal(100));
-                BigDecimal roundedResult = BigDecimal.valueOf(Precision.round(result.doubleValue(), 0));
-                ordersShop.setEcommerceTotalAmount(roundedResult);
+                allServiceFee = allServiceFee.add(ordersShop.getServiceFee());
 
                 //Tao ordershipping
                 OrderShipping shipping = new OrderShipping();
@@ -367,6 +371,7 @@ public class ICheckoutService implements CheckoutService {
                 ordersShop = orderShopRepository.save(ordersShop);
             }
 
+            orderShopRepository.updateEcommerceServiceFee(allServiceFee, orders.getId());
             log.info("Create order success!");
             if(req.getPaymentMethod()== OrderPayment.Method.VNPAY){
                 return new ResponseBody(
@@ -377,6 +382,7 @@ public class ICheckoutService implements CheckoutService {
                         ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Checkout error! " + e.getMessage());
             throw new RequestNotFoundException(e.getMessage());
         }

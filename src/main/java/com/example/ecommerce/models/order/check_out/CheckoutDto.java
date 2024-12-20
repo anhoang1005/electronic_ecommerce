@@ -19,9 +19,10 @@ public class CheckoutDto {
     private Integer itemsCount;
     private BigDecimal productTotal;
     private BigDecimal totalFee;
-    private BigDecimal totalPrice;
-    private BigDecimal voucherDiscount;
-    private BigDecimal shippingDiscount;
+    private BigDecimal shopDiscount;
+    private BigDecimal ecommerceDiscount;
+    private BigDecimal ecommerceShipping;
+    private BigDecimal totalAmount;
     private VoucherDto discountVoucher;
     private VoucherDto shippingVoucher;
     private List<ShopCheckoutDto> shopBill;
