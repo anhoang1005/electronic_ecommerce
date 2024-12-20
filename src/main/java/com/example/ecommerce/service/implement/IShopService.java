@@ -43,6 +43,14 @@ public class IShopService implements ShopService {
             throw new RequestNotFoundException("ERROR");
         }
     }
+    @Override
+    public ResponseBody getShopDetailByCode(String shopCode) {
+        Shop shop = shopRepository.findShopByShopCode(shopCode);
+        if (shop == null) {
+            throw new RequestNotFoundException("Shop not found with code: " + shopCode);
+        }
+        return new ResponseBody(shopMapper.entityToShopDetailDto(shop), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+    }
 
     @Override
     @Transactional
@@ -86,6 +94,7 @@ public class IShopService implements ShopService {
             throw new RequestNotFoundException("ERROR");
         }
     }
+
 
     @Override
     public ResponseBody shopOwnerRemoveTheirShop() {
