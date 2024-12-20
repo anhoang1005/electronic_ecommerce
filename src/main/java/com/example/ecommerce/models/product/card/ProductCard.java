@@ -22,4 +22,5 @@ public class ProductCard {
     private Integer soldCount;
     private Long brandId;
     private Long categoryId;
+    private String brandName;
 }

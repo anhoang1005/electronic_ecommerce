@@ -71,6 +71,7 @@ public class ProductMapper {
                 .minPrice(product.getMinInitialPrice())
                 .categoryId(product.getCategory().getId())
                 .brandId(product.getBrandOfProduct().getId())
+                .brandName(product.getBrandOfProduct().getBrandName())
 
                 .listImg(product.getListImageOfProduct().stream().map(
                         ProductImage::getImageUrl
@@ -96,6 +97,7 @@ public class ProductMapper {
                 .rating(4.6)
                 .soldCount(1000)
                 .brandId(product.getBrandOfProduct().getId())
+                .brandName(product.getBrandOfProduct().getBrandName())
                 .build();
     }
 }

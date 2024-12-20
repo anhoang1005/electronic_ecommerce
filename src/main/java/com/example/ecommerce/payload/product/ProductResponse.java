@@ -28,6 +28,7 @@ public class ProductResponse {
     private Long favoritesCount;
     private Long brandId;
     private Long categoryId;
+    private String brandName;
     private String productSpecifications;
     private String productSlug;
 }
