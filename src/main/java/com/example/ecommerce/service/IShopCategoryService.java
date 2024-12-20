@@ -4,7 +4,7 @@ import com.example.ecommerce.models.category.CategoryDto;
 import com.example.ecommerce.payload.ResponseBody;
 
 public interface IShopCategoryService {
-    ResponseBody createCategory(CategoryDto dto, Long shopId);
+    ResponseBody createCategory(CategoryDto dto);
     ResponseBody unActiveCategory(Long id);
     ResponseBody addProduct(Long id, Long shopId);
     ResponseBody removeProduct(Long id, Long shopId);

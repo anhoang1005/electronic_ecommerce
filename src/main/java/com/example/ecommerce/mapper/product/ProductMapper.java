@@ -12,6 +12,7 @@ import com.example.ecommerce.payload.product.VariantResponse;
 import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -49,18 +50,22 @@ public class ProductMapper {
         productDocument.setCategoryDocument(categoryDocument);
 
         ProductDocument.BrandDocument brandDocument = new ProductDocument.BrandDocument();
-        brandDocument.setBrandId(product.getBrandOfProduct().getId());
-        brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
-        productDocument.setBrandDocument(brandDocument);
+        if(!ObjectUtils.isEmpty(product.getBrandOfProduct())){
+            brandDocument.setBrandId(product.getBrandOfProduct().getId());
+            brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
+            productDocument.setBrandDocument(brandDocument);
+        }
 
         List<ProductDocument.AttributeDocument> attributeDocuments = new ArrayList<>();
-        List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
-        for(ProductAttributeValue productAttributeValue : productAttributeValues){
-            ProductDocument.AttributeDocument attributeDocument = new ProductDocument.AttributeDocument();
-            attributeDocument.setAttributeId(productAttributeValue.getId());
-            attributeDocument.setAttributeName(productAttributeValue.getAttribute().getAttributeName());
-            attributeDocument.setAttributeValue(productAttributeValue.getAttributeValue().getValue());
-            attributeDocuments.add(attributeDocument);
+        if(!ObjectUtils.isEmpty(product.getProductAttributeValues())){
+            List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
+            for(ProductAttributeValue productAttributeValue : productAttributeValues){
+                ProductDocument.AttributeDocument attributeDocument = new ProductDocument.AttributeDocument();
+                attributeDocument.setAttributeId(productAttributeValue.getId());
+                attributeDocument.setAttributeName(productAttributeValue.getAttribute().getAttributeName());
+                attributeDocument.setAttributeValue(productAttributeValue.getAttributeValue().getValue());
+                attributeDocuments.add(attributeDocument);
+            }
         }
 
         productDocument.setAttributes(attributeDocuments);
@@ -104,18 +109,22 @@ public class ProductMapper {
         categoryDocument.setCategoryName(product.getCategory().getCategoryName());
 
         ProductResponse.BrandDocument brandDocument = new ProductResponse.BrandDocument();
-        brandDocument.setBrandId(product.getBrandOfProduct().getId());
-        brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
+        if(!ObjectUtils.isEmpty(product.getBrandOfProduct())){
+            brandDocument.setBrandId(product.getBrandOfProduct().getId());
+            brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
+        }
 
         List<ProductResponse.AttributeDocument> attributeDocuments = new ArrayList<>();
-        List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
-        for(ProductAttributeValue productAttributeValue : productAttributeValues){
-            ProductResponse.AttributeDocument attributeDocument = new ProductResponse.AttributeDocument();
-            attributeDocument.setAttributeId(productAttributeValue.getId());
-            attributeDocument.setAttributeName(productAttributeValue.getAttribute().getAttributeName());
-            attributeDocument.setAttributeValue(productAttributeValue.getAttributeValue().getValue());
+        if(!ObjectUtils.isEmpty(product.getProductAttributeValues())){
+            List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
+            for(ProductAttributeValue productAttributeValue : productAttributeValues){
+                ProductResponse.AttributeDocument attributeDocument = new ProductResponse.AttributeDocument();
+                attributeDocument.setAttributeId(productAttributeValue.getId());
+                attributeDocument.setAttributeName(productAttributeValue.getAttribute().getAttributeName());
+                attributeDocument.setAttributeValue(productAttributeValue.getAttributeValue().getValue());
 
-            attributeDocuments.add(attributeDocument);
+                attributeDocuments.add(attributeDocument);
+            }
         }
 
         return ProductResponse
@@ -141,7 +150,7 @@ public class ProductMapper {
                 .shopCode(product.getShopOfProduct().getShopCode())
                 .shopCategoryIds(handleGetListShopCategories(product))
                 .categoryDocument(categoryDocument)
-                .brandDocument(brandDocument)
+                .brandDocument(brandDocument != null && brandDocument.getBrandOfProductId() == null && brandDocument.getBrandOfProductName() == null ? null : brandDocument)
                 .attributes(attributeDocuments)
                 .variantIds(StringFormatUtils.ConvertStringToList(product.getVariantIds()))
                 .productState(product.getProductState())
@@ -169,7 +178,7 @@ public class ProductMapper {
         });
         return shopCategoryIds;
     }
-        public static List<VariantResponse> mapperVariantToVariantResponses(Product product){
+    public static List<VariantResponse> mapperVariantToVariantResponses(Product product){
         List<VariantResponse> responses = new ArrayList<>();
         for(Variant variant : product.getVariants()){
             VariantResponse variantResponse = new VariantResponse();
@@ -179,8 +188,8 @@ public class ProductMapper {
             List<VariantAttributeValueResponse> variantAttributeValueResponses = new ArrayList<>();
             for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
                 VariantAttributeValueResponse variantAttributeValueResponse = new VariantAttributeValueResponse();
-                variantAttributeValueResponse.setAttributeId(variantAttributeValueResponse.getAttributeId());
-                variantAttributeValueResponse.setAttributeName(variantAttributeValueResponse.getAttributeName());
+                variantAttributeValueResponse.setAttributeId(variantAttributeValue.getAttribute().getId());
+                variantAttributeValueResponse.setAttributeName(variantAttributeValue.getAttribute().getAttributeName());
                 variantAttributeValueResponse.setAttributeValue(variantAttributeValue.getAttributeValue().getValue());
                 variantAttributeValueResponses.add(variantAttributeValueResponse);
             }

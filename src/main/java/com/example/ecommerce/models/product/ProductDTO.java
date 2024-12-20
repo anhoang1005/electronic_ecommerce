@@ -3,6 +3,7 @@ package com.example.ecommerce.models.product;
 import com.example.ecommerce.models.variant.VariantDTO;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,4 +24,8 @@ public class ProductDTO {
 
     private List<VariantDTO> variantDTOS = new ArrayList<>();
     private List<Long> shopCategoryIds = new ArrayList<>();
+
+    private Integer stockQuantity;
+    private BigDecimal price;
+    private ShippingDimensionsDTO shippingDimensionsDTO;
 }

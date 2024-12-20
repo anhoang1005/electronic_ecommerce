@@ -12,14 +12,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VariantDTO {
     private List<AttributeDTO> attributeDTOList = new ArrayList<>();
     private BigDecimal price;
     private Integer quantity;
     private String sku;
     private MultipartFile productImage;
-    private Double height;
-    private Double weight;
-    private Double length;
-    private Double width;
+    private Integer stockQuantity;
 }

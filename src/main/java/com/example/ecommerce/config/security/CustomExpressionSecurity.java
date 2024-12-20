@@ -2,7 +2,9 @@ package com.example.ecommerce.config.security;
 
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.Shop;
+import com.example.ecommerce.entities.ShopCategory;
 import com.example.ecommerce.repository.ProductRepository;
+import com.example.ecommerce.repository.ShopCategoryRepository;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.implement.IProductService;
 import com.example.ecommerce.utils.JwtTokenUtils;
@@ -18,11 +20,18 @@ public class CustomExpressionSecurity {
     private final JwtTokenUtils jwtTokenUtils;
     private final ProductRepository productRepository;
     private final ShopRepository shopRepository;
+    private final ShopCategoryRepository shopCategoryRepository;
     public boolean isShopAllowed(String productCode){
         String token = jwtTokenUtils.getToken();
         Long userId = jwtTokenUtils.extractUserId(token);
         log.info(productCode);
         Product product = productRepository.findProductByProductCode(productCode);
         return userId.equals(product.getShopOfProduct().getUsersInShop().getId());
+    }
+    public boolean isShopCategoryAllowed(Long id){
+        String token = jwtTokenUtils.getToken();
+        Long userId = jwtTokenUtils.extractUserId(token);
+        ShopCategory shopCategory = shopCategoryRepository.findShopCategoriesById(id);
+        return userId.equals(shopCategory.getShopOfCategory().getUsersInShop().getId());
     }
 }

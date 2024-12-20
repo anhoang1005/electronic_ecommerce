@@ -10,6 +10,7 @@ import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ProductUpdateDTO;
+import com.example.ecommerce.models.product.ShippingDimensionsDTO;
 import com.example.ecommerce.models.variant.VariantDTO;
 import com.example.ecommerce.payload.category.CategoryResponse;
 import com.example.ecommerce.payload.ResponseBody;
@@ -84,83 +85,60 @@ public class IProductService implements ProductService {
         product.setShopOfProduct(shop);
         List<BigDecimal> prices = new ArrayList<>();
         CompletableFuture<List<String>> imagesUrl = fileService.uploadAndSaveImagesProductAsync(productFile);
-        for(VariantDTO variantDTO : dto.getVariantDTOS()){
-            Variant variant = new Variant();
-            BigDecimal price = variantDTO.getPrice();
-            prices.add(price);
-            variant.setPrice(price);
-            variant.setQuantity(variantDTO.getQuantity());
-            variant.setSku(variantDTO.getSku());
-            variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
-            variant.setHeight(variantDTO.getHeight());
-            variant.setWeight(variantDTO.getWeight());
-            variant.setLength(variantDTO.getLength());
-            variant.setWidth(variantDTO.getWidth());
-            variant.setStockQuantity(100);
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
+        if(!ObjectUtils.isEmpty(dto.getVariantDTOS())){
+            for(VariantDTO variantDTO : dto.getVariantDTOS()){
+                Variant variant = hanldeInsertVariant(product,variantDTO,dto.getShippingDimensionsDTO());
+                prices.add(variant.getPrice());
                 //
-                Attribute attribute = attributeRepository.findAttributeByAttributeName(attributeDTO.getName());
-                if(ObjectUtils.isEmpty(attribute)){
-                    attribute = handleInsertAttribute(attributeDTO.getName());
-
+                for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
+                    variantAttributeValue.setVariant(variant);
+                    variantAttributeValueRepository.save(variantAttributeValue);
                 }
-                //
-                AttributeValue attributeValue = attributeValueRepository.findAttributeValueByValueAndAttributeId(attribute.getId(),attributeDTO.getValue());
-                if(ObjectUtils.isEmpty(attributeValue)){
-                    attributeValue = handleInsertAttributeValue(attributeDTO.getValue(),attribute);
-                    try {
-                        List<String> valueJson = jsonConvert.convertValueJsonToList(attribute.getValueJson());
-                        if (valueJson == null) {
-                            valueJson = new ArrayList<>();
-                        }
-                        valueJson.add(attributeValue.getValue());
-                        attribute.setValueJson(jsonConvert.convertListObjectToJson(valueJson));
-//                        attributeRepository.save(attribute);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                //
-                stringBuilder.append(attribute.getAttributeName().toLowerCase())
-                        .append("=")
-                        .append(attributeValue.getValue().toLowerCase())
-                        .append(";");
-                //
-
-                variant.getVariantAttributeValueList().add(handleInsertVariantAttributeValue(attributeValue,attribute));
-                product.getProductAttributeValues().add(handleInsertProductAttributeValue(attribute,attributeValue));
-            }
-            if(stringBuilder.length() > 0) {
-                stringBuilder.substring(0,stringBuilder.length()-1);
+                product.getVariants().add(variant);
             }
 
-            variant.setProductVariation(stringBuilder.toString());
-            variantRepository.save(variant);
-            CompletableFuture<String> imageUrl = fileService.uploadImageVariantAsync(variantDTO.getProductImage());
-            CompletableFuture<Void> processImg = fileService.processImageAndSaveAsync(variant,imageUrl);
             //
-            for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
-                variantAttributeValue.setVariant(variant);
-                variantAttributeValueRepository.save(variantAttributeValue);
+            for(ProductAttributeValue productAttributeValue : product.getProductAttributeValues()){
+                productAttributeValue.setProduct(product);
+                productAttributeValueRepository.save(productAttributeValue);
             }
-            product.getVariants().add(variant);
-        }
+            //
+            List<Long> variantIds = new ArrayList<>();
+            for(Variant variant : product.getVariants()){
+                variantIds.add(variant.getId());
+                variant.setProduct(product);
+                variantRepository.save(variant);
+            }
+            product.setVariantIds(variantIds.toString());
 
-        //
-        for(ProductAttributeValue productAttributeValue : product.getProductAttributeValues()){
-            productAttributeValue.setProduct(product);
-            productAttributeValueRepository.save(productAttributeValue);
-        }
-        //
-        List<Long> variantIds = new ArrayList<>();
-        for(Variant variant : product.getVariants()){
-            variantIds.add(variant.getId());
+            List<Variant> variants = product.getVariants();
+            try {
+                product.setVariations(jsonConvert.convertListObjectToJson(variants));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            product.setMaxInitialPrice(prices.stream().min(BigDecimal::compareTo).orElse(null));
+            product.setMinInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
+        }else{
+
+            Variant variant = new Variant();
+            BigDecimal price = dto.getPrice();
+            variant.setPrice(price);
+            variant.setQuantity(dto.getStockQuantity());
+            variant.setStockQuantity(dto.getStockQuantity());
+
+            if(!ObjectUtils.isEmpty(dto.getShippingDimensionsDTO())){
+                variant.setHeight(dto.getShippingDimensionsDTO().getHeight());
+                variant.setWeight(dto.getShippingDimensionsDTO().getWeight());
+                variant.setWidth(dto.getShippingDimensionsDTO().getWidth());
+                variant.setLength(dto.getShippingDimensionsDTO().getLength());
+            }
             variant.setProduct(product);
             variantRepository.save(variant);
+            product.setMaxInitialPrice(dto.getPrice());
+            product.setMinInitialPrice(dto.getPrice());
         }
-        product.setVariantIds(variantIds.toString());
 
         List<CategoryResponse> categoryResponses = new ArrayList<>();
         categoryResponses.add(categoryMapper.entityToCategoryResponse(category));
@@ -174,14 +152,6 @@ public class IProductService implements ProductService {
             }
             current = current.getParentCategory();
         }
-        List<Variant> variants = product.getVariants();
-        try {
-            product.setVariations(jsonConvert.convertListObjectToJson(variants));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        product.setMaxInitialPrice(prices.stream().min(BigDecimal::compareTo).orElse(null));
-        product.setMinInitialPrice(prices.stream().max(BigDecimal::compareTo).orElse(null));
 
         productRepository.save(product);
         for(Long id : dto.getShopCategoryIds()){
@@ -252,10 +222,6 @@ public class IProductService implements ProductService {
             variant.setQuantity(variantDTO.getQuantity());
             variant.setSku(variantDTO.getSku());
             variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
-            variant.setHeight(variantDTO.getHeight());
-            variant.setWeight(variantDTO.getWeight());
-            variant.setLength(variantDTO.getLength());
-            variant.setWidth(variantDTO.getWidth());
             variant.setStockQuantity(100);
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -445,11 +411,7 @@ public class IProductService implements ProductService {
     }
 
     public void handleProductProducer(Product product){
-        CompletableFuture.runAsync(
-                () -> {
-                    productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
-                }
-        );
+        productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
     }
 
     public void handleNotification(String shopCode, String message){
@@ -477,6 +439,7 @@ public class IProductService implements ProductService {
         productAttributeValueRepository.save(productAttributeValue);
         return productAttributeValue;
     }
+
     public Attribute handleInsertAttribute(String attributeName){
         Attribute attribute = new Attribute();
         attribute.setAttributeName(attributeName);
@@ -484,6 +447,7 @@ public class IProductService implements ProductService {
         attributeRepository.save(attribute);
         return attribute;
     }
+
     public AttributeValue handleInsertAttributeValue(String attributeValueString,Attribute attribute){
         AttributeValue attributeValue = new AttributeValue();
         attributeValue.setAttribute(attribute);
@@ -498,11 +462,15 @@ public class IProductService implements ProductService {
         return category;
     }
     public Brand handleCheckBrand(Long id){
-        Brand brand = brandRepository.findById(id).orElseThrow(
-                () -> new RequestNotFoundException("Brand not found")
-        );
-        return brand;
+        if(id != null){
+            Brand brand = brandRepository.findById(id).orElseThrow(
+                    () -> new RequestNotFoundException("Brand not found")
+            );
+            return brand;
+        }
+        return null;
     }
+
     public CategoryProduct handleInsertCategoryProduct(Category category , Product product){
         CategoryProduct categoryProduct = new CategoryProduct();
         categoryProduct.setCategory(category);
@@ -510,9 +478,10 @@ public class IProductService implements ProductService {
         categoryProductRepository.save(categoryProduct);
         return categoryProduct;
     }
+
     public ShopCategoryProduct handleInsertShopCategoryProduct(Long id , Product product){
         ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
-        ShopCategory shopCategory = shopCategoryRepository.findById(id).orElseThrow(
+        ShopCategory shopCategory = shopCategoryRepository.findShopCategoriesIfActive(product.getShopOfProduct().getId(),id).orElseThrow(
                 () -> new RequestNotFoundException(ErrorMessage.SHOP_CATEGORY_NOT_FOUND.toString())
         );
         shopCategoryProduct.setShopCategory(shopCategory);
@@ -520,4 +489,63 @@ public class IProductService implements ProductService {
         shopCategoryProductRepository.save(shopCategoryProduct);
         return shopCategoryProduct;
     }
+
+    public Variant hanldeInsertVariant(Product product, VariantDTO variantDTO, ShippingDimensionsDTO shippingDimensionsDTO){
+        Variant variant = new Variant();
+        BigDecimal price = variantDTO.getPrice();
+        variant.setPrice(price);
+        variant.setQuantity(variantDTO.getQuantity());
+        variant.setSku(variantDTO.getSku());
+        variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
+        variant.setStockQuantity(variantDTO.getStockQuantity());
+
+        if(!ObjectUtils.isEmpty(shippingDimensionsDTO)){
+            variant.setHeight(shippingDimensionsDTO.getHeight());
+            variant.setWeight(shippingDimensionsDTO.getWeight());
+            variant.setWidth(shippingDimensionsDTO.getWidth());
+            variant.setLength(shippingDimensionsDTO.getLength());
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()){
+            //
+            Attribute attribute = attributeRepository.findAttributeByAttributeName(attributeDTO.getName());
+            if(ObjectUtils.isEmpty(attribute)){
+                attribute = handleInsertAttribute(attributeDTO.getName());
+
+            }
+            //
+            AttributeValue attributeValue = attributeValueRepository.findAttributeValueByValueAndAttributeId(attribute.getId(),attributeDTO.getValue());
+            if(ObjectUtils.isEmpty(attributeValue)){
+                attributeValue = handleInsertAttributeValue(attributeDTO.getValue(),attribute);
+                try {
+                    List<String> valueJson = jsonConvert.convertValueJsonToList(attribute.getValueJson());
+                    if (valueJson == null) {
+                        valueJson = new ArrayList<>();
+                    }
+                    valueJson.add(attributeValue.getValue());
+                    attribute.setValueJson(jsonConvert.convertListObjectToJson(valueJson));
+//                        attributeRepository.save(attribute);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            //
+            stringBuilder.append(attribute.getAttributeName().toLowerCase())
+                    .append("=")
+                    .append(attributeValue.getValue().toLowerCase())
+                    .append(";");
+            //
+
+            variant.getVariantAttributeValueList().add(handleInsertVariantAttributeValue(attributeValue,attribute));
+            product.getProductAttributeValues().add(handleInsertProductAttributeValue(attribute,attributeValue));
+        }
+        if(stringBuilder.length() > 0) {
+            stringBuilder.substring(0,stringBuilder.length()-1);
+        }
+
+        variant.setProductVariation(stringBuilder.toString());
+        return variantRepository.save(variant);
+    }
+
 }

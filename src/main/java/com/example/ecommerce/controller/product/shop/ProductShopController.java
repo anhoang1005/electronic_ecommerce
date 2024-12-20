@@ -53,6 +53,7 @@ public class ProductShopController {
     public ResponseEntity<?> deleteProduct(@PathVariable String code){
         return ResponseEntity.ok(iProductService.deleteProduct(code));
     }
+
     @PutMapping("/product/{code}")
     @PreAuthorize("@customExpressionSecurity.isShopAllowed(#code)")
     public ResponseEntity<?> updateProduct(@PathVariable String code,

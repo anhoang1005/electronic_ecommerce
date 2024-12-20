@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
@@ -17,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "product")
-@Where(clause = "is_deleted = false and is_hidden = false")
+@Where(clause = "is_deleted = false")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,7 +79,7 @@ public class Product extends BaseEntity{
     @Column(nullable = false, name = "is_rejected")
     private Boolean isRejected  ;
 
-    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productOfProductImage",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonManagedReference("product-image")
     private List<ProductImage> listImageOfProduct = new ArrayList<>();
 
@@ -117,11 +119,17 @@ public class Product extends BaseEntity{
     private Shop shopOfProduct;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "brand_id")
     private Brand brandOfProduct;
 
     private String variantIds;
     private String imageIds;
+
+    //các trường sẽ thêm vào nếu product không có variant
+    private BigDecimal price;
+    private Integer stockQuantity;
+
 
     @PrePersist
     public void onCreate() {

@@ -5,6 +5,7 @@ import com.example.ecommerce.entities.AttributeValue;
 import com.example.ecommerce.entities.ProductAttributeValue;
 import com.example.ecommerce.entities.elastic.ProductDocument;
 import com.example.ecommerce.entities.enums.ProductState;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ProductResponse {
     private Long productId;
     private String productTitle;
@@ -45,6 +47,7 @@ public class ProductResponse {
     private Boolean isHidden;
     private ProductResponse.BrandDocument brandDocument;
     private ProductResponse.CategoryDocument categoryDocument;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class BrandDocument{
         private Long brandId;
         private String brandName;
@@ -61,7 +64,7 @@ public class ProductResponse {
             this.brandId = brandId;
         }
     }
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class CategoryDocument{
         private Long categoryId;
         private String categoryName;
@@ -79,6 +82,7 @@ public class ProductResponse {
             this.categoryId = categoryId;
         }
     }
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ProductResponse.AttributeDocument> attributes;
     public static class AttributeDocument{
         private Long attributeId;

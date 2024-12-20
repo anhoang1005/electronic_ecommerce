@@ -10,11 +10,9 @@ import com.example.ecommerce.models.post.MediaUrl;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.mapper.post.PostMapper;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.repository.PostRepository;
+import com.example.ecommerce.repository.*;
 
 import com.example.ecommerce.repository.PostRepository;
-import com.example.ecommerce.repository.ProductImageRepository;
-import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.service.FileService;
 
 import com.example.ecommerce.utils.GlobalUtils;
@@ -42,7 +40,7 @@ public class IFileService implements FileService {
     private final Cloudinary cloudinary;
     private final ShopRepository shopRepository;
     private final ProductImageRepository productImageRepository;
-
+    private final ProductRepository productRepository;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
 
@@ -126,14 +124,19 @@ public class IFileService implements FileService {
     public CompletableFuture<Void> processImagesAndSaveAsync(Product product, CompletableFuture<List<String>> imagesUrlFuture) {
         return imagesUrlFuture.thenAcceptAsync(imageUrls -> {
             if (imageUrls != null && !imageUrls.isEmpty()) {
+                List<Long> imageIds = new ArrayList<>();
                 for (int i = 0; i < imageUrls.size(); i++) {
                     ProductImage productImage = new ProductImage();
                     productImage.setImageUrl(imageUrls.get(i));
                     productImage.setIsMainImage(i == 0);
                     productImage.setActive(true);
                     productImage.setProductOfProductImage(product);
-                    productImageRepository.save(productImage);
+                    ProductImage savedProductImg = productImageRepository.save(productImage);
+
+                    imageIds.add(savedProductImg.getId());
                 }
+                product.setImageIds(imageIds.toString());
+                productRepository.save(product);
             } else {
                 ProductImage defaultImage = new ProductImage();
                 defaultImage.setImageUrl(GlobalUtils.DEFAULT_URL);

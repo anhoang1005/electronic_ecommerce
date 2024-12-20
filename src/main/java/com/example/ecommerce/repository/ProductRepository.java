@@ -1,6 +1,7 @@
 package com.example.ecommerce.repository;
 
 import com.example.ecommerce.entities.Product;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
@@ -41,8 +44,16 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     Product findProductByIdIfAcceptedAndNotHidden(@RequestParam String code);
     Product findProductByProductCode(String productCode);
 
-    @Query("select p from Product p  where p.isAccepted = true and p.isHidden = false and p.id = :id")
-    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam Long id);
+//    @Query("select p from Product p  where p.isAccepted = true and p.isHidden = false and p.id = :id")
+//    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam Long id);
 
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN FETCH p.productAttributeValues " +
+            "LEFT JOIN FETCH p.variants " +
+            "LEFT JOIN FETCH p.category " +
+            "LEFT JOIN FETCH p.brandOfProduct " +
+            "LEFT JOIN FETCH p.shopOfProduct " +
+            "WHERE p.id = :productId")
+    Optional<Product> findByIdWithAllDetails(@Param("productId") Long productId);
     Page<Product> findAll(Pageable pageable);
 }

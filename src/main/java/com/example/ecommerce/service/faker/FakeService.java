@@ -100,6 +100,34 @@ public class FakeService {
             users.setEmail(email);
             usersRepository.save(users);
         }
+
+        for(int i = 0 ; i < 5 ; i++){
+            Optional<Roles> roleOptional = rolesRepository.findByRoleName(BaseRole.QUANLY.name());
+            List<Roles> roleEntityList = new ArrayList<>();
+            roleOptional.ifPresent(roleEntityList::add);
+
+            Users users = new Users();
+            users.setFirstName(faker.name().firstName());
+            users.setLastName(faker.name().lastName());
+            users.setDob(generateFakeLocalDate());
+            users.setGender(randomGender());
+            users.setPhoneNumber(faker.phoneNumber().subscriberNumber(10));
+            users.setPasswordHash(passwordEncoder.encode("1234"));
+            users.setActive(true);
+            users.setImageUrl(Constant.USER_IMAGE);
+            users.setVerifyCode(null);
+            users.setListRolesOfUsers(roleEntityList);
+            users.setEnable(true);
+            users.setUsername(faker.name().username());
+            String email;
+            do {
+                email = "admin" + i + "@gmail.com";
+            } while (uniqueEmails.contains(email));
+
+            uniqueEmails.add(email);
+            users.setEmail(email);
+            usersRepository.save(users);
+        }
     }
 
     public LocalDate generateFakeLocalDate(){
