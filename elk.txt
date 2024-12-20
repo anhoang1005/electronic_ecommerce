@@ -4,7 +4,7 @@ GET product-document/_search
 {
   "query": {
     "term": {
-      "id": "1025"
+      "id": "546"
     }
   }
 }
@@ -35,7 +35,8 @@ PUT /product-document
   "mappings": {
     "properties": {
       "id": {
-        "type": "long"
+        "type": "long",
+        "index": true
       },
       "title": {
         "type": "text",
@@ -195,3 +196,7 @@ GET /product-document/_search
     }
   }
 }
+
+
+
+

@@ -25,13 +25,6 @@ public class ProductConsumer {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ProductDocument productDocument = objectMapper.readValue(message, ProductDocument.class);
-//            if(productTemplate.getProductState().equals(ProductElkState.CREATED)){
-//
-//            }else if(productTemplate.getProductState().equals(ProductElkState.UPDATE)){
-//                log.info("Product consumed and saved: " + productTemplate.getProductDocument().getTitle());
-//            }else{
-//
-//            }
 
             productDocumentRepository.save(productDocument);
             log.info("Product consumed and saved: " + productDocument.getTitle());
