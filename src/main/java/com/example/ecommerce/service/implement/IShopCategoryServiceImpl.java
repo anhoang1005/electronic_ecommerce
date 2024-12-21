@@ -20,6 +20,7 @@ import com.example.ecommerce.utils.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -41,6 +42,7 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final UsersRepository usersRepository;
     private final ProductProducer productProducer;
+
     @Override
     public ResponseBody createCategory(CategoryDto dto) {
         Shop currentShop = handleGetCurrentShop();
@@ -132,8 +134,17 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
 
         //elk
         ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
-        handleProductProducer(productDocument);
+        List<Long> shopCategoryIds = productDocument.getShopCategoryIds();
 
+        if (shopCategoryIds == null) {
+            shopCategoryIds = new ArrayList<>();
+        }
+
+        shopCategoryIds.add(shopCategoryProduct.getShopCategory().getId());
+
+        productDocument.setShopCategoryIds(shopCategoryIds);
+
+        handleSendToElk(productDocument);
         return new ResponseBody(
                 updateObjectsResponse,
                 ResponseBody.Status.SUCCESS,
@@ -160,7 +171,18 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         updateObjectsResponse.setAfterUpdatedAmount(shopCategory.getShopCategoryProducts().size());
 
         //elk
-//        handleProductProducer(productId);
+        ProductDocument productDocument = ProductMapper.mapperProductToDocument(product);
+        List<Long> shopCategoryIds = productDocument.getShopCategoryIds();
+
+        if(shopCategoryIds != null && shopCategoryIds.contains(shopCategoryProduct.getShopCategory().getId())){
+            shopCategoryIds.remove(shopCategoryProduct.getShopCategory().getId());
+        }else{
+            throw new BaseException(ErrorType.DATA_CONFILCT.name());
+        }
+
+        productDocument.setShopCategoryIds(shopCategoryIds);
+
+        handleSendToElk(productDocument);
 
         return new ResponseBody(
                 updateObjectsResponse,
@@ -217,20 +239,18 @@ public class IShopCategoryServiceImpl implements IShopCategoryService {
         }
         return product;
     }
-
     public boolean handleCheckProductExistsInShopCategory(Long id, Long productId){
         return shopCategoryProductRepository.existsByProductIdAndShopCategoryId(productId,id);
     }
-
-    public void handleProductProducer(ProductDocument productDocument){
+    public void handleSendToElk(ProductDocument productDocument){
         CompletableFuture.runAsync(() -> {
-            try {
-                productProducer.sendProductToQueue((productDocument));
-            } catch (Exception e) {
-                log.error("Error updating Elasticsearch for product {}: {}", productDocument.getId(), e.getMessage());
-
+            try{
+                productProducer.sendProductToQueue(productDocument);
+                log.info("data send to rabbit {} ", productDocument.getShopCategoryIds());
+            }catch (Exception e){
+                e.printStackTrace();
+                log.info("error sending to elasticsearch for product {} :{}",productDocument.getId());
             }
         });
     }
-
 }

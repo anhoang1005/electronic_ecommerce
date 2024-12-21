@@ -47,13 +47,30 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 //    @Query("select p from Product p  where p.isAccepted = true and p.isHidden = false and p.id = :id")
 //    Product findProductByIdIfAcceptedAndNotHidden(@RequestParam Long id);
 
-    @Query("SELECT DISTINCT p FROM Product p " +
-            "LEFT JOIN FETCH p.productAttributeValues " +
-            "LEFT JOIN FETCH p.variants " +
-            "LEFT JOIN FETCH p.category " +
-            "LEFT JOIN FETCH p.brandOfProduct " +
-            "LEFT JOIN FETCH p.shopOfProduct " +
-            "WHERE p.id = :productId")
-    Optional<Product> findByIdWithAllDetails(@Param("productId") Long productId);
+    @Query("""
+        SELECT DISTINCT p FROM Product p 
+        LEFT JOIN FETCH p.shopOfProduct s
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH p.brandOfProduct b
+        WHERE p.id = :id
+    """)
+    Product findProductWithBasicRelationships(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.listImageOfProduct WHERE p.id = :id")
+    Product findProductWithImages(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.categoryProducts WHERE p.id = :id")
+    Product findProductWithCategories(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.shopCategoryProducts WHERE p.id = :id")
+    Product findProductWithShopCategories(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.variants WHERE p.id = :id")
+    Product findProductWithVariants(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productAttributeValues WHERE p.id = :id")
+    Product findProductWithAttributes(@Param("id") Long id);
     Page<Product> findAll(Pageable pageable);
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.shopCategoryProducts WHERE p.id = :id")
+    Product findProductWithCategoriesById(@Param("id") Long id);
 }
