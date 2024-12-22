@@ -132,6 +132,7 @@ public class ProductMapper {
                     .soldCount(variant.getSoldQuantity())
                     .stockCount(variant.getStockQuantity())
                     .description(variant.getSku())
+                    .sellPrice(variant.getPrice())
                     .build();
     }
 

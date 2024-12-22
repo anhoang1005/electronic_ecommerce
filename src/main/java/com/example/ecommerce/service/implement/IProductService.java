@@ -98,9 +98,10 @@ public class IProductService implements ProductService {
                 variant.setSku(variantDTO.getSku());
                 variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
                 variant.setHeight(variantDTO.getHeight());
-                variant.setWeight(variant.getWeight());
-                variant.setLength(variant.getLength());
-                variant.setWidth(variant.getWidth());
+                variant.setWeight(variantDTO.getWeight());
+                variant.setLength(variantDTO.getLength());
+                variant.setWidth(variantDTO.getWidth());
+                variant.setStockQuantity(variantDTO.getStockQuantity());
 
                 StringBuilder stringBuilder = new StringBuilder();
 

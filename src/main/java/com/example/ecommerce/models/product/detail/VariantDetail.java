@@ -4,6 +4,7 @@ import com.example.ecommerce.entities.ProductVariant;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class VariantDetail {
     private Integer soldCount;
     private Integer stockCount;
     private String description;
+    private BigDecimal sellPrice;
 
     @Getter
     @Setter
