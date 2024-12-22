@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Locale;
 import java.util.Random;
 
 @Configuration
@@ -21,7 +22,7 @@ public class AppConfig {
 
     @Bean
     public Faker faker(){
-        return new Faker();
+        return new Faker(new Locale("vi","VN"));
     }
 
     @Bean

@@ -6,6 +6,7 @@ import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.entities.enums.ProductState;
 import com.example.ecommerce.mapper.category.CategoryMapper;
+import com.example.ecommerce.mapper.order.OrderMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.payload.category.CategoryResponse;
@@ -14,6 +15,7 @@ import com.example.ecommerce.repository.*;
 
 import com.example.ecommerce.service.AccountService;
 
+import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
@@ -67,13 +69,20 @@ public class FakeService {
     private final EntityManagerFactory entityManagerFactory;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final ObjectMapper objectMapper;
-
+    private final OrderRepository orderRepository;
+    private final OrderShippingRepository orderShippingRepository;
+    private final OrderShopRepository orderShopRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
+    private final OrderPaymentRepository orderPaymentRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderMapper orderMapper;
 
     //user - fake
     @Transactional
     public void generateAndInsertFakeUserData(){
         Set<String> uniqueEmails = new HashSet<>();
-        for(int i = 0 ; i < 100 ; i++){
+        Set<String> uniqueUsernames = new HashSet<>();
+        for(int i = 0 ; i < 1000 ; i++){
             Optional<Roles> roleOptional = rolesRepository.findByRoleName("KHACHHANG");
             List<Roles> roleEntityList = new ArrayList<>();
             roleOptional.ifPresent(roleEntityList::add);
@@ -90,14 +99,20 @@ public class FakeService {
             users.setVerifyCode(null);
             users.setListRolesOfUsers(roleEntityList);
             users.setEnable(true);
-            users.setUsername(faker.name().username());
+
             String email;
             do {
                 email = faker.internet().emailAddress();
             } while (uniqueEmails.contains(email));
 
+            String username;
+            do {
+                username = faker.name().username();
+            }while (uniqueUsernames.contains(username));
             uniqueEmails.add(email);
             users.setEmail(email);
+            users.setUsername(username);
+            uniqueUsernames.add(username);
             usersRepository.save(users);
         }
 
@@ -577,12 +592,155 @@ public class FakeService {
         }
     }
 
+    @Transactional
+    public void generateAndInsertOrders() {
+        for(int i = 0; i < 50; i++) {
+            // get 1 buyer random
+            Users buyer = usersRepository.findUsersById(random.nextLong(500) + 2);
+            for(int orderStt = 1; orderStt <= random.nextInt(10) + 1; orderStt++) {
+                // Create and populate Orders first
+                Orders orders = new Orders();
+                orders.setClientAddress(faker.address().streetAddress() + ", " + faker.address().city() + ", " + faker.address().country());
+                orders.setClientName(faker.name().firstName() + " " + faker.name().lastName());
+                orders.setClientTelephone(faker.phoneNumber().cellPhone());
+                orders.setUsersOfOrder(buyer);
+                String deliveryMethod = OrderShipping.Method.GHN.name();
+                orders.setDeliveryMethod(deliveryMethod);
+
+                boolean isPayment = random.nextBoolean();
+                orders.setIsPayment(isPayment);
+
+                String paymentMethod = OrderPayment.Method.values()[random.nextInt(OrderPayment.Method.values().length)].name();
+                orders.setPaymentMethod(paymentMethod);
+                Orders.Status status = Orders.Status.values()[random.nextInt(Orders.Status.values().length)];
+                orders.setStatus(status);
+
+                BigDecimal totalAmount = BigDecimal.ZERO;
+                BigDecimal totalDiscount = BigDecimal.ZERO;
+                BigDecimal totalServiceFee = BigDecimal.ZERO;
+                BigDecimal totalShipping = BigDecimal.ZERO;
+                BigDecimal totalProductAmount = BigDecimal.ZERO;
+
+                orders.setTotalDiscount(totalDiscount);
+                orders.setTotalFee(totalServiceFee);
+                orders.setTotalShipping(totalShipping);
+                orders.setTotalAmount(totalAmount);
+
+                // Save Orders first to get ID
+                orders = orderRepository.save(orders);
+
+                List<OrdersShop> ordersShops = new ArrayList<>();
+
+                for(int shopStt = 1; shopStt <= random.nextInt(2) + 1; shopStt++) {
+                    Shop shop = shopRepository.findShopById(random.nextLong(99) + 1);
+                    OrdersShop ordersShop = new OrdersShop();
+                    BigDecimal totalAmountProductShop = BigDecimal.ZERO;
+
+                    ordersShop.setShopOfOrdersShop(shop);
+                    ordersShop.setDeliveryMethod(deliveryMethod);
+                    ordersShop.setEcommerceTotalAmount(randomFeeForSomething());
+                    ordersShop.setIsPayment(isPayment);
+
+                    OrdersShop.Status orderShopStatus = OrdersShop.Status.values()[random.nextInt(OrdersShop.Status.values().length)];
+                    ordersShop.setOrderStatus(orderShopStatus);
+                    ordersShop.setPaymentMethod(paymentMethod);
+
+                    BigDecimal totalShopServiceFee = randomFeeForSomething();
+                    ordersShop.setServiceFee(totalShopServiceFee);
+
+                    BigDecimal totalShopShippingFee = randomFeeForSomething();
+                    ordersShop.setShopShippingFee(totalShopShippingFee);
+
+                    // Set the saved Orders
+                    ordersShop.setOrdersOfOrdersShop(orders);
+                    ordersShop.setShopOfOrdersShop(shop);
+
+                    ordersShop.setTotalProduct(totalAmountProductShop);
+                    ordersShop.setShopShippingFee(totalShopShippingFee);
+                    ordersShop.setShopDiscount(BigDecimal.ZERO);
+                    ordersShop.setShopTotalAmount(BigDecimal.ZERO);
+                    // Save OrdersShop before creating OrderItems
+                    ordersShop = orderShopRepository.save(ordersShop);
+
+                    for(int orderItemProductStt = 1; orderItemProductStt <= (random.nextInt(shop.getProducts().size()) + 1); orderItemProductStt++) {
+                        Product itemProduct = shop.getProducts().get(random.nextInt(shop.getProducts().size()));
+                        BigDecimal totalAmountItemProduct = BigDecimal.ZERO;
+
+                        for(int orderItemVariantStt = 0; orderItemVariantStt <= (random.nextInt(itemProduct.getVariants().size())); orderItemVariantStt++) {
+                            Variant itemVariant = itemProduct.getVariants().get(orderItemVariantStt);
+                            BigDecimal totalAmountItemVariant = itemVariant.getPrice();
+
+                            OrdersItems ordersItems = new OrdersItems();
+                            ordersItems.setProductId(itemProduct.getId());
+                            ordersItems.setVariantId(itemVariant.getId());
+                            ordersItems.setDescription(faker.lorem().sentence());
+                            ordersItems.setVariantName(faker.name().title());
+                            ordersItems.setProductImage(
+                                    itemProduct.getListImageOfProduct()
+                                            .stream()
+                                            .filter(image -> image.getIsMainImage())
+                                            .findFirst()
+                                            .map(image -> image != null ? image.getImageUrl() : GlobalUtils.DEFAULT_URL)
+                                            .orElse(null));
+                            ordersItems.setProductTitle(itemProduct.getTitle());
+                            Long totalQuantity = random.nextLong(10) + 1;
+                            ordersItems.setQuantity(totalQuantity);
+                            ordersItems.setPrice(totalAmountItemVariant);
+
+                            totalAmountItemProduct = totalAmountItemProduct.add(totalAmountItemVariant.multiply(BigDecimal.valueOf(totalQuantity)));
+                            ordersItems.setOrdersShopOfOrdersItems(ordersShop);
+
+                            orderItemRepository.save(ordersItems);
+                        }
+
+                        totalAmountProductShop = totalProductAmount.add(totalAmountItemProduct);
+                    }
+
+                    BigDecimal totalShopDiscount = randomFeeForSomething();
+                    ordersShop.setTotalProduct(totalAmountProductShop);
+                    ordersShop.setShopShippingFee(totalShopShippingFee);
+                    ordersShop.setShopDiscount(totalShopDiscount);
+
+                    BigDecimal totalShopAmount = totalAmountProductShop
+                            .subtract(totalShopDiscount)
+                            .subtract(totalShopShippingFee);
+                    ordersShop.setShopTotalAmount(totalShopAmount);
+
+                    // Update OrdersShop with final calculations
+                    orderShopRepository.save(ordersShop);
+
+                    totalProductAmount = totalProductAmount.add(totalAmountProductShop);
+                    totalServiceFee = totalServiceFee.add(totalShopServiceFee);
+                    totalShipping = totalShipping.add(totalShopShippingFee);
+                    totalDiscount = totalDiscount.add(totalShopDiscount);
+                }
+
+                // Update final Orders calculations
+                orders.setTotalDiscount(totalDiscount);
+                orders.setTotalFee(totalServiceFee);
+                orders.setTotalShipping(totalShipping);
+
+                totalAmount = totalProductAmount
+                        .add(totalServiceFee)
+                        .add(totalShipping)
+                        .subtract(totalDiscount);
+                BigDecimal totalEcommerceServiceFee = totalServiceFee.multiply(BigDecimal.valueOf(0.05));
+                orders.setEcommerceServiceFee(totalEcommerceServiceFee);
+                totalAmount = totalProductAmount.subtract(totalEcommerceServiceFee);
+                orders.setTotalAmount(totalAmount);
+
+                orderRepository.save(orders);
+            }
+        }
+    }
+
     // Helper method to add variant and product attribute values
     private void addVariantAttributeValueAndProductAttributeValue(Variant variant, Attribute attribute,
                                                                   AttributeValue value, Product product, StringBuilder stringBuilder) {
         VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
         variantAttributeValue.setAttribute(attribute);
         variantAttributeValue.setAttributeValue(value);
+        variantAttributeValue.setVariant(variant);
         variant.getVariantAttributeValueList().add(variantAttributeValue);
 
         stringBuilder.append(attribute.getAttributeName().toLowerCase())
@@ -593,18 +751,10 @@ public class FakeService {
         ProductAttributeValue productAttributeValue = new ProductAttributeValue();
         productAttributeValue.setAttribute(attribute);
         productAttributeValue.setAttributeValue(value);
+        productAttributeValue.setProduct(product);
         product.getProductAttributeValues().add(productAttributeValue);
     }
 
-    // Helper method to save product attributes and variants
-    private void saveProductAttributesAndVariants(Product product) {
-
-    }
-
-    // Helper method to save breadcrumb and variations
-    private void saveBreadcrumbAndProductDetails(Product product, Category category) {
-
-    }
 
     private List<Attribute> randomAttributes(int count){
         List<Attribute> attributes = attributeRepository.findAll();
@@ -622,6 +772,12 @@ public class FakeService {
     }
     private Brand randomBrand(){
         return brandRepository.findRandomBrand();
+    }
+
+
+    private BigDecimal randomFeeForSomething(){
+        double randomValue = 1000 + (100000 - 1000) * random.nextDouble();
+        return new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
     }
 
 

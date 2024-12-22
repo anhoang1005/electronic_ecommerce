@@ -30,7 +30,6 @@ public class OrderController {
                                               @RequestParam("status")Orders.Status status){
         return ResponseEntity.ok(orderService.adminUpdateOrder(orderCode, status));
     }
-
     @PostMapping("/api/owner/order/dashboard")
     public ResponseEntity<?> shopGetDashBoard(@RequestBody OrderShopFilter filter){
         return ResponseEntity.ok(orderService.shopGetDashboard(filter));

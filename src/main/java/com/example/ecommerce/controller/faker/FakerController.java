@@ -52,14 +52,19 @@ public class FakerController {
     }
     @PostMapping("/products")
     public String fakeProduct(@RequestParam("file") MultipartFile file){
-        fakeService.createRootAccount();
-        fakeService.generateAndInsertFakeUserData();
-        importService.importCategoriesFromExcel(file);
-        fakeService.generateAndInsertFakeShopDate();
-        fakeService.generateAndInserFakeShopCategoryData();
-        fakeService.generateAndInsertFakeAttributeData();
-        fakeService.generateAndInsertFakeBrand();
+//        fakeService.createRootAccount();
+//        fakeService.generateAndInsertFakeUserData();
+//        importService.importCategoriesFromExcel(file);
+//        fakeService.generateAndInsertFakeShopDate();
+//        fakeService.generateAndInserFakeShopCategoryData();
+//        fakeService.generateAndInsertFakeAttributeData();
+//        fakeService.generateAndInsertFakeBrand();
         fakeService.generateAndInsertFakeProductData();
+        return "done";
+    }
+    @PostMapping("/orders")
+    public String fakerOder(){
+        fakeService.generateAndInsertOrders();
         return "done";
     }
 }
