@@ -773,8 +773,6 @@ public class FakeService {
     private Brand randomBrand(){
         return brandRepository.findRandomBrand();
     }
-
-
     private BigDecimal randomFeeForSomething(){
         double randomValue = 1000 + (100000 - 1000) * random.nextDouble();
         return new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
