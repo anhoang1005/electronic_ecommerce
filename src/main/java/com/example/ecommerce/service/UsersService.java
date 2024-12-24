@@ -20,4 +20,10 @@ public interface UsersService {
 
     ResponseBody rootChangeRoleUsers(String userCode, boolean isAdmin);
 
+    ResponseBody adminGetDashboard(Boolean active, String userCode,
+                                 String email,
+                                 String telephone,
+                                 int pageNumber,
+                                 int pageSize);
+
 }

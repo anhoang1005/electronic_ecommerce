@@ -68,4 +68,16 @@ public class ShopController {
         return ResponseEntity.ok(shopService.customerFollowAndUnfollowShop(shopCode, isFollow));
     }
 
+    @GetMapping("/api/customer/shop/check-follow/{shop_code}")
+    public ResponseEntity<?> customerCheckFollowApi(@PathVariable("shop_code") String shopCode){
+        return ResponseEntity.ok(shopService.checkUsersFollowShop(shopCode));
+    }
+
+    @GetMapping("/api/customer/shop/follow-user")
+    public ResponseEntity<?> getUserFollowApi(@RequestParam("shop_code")String shopCode,
+                                              @RequestParam("page_number") int pageNumber,
+                                              @RequestParam("page_size") int pageSize){
+        return ResponseEntity.ok(shopService.getListUsersFollowShop(shopCode, pageNumber, pageSize));
+    }
+
 }

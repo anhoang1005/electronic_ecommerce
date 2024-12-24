@@ -1,6 +1,7 @@
 package com.example.ecommerce.controller.users;
 
 import com.example.ecommerce.models.users.UserRegisterRequest;
+import com.example.ecommerce.models.users.UsersFilter;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +50,11 @@ public class UsersController {
             @RequestParam("user_code") String userCode,
             @RequestParam("is_admin") boolean isAdmin){
         return ResponseEntity.ok(usersService.rootChangeRoleUsers(userCode, isAdmin));
+    }
+
+    @PostMapping("/api/admin/users/dashboard")
+    public ResponseEntity<ResponseBody> adminGetDashboardApi(@RequestBody UsersFilter filter){
+        return ResponseEntity.ok(usersService.adminGetDashboard(filter.getActive(),
+                filter.getUserCode(), filter.getEmail(), filter.getTelephone(), filter.getPageNumber(), filter.getPageSize()));
     }
 }

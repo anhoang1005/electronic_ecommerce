@@ -18,4 +18,8 @@ public interface ShopService {
     ResponseBody adminChangeActiveShop(String shopCode, Boolean enable);
 
     ResponseBody customerFollowAndUnfollowShop(String shopCode, boolean isFollow);
+
+    ResponseBody checkUsersFollowShop(String shopCode);
+
+    ResponseBody getListUsersFollowShop(String shopCode, int pageNumber, int pageSize);
 }

@@ -25,8 +25,6 @@ public class ProductShopController {
     @PostMapping("/product")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
                                            @RequestParam("files") List<MultipartFile> files) {
-        log.info("controller");
-
         try {
             ProductDTO productDTO = objectMapper.readValue(jsonDto, ProductDTO.class);
             for(int i = 0 ; i < productDTO.getVariantDTOS().size() ;i++){
@@ -51,15 +49,13 @@ public class ProductShopController {
         }
     }
     @GetMapping("/product/{id}")
-    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id) or hasAuthority('QUANLY')")
     public ResponseEntity<?> findProduct(@PathVariable Long id){
         return ResponseEntity.ok(iProductService.findProductHiddenById(id));
     }
 
     @DeleteMapping("/product/{id}")
-    @PreAuthorize("@customExpressionSecurity.isShopAllowed(#id)")
     public ResponseEntity<?> deleteProduct(@PathVariable Long id){
-        return ResponseEntity.ok(iProductService.deleteProduct(id));
+        return ResponseEntity.ok(iProductService.shopDeleteProduct(id));
     }
 }
 

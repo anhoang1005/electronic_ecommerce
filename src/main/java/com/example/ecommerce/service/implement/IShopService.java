@@ -6,6 +6,8 @@ import com.example.ecommerce.entities.Users;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.shop.ShopMapper;
 import com.example.ecommerce.models.shop.SubscribeShopRequest;
+import com.example.ecommerce.models.users.UserCard;
+import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.ShopRepository;
 import com.example.ecommerce.repository.UsersRepository;
@@ -15,11 +17,16 @@ import com.example.ecommerce.service.ShopService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @AllArgsConstructor
@@ -165,6 +172,45 @@ public class IShopService implements ShopService {
         }
     }
 
+    @Override
+    public ResponseBody checkUsersFollowShop(String shopCode) {
+        try{
+            Long userId = authUtils.getUserFromAuthentication().getId();
+            Users users = usersRepository.findById(userId)
+                    .orElseThrow(()-> new RequestNotFoundException("user not found!"));
+            Boolean checkFollow = shopRepository.checkUserFollow(users, shopCode);
+            return new ResponseBody(checkFollow, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("check users follow shop failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
+
+    @Override
+    public ResponseBody getListUsersFollowShop(String shopCode, int pageNumber, int pageSize) {
+        try{
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Page<Users> page = shopRepository.getUserFollowShop(shopCode, pageable);
+            PageData pageData = PageData.builder()
+                    .pageNumber(pageNumber)
+                    .pageSize(pageSize)
+                    .totalPage(page.getTotalPages())
+                    .totalAmount(page.getTotalElements())
+                    .data(page.stream().map(users -> {
+                        return UserCard.builder()
+                                .userCode(users.getUserCode())
+                                .userName(users.getUsername())
+                                .userAvatar(users.getImageUrl())
+                                .build();
+                    }).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("get list users follow shop failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
+
     private void updateShopInfo(SubscribeShopRequest req, Shop shop) {
         shop.setBusinessType(req.getBusinessType());
         shop.setShopName(req.getShopName());
@@ -205,7 +251,6 @@ public class IShopService implements ShopService {
                     throw new RuntimeException("Failed to upload back card");
                 }
             });
-
             shop.setFrontIdentityCard(frontImageFuture.join());
             shop.setBackIdentityCard(backImageFuture.join());
 

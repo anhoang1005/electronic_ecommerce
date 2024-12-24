@@ -22,4 +22,5 @@ public class VariantDTO {
     private Double weight;
     private Double length;
     private Double width;
+    private Integer stockQuantity;
 }

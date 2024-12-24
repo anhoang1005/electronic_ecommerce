@@ -8,8 +8,10 @@ import com.example.ecommerce.models.attribute.AttributeDTO;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ProductUpdateDTO;
+import com.example.ecommerce.models.product.ShopProductFilter;
 import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.variant.VariantDTO;
+import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.payload.object.ObjectChangedActiveResponse;
 import com.example.ecommerce.rabbit.ProductProducer;
@@ -98,10 +100,10 @@ public class IProductService implements ProductService {
                 variant.setSku(variantDTO.getSku());
                 variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
                 variant.setHeight(variantDTO.getHeight());
-                variant.setWeight(variant.getWeight());
-                variant.setLength(variant.getLength());
-                variant.setWidth(variant.getWidth());
-
+                variant.setWeight(variantDTO.getWeight());
+                variant.setLength(variantDTO.getLength());
+                variant.setWidth(variantDTO.getWidth());
+                variant.setStockQuantity(variantDTO.getStockQuantity());
                 StringBuilder stringBuilder = new StringBuilder();
 
                 //Tao attribute cua bien the
@@ -243,6 +245,59 @@ public class IProductService implements ProductService {
     }
 
     @Override
+    public ResponseBody shopGetDashboard(ShopProductFilter filter) {
+        try{
+            String shopCode = authenticationUtils.getUserFromAuthentication().getShopCode();
+            Sort.Order.desc("id");
+            Sort sort = switch (filter.getSort()) {
+                case "id-asc" -> Sort.by(Sort.Order.asc("id"));
+                case "minprice-asc" -> Sort.by(Sort.Order.asc("minInitialPrice"));
+                case "minprice-desc" -> Sort.by(Sort.Order.desc("minInitialPrice"));
+                case "soldcount-asc" -> Sort.by(Sort.Order.asc("soldCount"));
+                case "soldCount-desc" -> Sort.by(Sort.Order.desc("soldCount"));
+                default -> Sort.by(Sort.Order.desc("id"));
+            };
+            Pageable pageable = PageRequest.of(filter.getPageNumber()-1, filter.getPageSize(), sort);
+            Page<Product> page = productRepository.shopGetDashboard(shopCode, filter.getTitle(), filter.getBrandId(),
+                    filter.getCategory(), filter.getMinPrice(), filter.getMaxPrice(), pageable);
+            PageData pageData = PageData.builder()
+                    .pageSize(filter.getPageSize())
+                    .pageNumber(filter.getPageNumber())
+                    .totalPage(page.getTotalPages())
+                    .totalAmount(page.getTotalElements())
+                    .data(page.stream().map(productMapper::entityToProductDetail).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("create product failed!");
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBody updateProduct(Long id, ProductUpdateDTO dto) {
+        return null;
+    }
+
+    @Override
+    public ResponseBody shopDeleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name()));
+        product.setIsDeleted(true);
+        productRepository.save(product);
+        return new ResponseBody(
+                new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
+                ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS
+        );
+    }
+
+    @Override
+    public ResponseBody shopGetProductDetail(Long id) {
+        return null;
+    }
+
+    @Override
     public ResponseBody findProductById(Long id) {
         Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
         if(ObjectUtils.isEmpty(product)){
@@ -268,11 +323,6 @@ public class IProductService implements ProductService {
     }
 
     @Override
-    public ResponseBody updateProduct(Long id, ProductUpdateDTO dto) {
-        return null;
-    }
-
-    @Override
     public ResponseBody checkProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(
@@ -283,33 +333,6 @@ public class IProductService implements ProductService {
         productRepository.save(product);
 //        CompletableFuture.runAsync(
 //                () -> productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product))
-//        );
-        return new ResponseBody(
-                new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),
-                ResponseBody.Status.SUCCESS,
-                ResponseBody.Code.SUCCESS
-        );
-    }
-
-    @Override
-    public ResponseBody deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(
-                        () -> new RequestNotFoundException(ErrorMessage.PRODUCT_NOT_FOUND.name())
-                );
-        product.setIsDeleted(true);
-        productRepository.save(product);
-
-//        CompletableFuture.runAsync(
-//                () -> {
-//                    ProductDocument productDocument = productDocumentRepository.findById(id)
-//                            .orElseThrow(
-//                                    () -> new RequestNotFoundException(ErrorMessage.PRODUCT_UNACTIVE.name())
-//                            );
-//
-//                    productDocument.setIsDeleted(true);
-//                    productDocumentRepository.save(productDocument);
-//                }
 //        );
         return new ResponseBody(
                 new ObjectChangedActiveResponse(product.getId(),product.getIsAccepted()),

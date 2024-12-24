@@ -244,6 +244,7 @@ public class ICheckoutService implements CheckoutService {
 
             return new ResponseBody(checkoutDto, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Checkout error! " + e.getMessage());
             throw new RequestNotFoundException(e.getMessage());
         }
