@@ -10,6 +10,7 @@ public interface ShopService {
     ResponseBody customerSubscribeShop(SubscribeShopRequest req,
                                        MultipartFile frontCard, MultipartFile backCard);
     ResponseBody shopOwnerUpdateTheirShopInfo(SubscribeShopRequest req);
+    ResponseBody getShopDetailByCode (String shopCode);
 
     ResponseBody shopOwnerRemoveTheirShop();
 

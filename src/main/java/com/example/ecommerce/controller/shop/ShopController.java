@@ -37,6 +37,10 @@ public class ShopController {
     public ResponseEntity<?> shopOwnerGetTheirShopDetailApi(){
         return ResponseEntity.ok(shopService.customerGetTheirShopDetail());
     }
+    @GetMapping("/api/guest/shop/get-detail-by-code")
+    public ResponseEntity<?> getShopDetailByCode(@RequestParam("shopCode") String shopCode) {
+        return ResponseEntity.ok(shopService.getShopDetailByCode(shopCode));
+    }
 
     @PutMapping("/api/owner/shop/update")
     public ResponseEntity<?> shopOwnerUpdateShopApi(

@@ -132,6 +132,7 @@ public class ProductMapper {
                     .soldCount(variant.getSoldQuantity())
                     .stockCount(variant.getStockQuantity())
                     .description(variant.getSku())
+                    .sellPrice(variant.getPrice())
                     .build();
     }
 
@@ -149,6 +150,7 @@ public class ProductMapper {
                 .minPrice(product.getMinInitialPrice())
                 .categoryId(product.getCategory().getId())
                 .brandId(product.getBrandOfProduct().getId())
+                .brandName(product.getBrandOfProduct().getBrandName())
 
                 .listImg(product.getListImageOfProduct().stream().map(
                         ProductImage::getImageUrl
