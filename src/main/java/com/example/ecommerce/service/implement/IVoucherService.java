@@ -38,7 +38,6 @@ public class IVoucherService implements VoucherService {
     private final ShopRepository shopRepository;
     private final DateTimeMapperUtils timeUtils;
 
-
     @Override
     @Transactional
     public ResponseBody adminCreateVoucher(CreateVoucherRequest req) {
@@ -171,11 +170,13 @@ public class IVoucherService implements VoucherService {
     }
 
     @Override
-    public ResponseBody customerGetTheirListVoucher(String voucherCode, Voucher.Type type, int pageNumber, int pageSize) {
+    public ResponseBody customerGetTheirListVoucher(CustomerVoucherFilter filter) {
         try{
-            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("startedAt")));
+            Pageable pageable = PageRequest.of(filter.getPageNumber() - 1, filter.getPageSize(), Sort.by(Sort.Order.desc("startedAt")));
             LocalDateTime currentDateTime = LocalDateTime.now();
-            Page<Voucher> page = voucherRepository.customerGetListVoucher(voucherCode, type, Voucher.Status.ENABLE, currentDateTime, pageable);
+            Page<Voucher> page = voucherRepository.customerGetListVoucher(filter.getVoucherCode(),
+                    filter.getType(), filter.getDiscountType(),
+                    Voucher.Status.ENABLE, currentDateTime, pageable);
             List<VoucherDto> dtoList = page.stream()
                     .map(voucherMapper::voucherToVoucherDto).collect(Collectors.toList());
             PageData pageData = PageData.builder()
@@ -311,8 +312,91 @@ public class IVoucherService implements VoucherService {
     }
 
     @Override
-    public VoucherDto customerUseVoucher(String voucherCode) {
-        return null;
+    public ResponseBody guestGetShopVoucher(String shopCode, int pageNumber, int pageSize) {
+        try{
+            Pageable pageable = PageRequest.of(pageNumber-1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Page<ShopVoucher> page = shopVoucherRepository.guestGetShopVoucher(
+                    shopCode, Voucher.Status.ENABLE, LocalDateTime.now(), pageable);
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber()+1)
+                    .pageSize(page.getSize())
+                    .data(page.stream().map(voucherMapper::shopVoucherToVoucherDto).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("get shop voucher failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBody customerGetListCheckoutVoucher(CheckoutVoucher checkoutVoucher) {
+        try {
+            Pageable pageable = PageRequest.of(checkoutVoucher.getPageNumber()-1,
+                    checkoutVoucher.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<Voucher> page = voucherRepository.customerGetListVoucherCheckout(
+                    checkoutVoucher.getVoucherCode(),
+                    Voucher.Type.DISCOUNT, null, Voucher.Status.ENABLE,
+                    LocalDateTime.now(), checkoutVoucher.getTotalAmount(), pageable);
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber()+1)
+                    .pageSize(page.getSize())
+                    .data(page.stream().map(voucherMapper::voucherToVoucherDto).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("checkout customer voucher failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBody customerGetListCheckoutShippingVoucher(CheckoutVoucher checkoutVoucher) {
+        try {
+            Pageable pageable = PageRequest.of(checkoutVoucher.getPageNumber()-1,
+                    checkoutVoucher.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<Voucher> page = voucherRepository.customerGetListVoucherCheckout(
+                    checkoutVoucher.getVoucherCode(),
+                    Voucher.Type.SHIPPING, Voucher.DiscountType.AMOUNT, Voucher.Status.ENABLE,
+                    LocalDateTime.now(), checkoutVoucher.getTotalAmount(), pageable);
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber()+1)
+                    .pageSize(page.getSize())
+                    .data(page.stream().map(voucherMapper::voucherToVoucherDto).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("checkout customer voucher failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBody customerGetListCheckoutShopVoucher(CheckoutVoucher checkoutVoucher) {
+        try {
+            Pageable pageable = PageRequest.of(checkoutVoucher.getPageNumber()-1,
+                    checkoutVoucher.getPageSize(), Sort.by(Sort.Order.desc("id")));
+            Page<ShopVoucher> page = shopVoucherRepository.customerGetShopVoucherCheckOut(
+                    checkoutVoucher.getShopCode(), checkoutVoucher.getVoucherCode(),
+                    Voucher.Status.ENABLE, LocalDateTime.now(), checkoutVoucher.getTotalAmount(), pageable);
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber()+1)
+                    .pageSize(page.getSize())
+                    .data(page.stream().map(voucherMapper::shopVoucherToVoucherDto).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("checkout customer voucher failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException(e.getMessage());
+        }
     }
 
     @Override

@@ -17,13 +17,26 @@ public interface ShopVoucherRepository extends JpaRepository<ShopVoucher, Long> 
     Optional<ShopVoucher> findShopVoucherByVoucherCode(String voucherCode);
 
     @Query(value = "select v from ShopVoucher v " +
-            "where v.status = :status " +
+            "where v.shopOfShopVoucher.shopCode = :shopCode " +
+            "and v.status = :status " +
+            "and v.expiredAt > :current and v.startedAt < :current ")
+    Page<ShopVoucher> guestGetShopVoucher(@Param("shopCode") String shopCode,
+                                          @Param("status") Voucher.Status status,
+                                          @Param("current") LocalDateTime current,
+                                          Pageable pageable);
+
+    @Query(value = "select v from ShopVoucher v " +
+            "where v.shopOfShopVoucher.shopCode = :shopCode " +
+            "and v.status = :status " +
             "and (:code is null or v.voucherCode = :code) " +
-            "and v.expiredAt < :current" )
-    Page<ShopVoucher> customerGetShopVoucher(@Param("code") String code,
-                                             @Param("status") Voucher.Status status,
-                                             @Param("current") LocalDateTime current,
-                                             Pageable pageable);
+            "and v.expiredAt < :current and v.startedAt > :current " +
+            "and v.minTotalOrder <= :minTotalOrder " )
+    Page<ShopVoucher> customerGetShopVoucherCheckOut(@Param("shopCode") String shopCode,
+                                                     @Param("code") String code,
+                                                     @Param("status") Voucher.Status status,
+                                                     @Param("current") LocalDateTime current,
+                                                     @Param("minTotalOrder") Double minTotalOrder,
+                                                     Pageable pageable);
 
     @Query(value = "select v from ShopVoucher v " +
             "where (:voucherCode is null or v.voucherCode = :voucherCode) " +

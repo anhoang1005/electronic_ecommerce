@@ -59,13 +59,4 @@ public class ShopVoucher extends BaseEntity{
         public String getValueString() { return this.valueString; }
         public int getValueInt() { return  this.valueInt; }
     }
-
-    public enum Status{
-        ENABLE,
-        WAIT,
-        EXPIRED,
-        DISABLE,
-        DELETED
-    }
-
 }

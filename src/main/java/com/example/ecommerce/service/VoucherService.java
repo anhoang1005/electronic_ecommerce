@@ -1,10 +1,7 @@
 package com.example.ecommerce.service;
 
 import com.example.ecommerce.entities.Voucher;
-import com.example.ecommerce.models.voucher.CreateVoucherRequest;
-import com.example.ecommerce.models.voucher.VoucherCheckout;
-import com.example.ecommerce.models.voucher.VoucherDto;
-import com.example.ecommerce.models.voucher.VoucherFilter;
+import com.example.ecommerce.models.voucher.*;
 import com.example.ecommerce.payload.ResponseBody;
 
 public interface VoucherService {
@@ -16,7 +13,7 @@ public interface VoucherService {
 
     ResponseBody userChangeStatusVoucher(String voucherCode, Voucher.Status status, boolean isAdmin);
 
-    ResponseBody customerGetTheirListVoucher(String voucherCode, Voucher.Type type, int pageNumber, int pageSize);
+    ResponseBody customerGetTheirListVoucher(CustomerVoucherFilter filter);
 
     VoucherCheckout customerCheckoutVoucher(String voucherCode, Double totalAmount);
 
@@ -24,7 +21,13 @@ public interface VoucherService {
 
     VoucherCheckout customerCheckoutShopVoucher(String voucherCode, Double shopTotal);
 
-    VoucherDto customerUseVoucher(String voucherCode);
+    ResponseBody guestGetShopVoucher(String shopCode, int pageNumber, int pageSize);
+
+    ResponseBody customerGetListCheckoutVoucher(CheckoutVoucher checkoutVoucher);
+
+    ResponseBody customerGetListCheckoutShippingVoucher(CheckoutVoucher checkoutVoucher);
+
+    ResponseBody customerGetListCheckoutShopVoucher(CheckoutVoucher checkoutVoucher);
 
     ResponseBody shopVoucherDashboard(VoucherFilter ft);
 

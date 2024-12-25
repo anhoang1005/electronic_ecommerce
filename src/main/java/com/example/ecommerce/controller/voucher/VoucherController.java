@@ -1,7 +1,9 @@
 package com.example.ecommerce.controller.voucher;
 
 import com.example.ecommerce.entities.Voucher;
+import com.example.ecommerce.models.voucher.CheckoutVoucher;
 import com.example.ecommerce.models.voucher.CreateVoucherRequest;
+import com.example.ecommerce.models.voucher.CustomerVoucherFilter;
 import com.example.ecommerce.models.voucher.VoucherFilter;
 import com.example.ecommerce.service.VoucherService;
 import lombok.AllArgsConstructor;
@@ -46,11 +48,8 @@ public class VoucherController {
     }
 
     @GetMapping("/api/customer/voucher")
-    public ResponseEntity<?> customerGetListVoucher(@RequestParam(name = "voucher_code", required = false) String voucherCode,
-                                                    @RequestParam(name = "type", required = false) Voucher.Type type,
-                                                    @RequestParam("page_number") int pageNumber,
-                                                    @RequestParam("page_size") int pageSize){
-        return ResponseEntity.ok(voucherService.customerGetTheirListVoucher(voucherCode, type, pageNumber, pageSize));
+    public ResponseEntity<?> customerGetListVoucher(@RequestBody CustomerVoucherFilter filter){
+        return ResponseEntity.ok(voucherService.customerGetTheirListVoucher(filter));
     }
 
     @GetMapping("/api/customer/voucher/system")
@@ -66,9 +65,31 @@ public class VoucherController {
     }
 
     @GetMapping("/api/customer/voucher/shop")
-    public ResponseEntity<?> shopChangeStatusVoucher(@RequestParam("voucher_code") String voucherCode,
+    public ResponseEntity<?> cusTomerCheckOutShopVoucher(@RequestParam("voucher_code") String voucherCode,
                                                      @RequestParam("shop_amount") Double totalAmount){
         return ResponseEntity.ok(voucherService.customerCheckoutShopVoucher(voucherCode, totalAmount));
+    }
+
+    @GetMapping("/api/guest/shop-voucher")
+    public ResponseEntity<?> guestGetShopVoucher(@RequestParam("shop_code") String shopCode,
+                                                @RequestParam("page_number") int pageNumber,
+                                                @RequestParam("page_size") int pageSize){
+        return ResponseEntity.ok(voucherService.guestGetShopVoucher(shopCode, pageNumber, pageSize));
+    }
+
+    @PostMapping("/api/customer/discount-system-voucher")
+    public ResponseEntity<?> customerGetListCheckoutVoucher(@RequestBody CheckoutVoucher checkoutVoucher){
+        return ResponseEntity.ok(voucherService.customerGetListCheckoutVoucher(checkoutVoucher));
+    }
+
+    @PostMapping("/api/customer/shipping-system-voucher")
+    public ResponseEntity<?> customerGetListCheckoutShippingVoucher(@RequestBody CheckoutVoucher checkoutVoucher){
+        return ResponseEntity.ok(voucherService.customerGetListCheckoutShippingVoucher(checkoutVoucher));
+    }
+
+    @PostMapping("/api/customer/discount-shop-voucher")
+    public ResponseEntity<?> customerGetListCheckoutShopVoucher(@RequestBody CheckoutVoucher checkoutVoucher){
+        return ResponseEntity.ok(voucherService.customerGetListCheckoutShopVoucher(checkoutVoucher));
     }
 
     @PostMapping("/api/owner/voucher/dashboard")
