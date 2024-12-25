@@ -16,6 +16,13 @@ public interface VoucherRepository extends JpaRepository<Voucher,Long> {
     Optional<Voucher> findVoucherByVoucherCode(String voucherCode);
 
     @Query(value = "select v from Voucher v " +
+            "where v.status = :status " +
+            "and v.expiredAt > :current ")
+    Page<Voucher> guestGetSystemVoucher(@Param("status") Voucher.Status status,
+                                         @Param("current") LocalDateTime currentDateTime,
+                                         Pageable pageable);
+
+    @Query(value = "select v from Voucher v " +
             "where (:voucherCode is null or v.voucherCode = :voucherCode) " +
             "and v.status = :status " +
             "and v.expiredAt > :current " +

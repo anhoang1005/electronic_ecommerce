@@ -70,6 +70,12 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.customerCheckoutShopVoucher(voucherCode, totalAmount));
     }
 
+    @GetMapping("/api/guest/system-voucher")
+    public ResponseEntity<?> guestGetSystemVoucher(@RequestParam("page_number") int pageNumber,
+                                                  @RequestParam("page_size") int pageSize){
+        return ResponseEntity.ok(voucherService.guestGetSystemVoucher(pageNumber, pageSize));
+    }
+
     @GetMapping("/api/guest/shop-voucher")
     public ResponseEntity<?> guestGetShopVoucher(@RequestParam("shop_code") String shopCode,
                                                 @RequestParam("page_number") int pageNumber,

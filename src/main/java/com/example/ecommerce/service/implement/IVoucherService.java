@@ -312,6 +312,26 @@ public class IVoucherService implements VoucherService {
     }
 
     @Override
+    public ResponseBody guestGetSystemVoucher(int pageNumber, int pageSize) {
+        try{
+            Pageable pageable = PageRequest.of(pageNumber-1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Page<Voucher> page = voucherRepository.guestGetSystemVoucher(Voucher.Status.ENABLE,
+                    LocalDateTime.now(), pageable);
+            PageData pageData = PageData.builder()
+                    .totalAmount(page.getTotalElements())
+                    .totalPage(page.getTotalPages())
+                    .pageNumber(page.getNumber()+1)
+                    .pageSize(page.getSize())
+                    .data(page.stream().map(voucherMapper::voucherToVoucherDto).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            log.error("get system voucher failed! Error: " + e.getMessage());
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
     public ResponseBody guestGetShopVoucher(String shopCode, int pageNumber, int pageSize) {
         try{
             Pageable pageable = PageRequest.of(pageNumber-1, pageSize, Sort.by(Sort.Order.desc("id")));

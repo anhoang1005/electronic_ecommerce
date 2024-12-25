@@ -21,6 +21,8 @@ public interface VoucherService {
 
     VoucherCheckout customerCheckoutShopVoucher(String voucherCode, Double shopTotal);
 
+    ResponseBody guestGetSystemVoucher(int pageNumber, int pageSize);
+
     ResponseBody guestGetShopVoucher(String shopCode, int pageNumber, int pageSize);
 
     ResponseBody customerGetListCheckoutVoucher(CheckoutVoucher checkoutVoucher);
