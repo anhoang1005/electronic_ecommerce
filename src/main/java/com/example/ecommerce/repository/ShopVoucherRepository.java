@@ -29,7 +29,7 @@ public interface ShopVoucherRepository extends JpaRepository<ShopVoucher, Long> 
             "where v.shopOfShopVoucher.shopCode = :shopCode " +
             "and v.status = :status " +
             "and (:code is null or v.voucherCode = :code) " +
-            "and v.expiredAt < :current and v.startedAt > :current " +
+            "and v.expiredAt > :current and v.startedAt < :current " +
             "and v.minTotalOrder <= :minTotalOrder " )
     Page<ShopVoucher> customerGetShopVoucherCheckOut(@Param("shopCode") String shopCode,
                                                      @Param("code") String code,
