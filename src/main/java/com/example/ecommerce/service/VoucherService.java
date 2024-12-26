@@ -19,7 +19,7 @@ public interface VoucherService {
 
     VoucherCheckout customerCheckoutShippingVoucher(String voucherCode, Double totalAmount);
 
-    VoucherCheckout customerCheckoutShopVoucher(String voucherCode, Double shopTotal);
+    VoucherCheckout customerCheckoutShopVoucher(String shopCode, String voucherCode, Double shopTotal);
 
     ResponseBody guestGetSystemVoucher(int pageNumber, int pageSize);
 

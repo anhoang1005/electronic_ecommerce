@@ -1,9 +1,11 @@
 package com.example.ecommerce.models.product_review;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ProductReviewRequest {
     private Long reviewId;

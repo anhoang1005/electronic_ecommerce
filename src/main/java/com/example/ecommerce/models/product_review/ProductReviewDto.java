@@ -1,13 +1,14 @@
 package com.example.ecommerce.models.product_review;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ProductReviewDto {
     @JsonProperty("review_id")
@@ -26,8 +27,8 @@ public class ProductReviewDto {
     private List<String> tag;
     @JsonProperty("is_shop_reply")
     private boolean isShopReply;
-    @JsonProperty("shop_reply")
-    private String shopReply;
+    @JsonProperty("reply")
+    private String reply;
     @JsonProperty("like_count")
     private Integer likeCount;
     @JsonProperty("createdAt")

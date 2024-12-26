@@ -64,11 +64,6 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.customerCheckoutShippingVoucher(voucherCode, totalAmount));
     }
 
-    @GetMapping("/api/customer/voucher/shop")
-    public ResponseEntity<?> cusTomerCheckOutShopVoucher(@RequestParam("voucher_code") String voucherCode,
-                                                     @RequestParam("shop_amount") Double totalAmount){
-        return ResponseEntity.ok(voucherService.customerCheckoutShopVoucher(voucherCode, totalAmount));
-    }
 
     @GetMapping("/api/guest/system-voucher")
     public ResponseEntity<?> guestGetSystemVoucher(@RequestParam("page_number") int pageNumber,

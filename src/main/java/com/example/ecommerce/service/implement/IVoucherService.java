@@ -79,12 +79,12 @@ public class IVoucherService implements VoucherService {
     @Transactional
     public ResponseBody shopCreateVoucher(CreateVoucherRequest req) {
         try{
-            ShopVoucher existed = shopVoucherRepository.findShopVoucherByVoucherCode(req.getVoucherCode()).orElse(null);
-            if(existed!=null){
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+            Boolean existed = shopVoucherRepository.existsByVoucherCode(req.getVoucherCode());
+            if(existed!=null && existed){
                 return new ResponseBody("", ResponseBody.Status.SUCCESS,
                         "VOUCHER_CODE_EXISTED", ResponseBody.Code.SUCCESS);
             }
-            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
             Shop shop = shopRepository.findShopByShopCode(shopCode);
             ShopVoucher voucher = new ShopVoucher();
             voucher.setShopOfShopVoucher(shop);
@@ -127,7 +127,8 @@ public class IVoucherService implements VoucherService {
                 voucher = voucherRepository.save(voucher);
                 return new ResponseBody(voucherMapper.voucherToVoucherDto(voucher), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
             } else {
-                ShopVoucher voucher = shopVoucherRepository.findShopVoucherByVoucherCode(req.getVoucherCode())
+                String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+                ShopVoucher voucher = shopVoucherRepository.findByShopCodeAndVoucherCode(shopCode, req.getVoucherCode())
                         .orElseThrow(()-> new RequestNotFoundException("ERROR"));
                 if(req.getTitle()!=null) voucher.setTitle(req.getTitle());
                 if(req.getVoucherCount()!=null) voucher.setVoucherCount(req.getVoucherCount());
@@ -157,7 +158,8 @@ public class IVoucherService implements VoucherService {
                 voucher = voucherRepository.save(voucher);
                 return new ResponseBody(voucherMapper.voucherToVoucherDto(voucher), ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
             } else {
-                ShopVoucher voucher = shopVoucherRepository.findShopVoucherByVoucherCode(voucherCode)
+                String shopCode = authUtils.getUserFromAuthentication().getShopCode();
+                ShopVoucher voucher = shopVoucherRepository.findByShopCodeAndVoucherCode(shopCode, voucherCode)
                         .orElseThrow(()-> new RequestNotFoundException("VOUCHER_NOT_EXIT"));
                 voucher.setStatus(status);
                 voucher = shopVoucherRepository.save(voucher);
@@ -270,10 +272,10 @@ public class IVoucherService implements VoucherService {
     }
 
     @Override
-    public VoucherCheckout customerCheckoutShopVoucher(String voucherCode, Double shopTotal) {
+    public VoucherCheckout customerCheckoutShopVoucher(String shopCode, String voucherCode, Double shopTotal) {
         try{
-            ShopVoucher voucher = shopVoucherRepository.findShopVoucherByVoucherCode(voucherCode)
-                    .orElseThrow(()-> new RequestNotFoundException("ERROR"));
+            ShopVoucher voucher = shopVoucherRepository.findByShopCodeAndVoucherCode(shopCode, voucherCode)
+                    .orElseThrow(()-> new RequestNotFoundException("VOUCHER_NOT_EXIST"));
             LocalDateTime now = LocalDateTime.now();
             if(voucher.getStatus()== Voucher.Status.ENABLE){
                 if(voucher.getStartedAt().isAfter(now) || voucher.getExpiredAt().isBefore(now)){
@@ -422,6 +424,7 @@ public class IVoucherService implements VoucherService {
     @Override
     public ResponseBody shopVoucherDashboard(VoucherFilter ft) {
         try{
+            String shopCode = authUtils.getUserFromAuthentication().getShopCode();
             Sort value = (ft.getSort() == null) ?
                     Sort.by(Sort.Order.desc("id")) : switch (ft.getSort()) {
                 case "id-asc" -> Sort.by(Sort.Order.asc("id"));
@@ -441,7 +444,7 @@ public class IVoucherService implements VoucherService {
                 expiryEd = timeUtils.htmlValueToLocalDateTime(ft.getExpiryEd());
             }
             Pageable pageable = PageRequest.of(ft.getPageNumber() - 1, ft.getPageSize(), value);
-            Page<ShopVoucher> page = shopVoucherRepository.shopGetListVoucher(ft.getVoucherCode(),
+            Page<ShopVoucher> page = shopVoucherRepository.shopGetListVoucher(shopCode, ft.getVoucherCode(),
                     ft.getDiscountType(), startSt, startEd, expirySt, expiryEd, ft.getStatus(), pageable);
             List<ShopVoucherDto> dtoList = page.stream().map(voucherMapper::shopVoucherToVoucherDto).collect(Collectors.toList());
             PageData pageData = PageData.builder()

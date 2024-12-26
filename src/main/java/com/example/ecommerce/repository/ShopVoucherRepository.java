@@ -14,7 +14,14 @@ import java.util.Optional;
 
 @Repository
 public interface ShopVoucherRepository extends JpaRepository<ShopVoucher, Long> {
-    Optional<ShopVoucher> findShopVoucherByVoucherCode(String voucherCode);
+
+    Boolean existsByVoucherCode(String voucherCode);
+
+    @Query(value = "select v from ShopVoucher v " +
+            "where v.voucherCode = :voucherCode " +
+            "and v.shopOfShopVoucher.shopCode = :shopCode")
+    Optional<ShopVoucher> findByShopCodeAndVoucherCode(@Param("shopCode") String shopCode,
+                                                       @Param("voucherCode") String voucherCode);
 
     @Query(value = "select v from ShopVoucher v " +
             "where v.shopOfShopVoucher.shopCode = :shopCode " +
@@ -39,17 +46,20 @@ public interface ShopVoucherRepository extends JpaRepository<ShopVoucher, Long> 
                                                      Pageable pageable);
 
     @Query(value = "select v from ShopVoucher v " +
-            "where (:voucherCode is null or v.voucherCode = :voucherCode) " +
+            "where v.shopOfShopVoucher.shopCode = :shopCode " +
+            "and (:voucherCode is null or v.voucherCode = :voucherCode) " +
             "and (:discountType is null or v.discountType = :discountType) " +
             "and ((:startSt is null or :startEd is null) or v.startedAt between :startSt and :startEd) " +
             "and ((:expirySt is null or :expiryEd is null) or v.expiredAt between :expirySt and :expiryEd)" +
             "and (:status is null or v.status = :status)")
-    Page<ShopVoucher> shopGetListVoucher(@Param("voucherCode") String voucherCode,
-                                  @Param("discountType") Voucher.DiscountType discountType,
-                                  @Param("startSt") LocalDateTime startSt,
-                                  @Param("startEd") LocalDateTime startEd,
-                                  @Param("expirySt") LocalDateTime expirySt,
-                                  @Param("expiryEd") LocalDateTime expiryEd,
-                                  @Param("status") Voucher.Status status,
-                                  Pageable pageable);
+    Page<ShopVoucher> shopGetListVoucher(
+            @Param("shopCode") String shopCode,
+            @Param("voucherCode") String voucherCode,
+            @Param("discountType") Voucher.DiscountType discountType,
+            @Param("startSt") LocalDateTime startSt,
+            @Param("startEd") LocalDateTime startEd,
+            @Param("expirySt") LocalDateTime expirySt,
+            @Param("expiryEd") LocalDateTime expiryEd,
+            @Param("status") Voucher.Status status,
+            Pageable pageable);
 }

@@ -153,7 +153,8 @@ public class ICheckoutService implements CheckoutService {
                     } else {
                         ShopCheckoutDto existed = shopCheckout.get(discount.getShopCode());
                         VoucherCheckout voucherCheckout = voucherService
-                                .customerCheckoutShopVoucher(discount.getShopCode(), existed.getProductTotal().doubleValue());
+                                .customerCheckoutShopVoucher(discount.getShopCode(),
+                                        discount.getVoucherCode(), existed.getProductTotal().doubleValue());
 
                         existed.setVoucher(voucherCheckout.getShopVoucherDto());
                         existed.setDiscount(BigDecimal.valueOf(voucherCheckout.getDiscount()));
@@ -209,7 +210,7 @@ public class ICheckoutService implements CheckoutService {
             //Vouher cua san (shipping)
             BigDecimal ecommerceShipping = BigDecimal.ZERO;
             VoucherDto sanShippingVoucher;
-            if (req.getDiscountVoucher() != null) {
+            if (req.getShippingVoucher() != null) {
                 VoucherCheckout ecommerceDiscountVoucher = voucherService
                         .customerCheckoutShippingVoucher(req.getShippingVoucher(), allProductTotal.doubleValue());
                 ecommerceShipping = BigDecimal.valueOf(ecommerceDiscountVoucher.getDiscount());

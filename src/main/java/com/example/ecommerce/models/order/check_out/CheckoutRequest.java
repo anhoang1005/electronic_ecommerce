@@ -22,6 +22,8 @@ public class CheckoutRequest {
 
     @Getter
     @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class ShopDiscount{
         private String shopCode;
