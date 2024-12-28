@@ -92,7 +92,7 @@ public class Product extends BaseEntity{
     @JsonManagedReference("product-category-product")
     private List<CategoryProduct> categoryProducts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     @JsonManagedReference("product-shop-category-product")
     private List<ShopCategoryProduct> shopCategoryProducts = new ArrayList<>();
 

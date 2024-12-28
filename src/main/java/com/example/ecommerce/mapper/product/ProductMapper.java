@@ -57,6 +57,7 @@ public class ProductMapper {
         productDocument.setIsDeleted(product.getIsDeleted());
         productDocument.setIsAccepted(product.getIsAccepted());
         productDocument.setIsHidden(product.getIsHidden());
+        productDocument.setIsRejected(product.getIsReject());
         productDocument.setShopCode(product.getShopOfProduct().getShopCode());
         productDocument.setShopId(product.getShopOfProduct().getId());
 
@@ -70,6 +71,11 @@ public class ProductMapper {
         brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
         productDocument.setBrandDocument(brandDocument);
 
+        Integer productStock = 0;
+        for(ProductVariant variant : product.getVariants()){
+            productStock += variant.getStockQuantity();
+        }
+        productDocument.setStockQuantity(Long.valueOf(productStock));
         List<ProductDocument.AttributeDocument> attributeDocuments = new ArrayList<>();
         List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
         for(ProductAttributeValue productAttributeValue : productAttributeValues){

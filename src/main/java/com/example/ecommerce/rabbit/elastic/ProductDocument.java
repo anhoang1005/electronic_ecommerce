@@ -32,6 +32,7 @@ public class ProductDocument implements Serializable {
     private Boolean isRejected;
     private Boolean isHidden;
     private Long shopId;
+    private Long stockQuantity;
     private ProductDocument.BrandDocument brandDocument;
     private ProductDocument.CategoryDocument categoryDocument;
     private List<ProductDocument.AttributeDocument> attributes;

@@ -206,7 +206,7 @@ public class FakeService {
         ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
         try {
             for (Shop shop : shops) {
-                int countProduct = 5;
+                int countProduct = 20;
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < countProduct; i++) {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
@@ -359,7 +359,7 @@ public class FakeService {
             product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
             product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
 
-            product = productRepository.save(product);
+            productRepository.save(product);
 
             //luu thong tin
             CategoryProduct categoryProduct = new CategoryProduct();
@@ -370,6 +370,7 @@ public class FakeService {
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             shopCategoryProduct.setProduct(product);
             shopCategoryProduct.setShopCategory(shopCategory);
+//            product.getShopCategoryProducts().add(shopCategoryProduct);
             shopCategoryProductRepository.save(shopCategoryProduct);
             return product;
         } catch (Exception e) {
