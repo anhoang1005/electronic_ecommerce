@@ -1,15 +1,15 @@
+### -> product-document
 GET product-document/_count
-GET product-document/_mapping
 GET product-document/_search
 {
   "query": {
     "term": {
-      "id": "546"
+      "id": "4000"
     }
   }
 }
 GET /product-document/_settings
-
+GET product-document/_mapping
 DELETE product-document
 PUT /product-document
 {
@@ -88,6 +88,9 @@ PUT /product-document
       "isHidden": {
         "type": "boolean"
       },
+      "stockQuantity": {
+        "type" : "long"
+      },
       "brandDocument": {
         "type": "object",
         "properties": {
@@ -135,24 +138,178 @@ PUT /product-document
   }
 }
 
+### -> order
+GET order-shop-document/_count
+GET order-item-document/_count
+DELETE order-shop-document
+DELETE order-item-document
+GET order-shop-document/_mapping
+GET order-item-document/_mapping
+GET order-shop-document/_search
+{
+  "query": {
+    "term": {
+      "id": 6
+    }
+  }
+}
+GET order-item-document/_search
+{
+  "query" :{
+    "term" : {
+      "id" : 380
+    }
+  }
+}
 
-DELETE product-search-document
-GET /product-document/_search
+### -> tuong quan completed - return
+GET order-shop-document/_search
 {
   "query": {
     "bool": {
-      "filter": [
+      "must": [
         {
-          "range": {
-            "minPrice": {
-              "gte": 100
-            }
+          "term": {
+            "shopId": 48
           }
         },
         {
           "range": {
-            "maxPrice": {
-              "lte": 900
+            "updatedAt": {
+              "gte": "2024-01-01",
+              "lte": "2024-12-29"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "months": {
+      "date_histogram": {
+        "field": "updatedAt",
+        "calendar_interval": "month",
+        "format": "yyyy-MM"
+      },
+      "aggs": {
+        "by_status": {
+          "terms": {
+            "field": "status.keyword"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+### -> tuong quan profit - revenue - amount
+GET order-shop-document/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "shopId": 4
+          }
+        },
+        {
+          "term": {
+            "status.keyword": "GH_THANH_CONG"
+          }
+        },
+        {
+          "range": {
+            "updatedAt": {
+              "gte": "2024-11-01",
+              "lte": "2024-12-29"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "monthly_stats": {
+      "date_histogram": {
+        "field": "updatedAt",
+        "calendar_interval": "month",
+        "format": "yyyy-MM"
+      },
+      "aggs": {
+        "total_amount": {
+          "sum": {
+            "field": "totalAmount"
+          }
+        },
+        "total_discount": {
+          "sum": {
+            "field": "shopDiscount"
+          }
+        },
+        "total_service_fee": {
+          "sum": {
+            "field": "serviceFee"
+          }
+        },
+        "revenue": {
+          "bucket_script": {
+            "buckets_path": {
+              "amount": "total_amount",
+              "discount": "total_discount"
+            },
+            "script": "params.amount - params.discount"
+          }
+        },
+        "profit": {
+          "bucket_script": {
+            "buckets_path": {
+              "revenue": "revenue",
+              "cost": "total_service_fee"
+            },
+            "script": "params.revenue - params.cost"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+
+### -> test : bulk search item
+GET order-item-document/_search
+{
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "id": [36, 37, 380, 381, 827, 38905, 38906]
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["id", "title", "price", "quantity", "productId", "code"]
+}
+### -> test : filter by shop end time
+GET order-item-document/_search
+{
+
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "shopId": 48
+          }
+        },
+        {
+          "range": {
+            "orderDate": {
+              "gte": "now-1M/M",
+              "lte": "now"
             }
           }
         }
@@ -160,43 +317,232 @@ GET /product-document/_search
     }
   }
 }
-GET /product-document/_search
+#### -> 10 product noi bat
+GET order-item-document/_search
 {
+  "size": 0,
   "query": {
-    "bool": {
-      "filter": [
-
-        {
-          "term": {
-            "shopCode": "SH00000002"
+    "term": {
+      "shopId": 48
+    }
+  },
+  "aggs": {
+    "top_products": {
+      "terms": {
+        "field": "productId",
+        "size": 10,
+        "order": {
+          "current_month>current_month_quantity": "desc"
+        }
+      },
+      "aggs": {
+        "current_month": {
+          "filter": {
+            "range": {
+              "orderDate": {
+                "gte": "now/M",
+                "lte": "now"
+              }
+            }
+          },
+          "aggs": {
+            "current_month_quantity": {
+              "sum": {
+                "field": "quantity"
+              }
+            },
+            "product_details": {
+              "top_hits": {
+                "size": 1,
+                "_source": {
+                  "includes": ["productId", "title", "price", "quantity", "url"]
+                }
+              }
+            }
+          }
+        },
+        "last_month_data": {
+          "filter": {
+            "range": {
+              "orderDate": {
+                "gte": "now-1M/M",
+                "lt": "now/M"
+              }
+            }
+          },
+          "aggs": {
+            "last_month_quantity": {
+              "sum": {
+                "field": "quantity"
+              }
+            }
           }
         }
-      ]
+      }
     }
   }
 }
 
-GET /product-document/_mapping
-GET /product-document/_search
+### -> phan phoi phuong thuc thanh toan
+GET order-shop-document/_search
 {
+
+  "query": {
+    "term": {
+      "shopId": 48
+    }
+  }
+  ,
+  "aggs": {
+    "payment_methods": {
+      "terms": {
+        "field": "paymentMethod",
+        "size": 10,
+        "order": {
+          "_count": "desc"
+        }
+      }
+    }
+  }
+}
+
+### -> phan tram tung loai product ban duoc
+GET order-item-document/_search
+{
+  "size": 0,
   "query": {
     "bool": {
       "filter": [
         {
           "term": {
-            "shopCode":  "s00000"
+            "shopId": 48
+          }
+        },
+        {
+          "range": {
+            "orderDate": {
+              "gte": "now/M",
+              "lte": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "products_sold": {
+      "terms": {
+        "field": "productId",
+        "order": {
+          "_count": "desc"
+        }
+      },
+      "aggs": {
+        "total_quantity": {
+          "sum": {
+            "field": "quantity"
+          }
+        }
+      }
+    },
+    "total_products_sold": {
+      "sum": {
+        "field": "quantity"
+      }
+    }
+  }
+}
+### -> phan tram trạng thai don hag
+GET order-shop-document/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "shopId": 48
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "statuses": {
+      "terms": {
+        "field": "status.keyword",
+        "size": 10,
+        "order": {
+          "_count": "desc"
+        }
+      },
+      "aggs": {
+        "total_orders": {
+          "value_count": {
+            "field": "status.keyword"
+          }
+        }
+      }
+    },
+    "overall_total_orders": {
+      "value_count": {
+        "field": "status.keyword"
+      }
+    }
+  }
+}
+
+### -> chi phi tung loai
+GET order-shop-document/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "shopId": 48
           }
         },
         {
           "term": {
-            "shopCategoryIds": 3
+            "status.keyword": "GH_THANH_CONG"
+          }
+        },
+        {
+          "range": {
+            "updatedAt": {
+              "gte": "now/M",
+              "lte": "now"
+            }
           }
         }
       ]
     }
+  },
+  "aggs": {
+    "total_shipping_free": {
+      "sum": {
+        "field": "shopShippingPrice"
+      }
+    },
+    "total_discount_fee": {
+      "sum": {
+        "field": "shopDiscount"
+      }
+    },
+    "total_service_free": {
+      "sum": {
+        "field": "serviceFee"
+      }
+    },
+    "total_amount": {
+      "sum": {
+        "field": "totalAmount"
+      }
+    }
   }
 }
-
 
 
 
