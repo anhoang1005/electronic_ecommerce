@@ -28,6 +28,7 @@ public class ProductConsumer {
 
             productDocumentRepository.save(productDocument);
             log.info("Product consumed and saved: " + productDocument.getTitle());
+            log.info("data received to rabbit :{}",productDocument.getShopCategoryIds());
         } catch (Exception e) {
             log.error("Failed to consume product from queue: " + e.getMessage());
             e.printStackTrace();

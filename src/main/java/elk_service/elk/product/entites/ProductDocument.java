@@ -56,13 +56,13 @@ public class ProductDocument {
     private Boolean isRejected;
     @Field(type = FieldType.Boolean)
     private Boolean isHidden;
-
     @Field(type = FieldType.Object)
     private ProductDocument.BrandDocument brandDocument;
+    @Field(type = FieldType.Long)
+    private Long stockQuantity;
 
     @Field(type = FieldType.Object)
     private ProductDocument.CategoryDocument categoryDocument;
-
 
     public static class BrandDocument{
         @Field(type = FieldType.Keyword)
