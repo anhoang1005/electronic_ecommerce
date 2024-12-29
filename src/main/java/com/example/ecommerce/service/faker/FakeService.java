@@ -277,12 +277,6 @@ public class FakeService {
             }
         }
     }
-    public  List<OrderShopDocument> getOrderShopDocumentList(){
-        return orderShopRepository.findAllWithItems()
-                .stream()
-                .map(orderMapper::mapToOrderDocument)
-                .collect(Collectors.toList());
-    }
     @Transactional
     public void sendOrderShopToElasticSearch() {
         int threadPoolSize = 10;
