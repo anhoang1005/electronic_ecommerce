@@ -3,10 +3,18 @@ package com.example.ecommerce.mapper.order;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.models.order.*;
 import com.example.ecommerce.models.order.check_out.OrderDetailDto;
+import com.example.ecommerce.rabbit.elastic.OrderDocument;
+import com.example.ecommerce.rabbit.elastic.OrderItemDocument;
+import com.example.ecommerce.rabbit.elastic.OrderShopDocument;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
+import com.example.ecommerce.utils.StringFormatUtils;
+import jakarta.persistence.criteria.Order;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +22,44 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class OrderMapper {
     private final DateTimeMapperUtils timeUtils;
+    private final StringFormatUtils stringFormatUtils;
 
+    public OrderShopDocument mapToOrderDocument(OrdersShop order) {
+        OrderShopDocument orderDocument = new OrderShopDocument();
+        orderDocument.setId(order.getId());
+        orderDocument.setOrderShopCode(order.getOrderShopCode());
+        orderDocument.setOrderCode(order.getOrdersOfOrdersShop().getOrderCode());
+        orderDocument.setStatus(order.getOrderStatus().name());
+        orderDocument.setShopShippingPrice(order.getShopShippingFee());
+        orderDocument.setShopDiscount(order.getShopDiscount());
+        orderDocument.setServiceFee(order.getServiceFee());
+        orderDocument.setShopShippingPrice(order.getShopShippingFee());
+        orderDocument.setShopDiscount(order.getShopDiscount());
+        orderDocument.setTotalAmount(order.getShopTotalAmount());
+        orderDocument.setDeliveryMethod(order.getDeliveryMethod());
+        orderDocument.setPayment(order.getIsPayment());
+        orderDocument.setShopId(order.getShopOfOrdersShop().getId());
+        orderDocument.setUserId(order.getOrdersOfOrdersShop().getUsersOfOrder().getId());
+        orderDocument.setUpdatedAt(Date.from(order.getModifiedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        orderDocument.setItemIds(stringFormatUtils.convertStringToList(order.getItemIds()));
+        orderDocument.setPaymentMethod(order.getPaymentMethod());
+
+        return orderDocument;
+    }
+    public OrderItemDocument mapToOrderItemDocument(OrdersItems ordersItems){
+        OrderItemDocument orderItemDocument = new OrderItemDocument();
+        orderItemDocument.setId(ordersItems.getId());
+        orderItemDocument.setProductId(ordersItems.getProductId());
+        orderItemDocument.setVariantId(ordersItems.getVariantId());
+        orderItemDocument.setTitle(ordersItems.getProductTitle());
+        orderItemDocument.setPrice(ordersItems.getPrice());
+        orderItemDocument.setOrderId(ordersItems.getId());
+        orderItemDocument.setUrl(ordersItems.getProductImage());
+        orderItemDocument.setOrderDate(Date.from(ordersItems.getModifiedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        orderItemDocument.setQuantity(ordersItems.getQuantity());
+        orderItemDocument.setShopId(ordersItems.getOrdersShopOfOrdersItems().getShopOfOrdersShop().getId());
+        return orderItemDocument;
+    }
     public OrderDto entityToOrderDto(Orders order) {
         return OrderDto.builder()
                 .id(order.getId())

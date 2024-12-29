@@ -30,6 +30,7 @@ public class ProductMapper {
         }
         return url;
     }
+
     public static List<Long> handleGetListShopCategories(Product product){
         List<ShopCategoryProduct> shopCategoryProducts = product.getShopCategoryProducts();
         List<Long> shopCategoryIds = new ArrayList<>();
@@ -45,7 +46,7 @@ public class ProductMapper {
         productDocument.setProductCode(product.getProductCode());
         productDocument.setTitle(product.getTitle());
         productDocument.setSlug(product.getProductSlug());
-        productDocument.setRating(0.0);
+        productDocument.setRating(product.getRating());
         productDocument.setMaxPrice(product.getMaxInitialPrice());
         productDocument.setMinPrice(product.getMinInitialPrice());
         productDocument.setUpdatedAt(Timestamp.from(Instant.now()));

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "Product")
+@Where(clause = "is_deleted = false")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +32,8 @@ public class Product extends BaseEntity{
     @Column
     private BigDecimal minInitialPrice;
 
+    @Column
+    private Double rating;
     @Column
     private BigDecimal maxInitialPrice;
 
@@ -92,7 +96,7 @@ public class Product extends BaseEntity{
     @JsonManagedReference("product-category-product")
     private List<CategoryProduct> categoryProducts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     @JsonManagedReference("product-shop-category-product")
     private List<ShopCategoryProduct> shopCategoryProducts = new ArrayList<>();
 
@@ -115,11 +119,15 @@ public class Product extends BaseEntity{
         if (this.isAccepted == null) {
             this.isAccepted = false;
         }
-        if(this.soldCount == null){
-            this.soldCount = 0;
+        if (this.rating == null) {
+            this.rating = 0.0;
+        }
+
+        if (this.isHidden == null) {
+            this.isHidden = false;
         }
         this.isDeleted = false;
-        this.isReject = true;
+        this.isReject = false;
     }
 
     public enum ProductState {

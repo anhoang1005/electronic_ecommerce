@@ -33,9 +33,9 @@ public class BaseEntity {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String modifiedBy;
 	
-	@LastModifiedDate
+//	@LastModifiedDate
 	@Column(columnDefinition = "TIMESTAMP")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private LocalDateTime modifiedAt;
 
 }

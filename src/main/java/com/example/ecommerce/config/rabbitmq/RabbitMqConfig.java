@@ -34,6 +34,22 @@ public class RabbitMqConfig {
     @Value("${rabbitmq.routing.product.key}")
     private String productRoutingKey;
 
+    //Order
+    @Value("${rabbitmq.exchange.order.name}")
+    private String orderExchangeName;
+    @Value("${rabbitmq.queue.order}")
+    private String orderQueueName;
+    @Value("${rabbitmq.routing.order.key}")
+    private String orderRoutingKey;
+
+    //OrderItem
+    @Value("${rabbitmq.exchange.item.name}")
+    private String itemExchangeName;
+    @Value("${rabbitmq.queue.item}")
+    private String itemQueueName;
+    @Value("${rabbitmq.routing.item.key}")
+    private String itemRoutingKey;
+
     //Recommend
     @Value("${rabbitmq.exchange.recommend.name}")
     private String recommendExchangeName;
@@ -46,6 +62,32 @@ public class RabbitMqConfig {
     @Value("${rabbitmq.routing.recommend.key}")
     private String recommendRoutingKey;
 
+    //order
+    @Bean public Queue orderQueue() {
+        return new Queue(orderQueueName, true);
+    }
+    @Bean
+    public DirectExchange orderExchange() {
+        return new DirectExchange(orderExchangeName,true,false );
+    }
+    @Bean
+    public Binding orderBinding() {
+        return BindingBuilder.bind(orderQueue()).to(orderExchange()).with(orderRoutingKey);
+    }
+
+    //order item
+    @Bean
+    public Queue itemQueue() {
+        return new Queue(itemQueueName, true);
+    }
+    @Bean
+    public DirectExchange itemExchange() {
+        return new DirectExchange(itemExchangeName,true,false );
+    }
+    @Bean
+    public Binding itemBinding() {
+        return BindingBuilder.bind(itemQueue()).to(itemExchange()).with(itemRoutingKey);
+    }
     // Product
     @Bean
     public Queue productQueue() {

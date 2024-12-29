@@ -16,7 +16,7 @@ public class ShopCategoryProduct {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "shopCategory_id")
+    @JoinColumn(name = "shop_category_id")
     @JsonBackReference("shop-category-shop-category-product")
     private ShopCategory shopCategory;
 
