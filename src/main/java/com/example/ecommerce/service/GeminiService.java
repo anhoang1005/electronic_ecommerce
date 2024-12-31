@@ -20,4 +20,6 @@ public interface GeminiService {
     Prompt updatePrompt(String promptName, String newPrompt, String promptText);
 
     ResponseBody deletePrompt(String promptName);
+
+    ResponseBody reviewProduct(Long productId);
 }

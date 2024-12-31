@@ -16,14 +16,14 @@ public class ProductReviewController {
     private final ProductReviewService previewService;
     private final ObjectMapper objectMapper;
 
-    @GetMapping("/api/guest/product-review")
-    public ResponseEntity<?> customerGetReviewOfProduct(@RequestBody ProductReviewFilter filter){
+    @PostMapping("/api/guest/product-review/get")
+    public ResponseEntity<?> guestGetReviewOfProduct(@RequestBody ProductReviewFilter filter){
         return ResponseEntity.ok(previewService.guestGetListReviewOfProduct(filter));
     }
 
-    @GetMapping("/api/customer/product-review/get")
-    public ResponseEntity<?> customerGetReviewOfProduct(@RequestParam("productId") Long productId){
-        return ResponseEntity.ok(previewService.customerGetTheirReview(productId));
+    @PostMapping("/api/customer/product-review/get")
+    public ResponseEntity<?> customerGetReviewOfProduct(@RequestBody ProductReviewFilter filter){
+        return ResponseEntity.ok(previewService.customerGetListReviewOfProduct(filter));
     }
 
     @PostMapping("/api/customer/product-review")
@@ -34,22 +34,25 @@ public class ProductReviewController {
             ProductReviewRequest req = objectMapper.readValue(json, ProductReviewRequest.class);
             return ResponseEntity.ok(previewService.customerCreateProductReview(req, image));
         } catch (Exception e){
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            throw new RequestNotFoundException("ERROR");
+            throw new RequestNotFoundException("ERROR " + e.getMessage());
         }
     }
 
     @PutMapping("/api/customer/product-review")
     public ResponseEntity<?> customerUpdateReviewOfProduct(
-            @RequestParam ProductReviewRequest req,
+            @RequestParam String json,
             @RequestParam(name = "image", required = false) MultipartFile image){
-        return ResponseEntity.ok(previewService.customerUpdateProductReview(req, image));
+        try{
+            ProductReviewRequest req = objectMapper.readValue(json, ProductReviewRequest.class);
+            return ResponseEntity.ok(previewService.customerUpdateProductReview(req, image));
+        } catch (Exception e){
+            throw new RequestNotFoundException("ERROR " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/api/customer/product-review/{reviewId}")
-    public ResponseEntity<?> customerDeleteReviewOfProduct(@PathVariable("reviewId") Long reviewId){
-        return ResponseEntity.ok(previewService.customerDeleteProductReview(reviewId));
+    @DeleteMapping("/api/customer/product-review/{productId}")
+    public ResponseEntity<?> customerDeleteReviewOfProduct(@PathVariable("productId") Long productId){
+        return ResponseEntity.ok(previewService.customerDeleteProductReview(productId));
     }
 
     @PostMapping("/api/owner/product-review/{reviewId}")

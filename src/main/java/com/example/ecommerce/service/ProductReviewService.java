@@ -7,11 +7,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductReviewService {
     ResponseBody guestGetListReviewOfProduct(ProductReviewFilter filter);
+    ResponseBody customerGetListReviewOfProduct(ProductReviewFilter filter);
+
     ResponseBody customerCreateProductReview(ProductReviewRequest req, MultipartFile image);
     ResponseBody customerUpdateProductReview(ProductReviewRequest req, MultipartFile image);
     ResponseBody customerDeleteProductReview(Long productId);
     ResponseBody shopOwnerReplyProductReview(Long reviewId, String shopReply);
-    ResponseBody customerGetTheirReview(Long productId);
 
     ResponseBody customerLikeProductReview(Long reviewId, boolean like);
 }

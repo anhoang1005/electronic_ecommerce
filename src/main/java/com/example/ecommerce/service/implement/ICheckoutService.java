@@ -23,8 +23,6 @@ import com.example.ecommerce.utils.DateTimeMapperUtils;
 import com.example.ecommerce.utils.MoneyUtils;
 import com.example.ecommerce.utils.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.math3.dfp.DfpField;
-import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

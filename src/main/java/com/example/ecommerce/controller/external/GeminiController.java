@@ -1,7 +1,7 @@
 package com.example.ecommerce.controller.external;
 
 import com.example.ecommerce.service.GeminiService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin("*")
 @RestController
+@AllArgsConstructor
 public class GeminiController {
-
-    @Autowired
-    private GeminiService geminiService;
+    private final GeminiService geminiService;
 
     @GetMapping("/api/guest/gemini/chat-text")
     public ResponseEntity<?> chatWithGeminiAPI(
@@ -53,6 +52,11 @@ public class GeminiController {
     public ResponseEntity<?> deletePromptAPI(
             @RequestParam("prompt_name") String promptName){
         return new ResponseEntity<>(geminiService.deletePrompt(promptName), HttpStatus.OK);
+    }
+
+    @GetMapping("/api/guest/gemini/product")
+    public ResponseEntity<?> reviewProductAPI(@RequestParam("product_id") Long productId){
+        return new ResponseEntity<>(geminiService.reviewProduct(productId), HttpStatus.OK);
     }
 
 }
