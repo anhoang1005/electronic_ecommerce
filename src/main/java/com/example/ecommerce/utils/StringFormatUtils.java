@@ -3,6 +3,9 @@ package com.example.ecommerce.utils;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class StringFormatUtils {
@@ -25,5 +28,17 @@ public class StringFormatUtils {
         } else {
             return String.valueOf(price);
         }
+    }
+    public  List<Long> convertStringToList(String dbValue) {
+
+        if(dbValue != null && !dbValue.isEmpty()){
+            String cleanedValue = dbValue.replaceAll("[\\[\\] ]", "");
+
+            List<Long> idList = Arrays.stream(cleanedValue.split(","))
+                    .map(Long::valueOf)
+                    .collect(Collectors.toList());
+            return idList;
+        }
+        return List.of();
     }
 }

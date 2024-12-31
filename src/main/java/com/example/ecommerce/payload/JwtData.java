@@ -28,6 +28,9 @@ public class JwtData {
     @JsonProperty("shop_code")
     private String shopCode;
 
+    @JsonProperty("shop_id")
+    private Long shopId;
+
     @JsonProperty("full_name")
     private String fullName;
 

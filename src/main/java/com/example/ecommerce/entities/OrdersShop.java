@@ -58,7 +58,7 @@ public class OrdersShop extends BaseEntity{
     @JoinColumn(name = "shop_id")
     private Shop shopOfOrdersShop;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "main_orders_id")
     private Orders ordersOfOrdersShop;
 
@@ -66,10 +66,12 @@ public class OrdersShop extends BaseEntity{
     private OrderShipping orderShippingOfShopOrder;
 
     @OneToMany(mappedBy = "ordersShopOfOrdersItems", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<OrdersItems> listOrdersItemsOfOrdersShop;
+    private List<OrdersItems> listOrdersItemsOfOrdersShop = new ArrayList<>();
 
     @OneToMany(mappedBy = "ordersShopPOfOrderHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrdersHistory> listOrderHistoryOfOrderShop;
+
+    private String itemIds;
 
     public enum Status{
         CHO_XAC_NHAN,

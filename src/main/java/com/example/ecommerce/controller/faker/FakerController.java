@@ -36,4 +36,11 @@ public class FakerController {
         fakeService.generateAndInsertFakeProductData();
         return "done";
     }
+    @PostMapping("/orders")
+    public String fakeOder(){
+//       fakeService.generateAndInsertOrders();
+        fakeService.sendOrderShopToElasticSearch();
+        fakeService.sendOrderItemShopToElasticsearch();
+        return "done";
+    }
 }

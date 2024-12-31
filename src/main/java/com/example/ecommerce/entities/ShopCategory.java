@@ -64,6 +64,6 @@ public class ShopCategory {
     @PrePersist
     public void onCreate(){
         this.isDelete = false;
-        this.active = false;
+        this.active = true;
     }
 }

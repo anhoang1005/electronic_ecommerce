@@ -30,6 +30,7 @@ public class ProductMapper {
         }
         return url;
     }
+
     public static List<Long> handleGetListShopCategories(Product product){
         List<ShopCategoryProduct> shopCategoryProducts = product.getShopCategoryProducts();
         List<Long> shopCategoryIds = new ArrayList<>();
@@ -45,7 +46,7 @@ public class ProductMapper {
         productDocument.setProductCode(product.getProductCode());
         productDocument.setTitle(product.getTitle());
         productDocument.setSlug(product.getProductSlug());
-        productDocument.setRating(0.0);
+        productDocument.setRating(product.getRating());
         productDocument.setMaxPrice(product.getMaxInitialPrice());
         productDocument.setMinPrice(product.getMinInitialPrice());
         productDocument.setUpdatedAt(Timestamp.from(Instant.now()));
@@ -57,6 +58,7 @@ public class ProductMapper {
         productDocument.setIsDeleted(product.getIsDeleted());
         productDocument.setIsAccepted(product.getIsAccepted());
         productDocument.setIsHidden(product.getIsHidden());
+        productDocument.setIsRejected(product.getIsReject());
         productDocument.setShopCode(product.getShopOfProduct().getShopCode());
         productDocument.setShopId(product.getShopOfProduct().getId());
 
@@ -70,6 +72,11 @@ public class ProductMapper {
         brandDocument.setBrandName(product.getBrandOfProduct().getBrandName());
         productDocument.setBrandDocument(brandDocument);
 
+        Integer productStock = 0;
+        for(ProductVariant variant : product.getVariants()){
+            productStock += variant.getStockQuantity();
+        }
+        productDocument.setStockQuantity(Long.valueOf(productStock));
         List<ProductDocument.AttributeDocument> attributeDocuments = new ArrayList<>();
         List<ProductAttributeValue> productAttributeValues = product.getProductAttributeValues();
         for(ProductAttributeValue productAttributeValue : productAttributeValues){

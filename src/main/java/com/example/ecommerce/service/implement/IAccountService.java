@@ -73,6 +73,7 @@ public class IAccountService implements AccountService {
                         .dob(dateMapperUtils.localDateToString(usersEntity.getDob()))
                         .gender(usersEntity.getGender().getValueString())
                         .shopCode((shop!=null) ? shop.getShopCode() : null)
+                        .shopId((shop!=null) ? shop.getId() : null)
                         .userCode(usersEntity.getUserCode())
                         .fullName(usersEntity.getFirstName() + " " + usersEntity.getLastName())
                         .imageUrl(usersEntity.getImageUrl())

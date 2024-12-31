@@ -4,11 +4,17 @@ import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
+import com.example.ecommerce.mapper.order.OrderMapper;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
+import com.example.ecommerce.rabbit.OrderItemProducer;
+import com.example.ecommerce.rabbit.OrderProducer;
 import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.rabbit.elastic.OrderItemDocument;
+import com.example.ecommerce.rabbit.elastic.OrderShopDocument;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.AccountService;
+import com.example.ecommerce.utils.GlobalUtils;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
@@ -17,12 +23,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
@@ -32,7 +41,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FakeService {
-
     private final UsersRepository usersRepository;
     private final Faker faker = new Faker(new Locale("vi"));
     private final PasswordEncoder passwordEncoder;
@@ -53,7 +61,12 @@ public class FakeService {
     private final ProductProducer productProducer;
     private final ShopCategoryProductRepository shopCategoryProductRepository;
     private final ObjectMapper objectMapper;
-
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderShopRepository orderShopRepository;
+    private final OrderProducer orderProducer;
+    private final OrderMapper orderMapper;
+    private final OrderItemProducer  orderItemProducer;
 
     //user - fake
     @Transactional
@@ -138,6 +151,7 @@ public class FakeService {
             accountService.changeRoleUsers(user.getUserCode(),BaseRole.CHUCUAHANG.toString(),true);
         }
     }
+
     private Shop.BusinessType getRandomBusinessType() {
         List<Shop.BusinessType> businessTypes = Arrays.asList(Shop.BusinessType.values());
         return businessTypes.get(random.nextInt(businessTypes.size()));
@@ -147,7 +161,7 @@ public class FakeService {
     public void generateAndInsertFakeShopCategoryData(){
         List<Shop> shops = shopRepository.findAll();
         for(Shop shop : shops){
-            int countCategory = random.nextInt(6);
+            int countCategory = random.nextInt(6)+1;
             for(int i = 0 ; i < countCategory ; i++){
                 ShopCategory shopCategory = new ShopCategory();
                 shopCategory.setShopOfCategory(shop);
@@ -189,6 +203,7 @@ public class FakeService {
             }
         }
     }
+
     @Transactional
     public void generateAndInsertFakeBrand(){
         for(int i = 0 ; i < 30 ; i++){
@@ -199,6 +214,7 @@ public class FakeService {
             brandRepository.save(brand);
         }
     }
+
     @Transactional
     public void generateAndInsertFakeProductData() {
         List<Shop> shops = shopRepository.findAll();
@@ -206,7 +222,7 @@ public class FakeService {
         ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
         try {
             for (Shop shop : shops) {
-                int countProduct = 5;
+                int countProduct = 20;
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < countProduct; i++) {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
@@ -229,10 +245,69 @@ public class FakeService {
     }
 
     @Transactional
+    public void sendOrderItemShopToElasticsearch(){
+        int threadPoolSize = 10;
+        ExecutorService itemExecutorService = Executors.newFixedThreadPool(threadPoolSize);
+
+        try{
+            List<OrdersItems> ordersItemsList = orderItemRepository.findAll();
+
+            for(OrdersItems ordersItems : ordersItemsList){
+                itemExecutorService.submit(() -> {
+                    try{
+                        OrderItemDocument orderItemDocument = orderMapper.mapToOrderItemDocument(ordersItems);
+                        orderItemProducer.sendItemToQueue(orderItemDocument);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        log.error("Failed to send item: {}, error: {}", ordersItems.getId(), e.getMessage(), e);
+
+                    }
+                });
+            }
+        } finally {
+            itemExecutorService.shutdown();
+            try {
+                if (!itemExecutorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    log.warn("Forcing shutdown of orderExecutorService due to timeout.");
+                    itemExecutorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                log.error("ExecutorService shutdown interrupted.", e);
+                itemExecutorService.shutdownNow();
+            }
+        }
+    }
+    @Transactional
+    public void sendOrderShopToElasticSearch() {
+        int threadPoolSize = 10;
+        ExecutorService orderExecutorService = Executors.newFixedThreadPool(threadPoolSize);
+
+        try {
+            List<OrdersShop> ordersShopList = orderShopRepository.findAll();
+
+            for (OrdersShop shop : ordersShopList) {
+                Hibernate.initialize(shop.getListOrdersItemsOfOrdersShop());
+            }
+
+            for (OrdersShop ordersShop : ordersShopList) {
+                orderExecutorService.submit(() -> {
+                    try {
+                        OrderShopDocument orderDocument = orderMapper.mapToOrderDocument(ordersShop);
+                        orderProducer.sendOrderToQueue(orderDocument);
+                    } catch (Exception e) {
+                        log.error("Failed to send order: {}, error: {}", ordersShop.getId(), e.getMessage(), e);
+                    }
+                });
+            }
+        } finally {
+
+        }
+    }
+    @Transactional
     public Product createProduct(Shop shop) {
         try {
             Category category = categoryRepository.findRandomCategory();
-            ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategory();
+            ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategoriesByShop(shop.getId()).get(0);
             Brand brand = brandRepository.findRandomBrand();
 
             List<CategoryBreadcrumb> breadcrumbs = new ArrayList<>();
@@ -262,13 +337,14 @@ public class FakeService {
             product.setProductSlug(StringFormatUtils.convertToSlug(title));
             product.setCurrency("VND");
             product.setIsHidden(false);
+            product.setIsAccepted(random.nextBoolean());
             product.setProductState(Product.ProductState.ACTIVE);
             product.setCategory(category);
             product.setBrandOfProduct(brand);
             product.setProductCode("PID" + randomUtils.generateRandomString(15));
             product.setShopOfProduct(shop);
             product.setSoldCount(random.nextInt(100, 10000));
-
+            product.setRating(faker.number().randomDouble(1, 1, 10));
             //Product image
             ProductImage image = new ProductImage();
             image.setImageUrl("https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lzd2qfj9xc99f4.webp");
@@ -359,7 +435,7 @@ public class FakeService {
             product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
             product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
 
-            product = productRepository.save(product);
+            productRepository.save(product);
 
             //luu thong tin
             CategoryProduct categoryProduct = new CategoryProduct();
@@ -370,6 +446,7 @@ public class FakeService {
             ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
             shopCategoryProduct.setProduct(product);
             shopCategoryProduct.setShopCategory(shopCategory);
+            product.getShopCategoryProducts().add(shopCategoryProduct);
             shopCategoryProductRepository.save(shopCategoryProduct);
             return product;
         } catch (Exception e) {
@@ -377,8 +454,158 @@ public class FakeService {
         }
     }
 
+    @Transactional
+    public void generateAndInsertOrders() {
+        for(int month = 1; month <= 12; month++) {
+            for(int i = 0; i < 100; i++) {
+                // get 1 buyer random
+                Users buyer = usersRepository.findUsersById(random.nextLong(99) + 1);
+                for(int orderStt = 1; orderStt <= random.nextInt(10) + 1; orderStt++) {
+                    // Create and populate Orders first
+                    Orders orders = new Orders();
 
+                    LocalDateTime modifyDate = generateRandomDateInMonth(month);
+                    log.info("modify date :{}", modifyDate);
+                    orders.setModifiedAt(modifyDate);
+                    orders.setClientAddress(faker.address().streetAddress() + ", " + faker.address().city() + ", " + faker.address().country());
+                    orders.setClientName(faker.name().firstName() + " " + faker.name().lastName());
+                    orders.setClientTelephone(faker.phoneNumber().cellPhone());
+                    orders.setUsersOfOrder(buyer);
+                    String deliveryMethod = OrderShipping.Method.GHN.name();
+                    orders.setDeliveryMethod(deliveryMethod);
 
+                    boolean isPayment = random.nextBoolean();
+                    orders.setIsPayment(isPayment);
+
+                    String paymentMethod = OrderPayment.Method.values()[random.nextInt(OrderPayment.Method.values().length)].name();
+                    orders.setPaymentMethod(paymentMethod);
+                    Orders.Status status = Orders.Status.values()[random.nextInt(Orders.Status.values().length)];
+                    orders.setStatus(status);
+
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    BigDecimal totalDiscount = BigDecimal.ZERO;
+                    BigDecimal totalServiceFee = BigDecimal.ZERO;
+                    BigDecimal totalShipping = BigDecimal.ZERO;
+                    BigDecimal totalProductAmount = BigDecimal.ZERO;
+
+                    orders.setTotalDiscount(totalDiscount);
+                    orders.setTotalFee(totalServiceFee);
+                    orders.setTotalShipping(totalShipping);
+                    orders.setTotalAmount(totalAmount);
+
+                    // Save Orders first to get ID
+                    orders = orderRepository.save(orders);
+
+                    List<OrdersShop> ordersShops = new ArrayList<>();
+
+                    for(int shopStt = 1; shopStt <= random.nextInt(2) + 1; shopStt++) {
+                        Shop shop = shopRepository.findShopById(random.nextLong(99) + 1);
+                        OrdersShop ordersShop = new OrdersShop();
+                        ordersShop.setModifiedAt(modifyDate);
+                        BigDecimal totalAmountProductShop = BigDecimal.ZERO;
+
+                        ordersShop.setShopOfOrdersShop(shop);
+                        ordersShop.setDeliveryMethod(deliveryMethod);
+                        ordersShop.setEcommerceTotalAmount(randomFeeForSomething());
+                        ordersShop.setIsPayment(isPayment);
+
+                        OrdersShop.Status orderShopStatus = OrdersShop.Status.values()[random.nextInt(OrdersShop.Status.values().length)];
+                        ordersShop.setOrderStatus(orderShopStatus);
+                        ordersShop.setPaymentMethod(paymentMethod);
+
+                        BigDecimal totalShopServiceFee = randomFeeForSomething();
+                        ordersShop.setServiceFee(totalShopServiceFee);
+
+                        BigDecimal totalShopShippingFee = randomFeeForSomething();
+                        ordersShop.setShopShippingFee(totalShopShippingFee);
+
+                        // Set the saved Orders
+                        ordersShop.setOrdersOfOrdersShop(orders);
+                        ordersShop.setShopOfOrdersShop(shop);
+
+                        ordersShop.setTotalProduct(totalAmountProductShop);
+                        ordersShop.setShopShippingFee(totalShopShippingFee);
+                        ordersShop.setShopDiscount(BigDecimal.ZERO);
+                        ordersShop.setShopTotalAmount(BigDecimal.ZERO);
+                        // Save OrdersShop before creating OrderItems
+                        ordersShop = orderShopRepository.save(ordersShop);
+
+                        log.info(shop.getId().toString());
+                        for(int orderItemProductStt = 1; orderItemProductStt <= (random.nextInt(shop.getProducts().size()) + 1); orderItemProductStt++) {
+                            Product itemProduct = shop.getProducts().get(random.nextInt(shop.getProducts().size()));
+                            BigDecimal totalAmountItemProduct = BigDecimal.ZERO;
+                            List<Long> items =new ArrayList<>();
+                            for(int orderItemVariantStt = 0; orderItemVariantStt <= (random.nextInt(itemProduct.getVariants().size())); orderItemVariantStt++) {
+                                ProductVariant itemVariant = itemProduct.getVariants().get(orderItemVariantStt);
+                                BigDecimal totalAmountItemVariant = itemVariant.getPrice();
+
+                                OrdersItems ordersItems = new OrdersItems();
+                                ordersItems.setModifiedAt(modifyDate);
+                                ordersItems.setProductId(itemProduct.getId());
+                                ordersItems.setVariantId(itemVariant.getId());
+                                ordersItems.setDescription(faker.lorem().sentence());
+                                ordersItems.setVariantName(faker.name().title());
+                                ordersItems.setProductImage(
+                                        itemProduct.getListImageOfProduct()
+                                                .stream()
+                                                .filter(image -> image.getIsMainImage())
+                                                .findFirst()
+                                                .map(image -> image != null ? image.getImageUrl() : GlobalUtils.DEFAULT_URL)
+                                                .orElse(null));
+                                ordersItems.setProductTitle(itemProduct.getTitle());
+                                Long totalQuantity = random.nextLong(10) + 1;
+                                ordersItems.setQuantity(totalQuantity);
+                                ordersItems.setPrice(totalAmountItemVariant);
+
+                                totalAmountItemProduct = totalAmountItemProduct.add(totalAmountItemVariant.multiply(BigDecimal.valueOf(totalQuantity)));
+                                ordersItems.setOrdersShopOfOrdersItems(ordersShop);
+
+                                ordersItems = orderItemRepository.save(ordersItems);
+                                items.add(ordersItems.getId());
+                            }
+                            log.info("items : {}",items.stream().toArray());
+                            ordersShop.setItemIds(items.toString());
+                            totalAmountProductShop = totalProductAmount.add(totalAmountItemProduct);
+                        }
+
+                        BigDecimal totalShopDiscount = randomFeeForSomething();
+                        ordersShop.setTotalProduct(totalAmountProductShop);
+                        ordersShop.setShopShippingFee(totalShopShippingFee);
+                        ordersShop.setShopDiscount(totalShopDiscount);
+
+                        BigDecimal totalShopAmount = totalAmountProductShop
+                                .subtract(totalShopDiscount)
+                                .subtract(totalShopShippingFee);
+                        ordersShop.setShopTotalAmount(totalShopAmount);
+
+                        // Update OrdersShop with final calculations
+                        orderShopRepository.save(ordersShop);
+
+                        totalProductAmount = totalProductAmount.add(totalAmountProductShop);
+                        totalServiceFee = totalServiceFee.add(totalShopServiceFee);
+                        totalShipping = totalShipping.add(totalShopShippingFee);
+                        totalDiscount = totalDiscount.add(totalShopDiscount);
+                    }
+
+                    // Update final Orders calculations
+                    orders.setTotalDiscount(totalDiscount);
+                    orders.setTotalFee(totalServiceFee);
+                    orders.setTotalShipping(totalShipping);
+
+                    totalAmount = totalProductAmount
+                            .add(totalServiceFee)
+                            .add(totalShipping)
+                            .subtract(totalDiscount);
+                    BigDecimal totalEcommerceServiceFee = totalServiceFee.multiply(BigDecimal.valueOf(0.05));
+                    orders.setEcommerceServiceFee(totalEcommerceServiceFee);
+                    totalAmount = totalProductAmount.subtract(totalEcommerceServiceFee);
+                    orders.setTotalAmount(totalAmount);
+
+                    orderRepository.save(orders);
+                }
+            }
+        }
+    }
 
     // Helper method to add variant and product attribute values
     private void addVariantAttributeValueAndProductAttributeValue(ProductVariant variant, Attribute attribute,
@@ -406,10 +633,20 @@ public class FakeService {
         Collections.shuffle(attributes);
         return attributes.subList(0, count);
     }
+
     private List<AttributeValue> randomAttributeValues(Attribute attribute,int count){
         List<AttributeValue> attributeValues = attributeValueRepository.findAttributeValuesByAttributeId(attribute.getId());
         Collections.shuffle(attributeValues);
         return attributeValues.subList(0,count);
 
+    }
+
+    private BigDecimal randomFeeForSomething(){
+        double randomValue = 1000 + (100000 - 1000) * random.nextDouble();
+        return new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
+    }
+    private LocalDateTime generateRandomDateInMonth(int month) {
+        int day = random.nextInt(28) + 1; // Giả sử mỗi tháng có 28 ngày để tránh lỗi ngày không hợp lệ
+        return LocalDateTime.of(2024, month, day, random.nextInt(24), random.nextInt(60), random.nextInt(60));
     }
 }
