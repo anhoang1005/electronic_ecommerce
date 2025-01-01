@@ -74,6 +74,7 @@ public class IAccountService implements AccountService {
                         .gender(usersEntity.getGender().getValueString())
                         .shopCode((shop!=null) ? shop.getShopCode() : null)
                         .shopId((shop!=null) ? shop.getId() : null)
+                        .userId(usersEntity.getId())
                         .userCode(usersEntity.getUserCode())
                         .fullName(usersEntity.getFirstName() + " " + usersEntity.getLastName())
                         .imageUrl(usersEntity.getImageUrl())
