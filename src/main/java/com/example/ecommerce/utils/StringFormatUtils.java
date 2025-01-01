@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,6 +17,30 @@ public class StringFormatUtils {
                 .replaceAll("[^a-z0-9]+", "_")
                 .replaceAll("_+", "_")
                 .replaceAll("^_|_$", "");
+    }
+
+    public static String convertNameToCustomFormat(String fullName) {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Full name cannot be null or empty");
+        }
+
+        String normalized = fullName.trim().toLowerCase();
+
+        //Loai bo dau tieng viet
+        normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        normalized = pattern.matcher(normalized).replaceAll("");
+
+        // Tách các phần tên
+        String[] nameParts = normalized.split("\\s+");
+
+        // Lấy phần tên chính (từ cuối cùng) ghép với họ và tên đệm
+        StringBuilder formattedName = new StringBuilder(nameParts[nameParts.length - 1]);
+        for (int i = 0; i < nameParts.length - 1; i++) {
+            formattedName.append(nameParts[i]);
+        }
+
+        return formattedName.toString();
     }
 
     public String formatPrice(long price) {

@@ -231,7 +231,7 @@ public class IAccountService implements AccountService {
                     userRoles.remove(role);
                 }
                 usersRepository.save(user);
-                log.info("Change roles users {} to {} success", user.getEmail(), userRoles);
+                //log.info("Change roles users {} to {} success", user.getEmail(), userRoles);
                 return true;
             }
         } catch (Exception e) {

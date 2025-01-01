@@ -1,15 +1,14 @@
 package com.example.ecommerce.controller.faker;
 
 import com.example.ecommerce.payload.ResponseBody;
+import com.example.ecommerce.service.faker.FakePlusService;
 import com.example.ecommerce.service.faker.FakeService;
+import com.example.ecommerce.service.imports.ImportProduct;
 import com.example.ecommerce.service.imports.ImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -18,12 +17,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class FakerController {
     private final FakeService fakeService;
     private final ImportService importService;
+    private final FakePlusService fakePlusService;
+    private final ImportProduct importProduct;
 
     @PostMapping("/brands")
     public String fakerBrand(){
         fakeService.generateAndInsertFakeBrand();
         return "done";
     }
+
     @PostMapping("/products")
     public String fakeProduct(@RequestParam("file") MultipartFile file){
         fakeService.createRootAccount();
@@ -41,6 +43,24 @@ public class FakerController {
 //       fakeService.generateAndInsertOrders();
         fakeService.sendOrderShopToElasticSearch();
         fakeService.sendOrderItemShopToElasticsearch();
+        return "done";
+    }
+
+    @GetMapping("/plus")
+    public ResponseEntity<String> test(@RequestParam("file") MultipartFile file){
+        fakePlusService.createRootAccount();
+        fakePlusService.createUserAccount(300);
+        fakePlusService.generateAndInsertFakeShopDate();
+        importService.importCategoriesFromExcel(file);
+        fakePlusService.generateAndInsertFakeShopCategoryData();
+        fakePlusService.generateAndInsertFakeBrand();
+        fakePlusService.generateAndInsertFakeAttributeData();
+        return ResponseEntity.ok("done");
+    }
+
+    @GetMapping("/import")
+    public String fakeProductt(@RequestParam("file") MultipartFile file){
+        importProduct.readProductsFromExcel(file);
         return "done";
     }
 }

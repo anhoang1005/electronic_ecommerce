@@ -19,4 +19,5 @@ public class AttributeValue{
     @ManyToOne
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;
+
 }
