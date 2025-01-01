@@ -35,4 +35,19 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
                                    @Param("maxPrice") BigDecimal maxPrice,
                                    Pageable pageable);
 
+    @Query("select p from Product p " +
+            "join p.shopCategoryProducts sc " +
+            "where p.shopOfProduct.shopCode = :shopCode " +
+            "and (:title is null or lower(p.title) like %:title%) " +
+            "and (:brandId is null or p.brandOfProduct.id = :brandId) " +
+            "and (:category is null or p.breadcrumb like %:category%) " +
+            "and (:shopCategoryId is null or sc.shopCategory.id = :shopCategoryId)")
+    Page<Product> guestGetListProduct(@Param("shopCode") String shopCode,
+                                      @Param("title") String title,
+                                      @Param("brandId") Long brandId,
+                                      @Param("category") String category,
+                                      @Param("shopCategoryId") String shopCategoryId,
+                                      Pageable pageable);
+
+
 }

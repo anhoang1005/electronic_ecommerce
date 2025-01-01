@@ -298,6 +298,29 @@ public class IProductService implements ProductService {
     }
 
     @Override
+    public ResponseBody guestGetListProduct(ShopProductFilter filter) {
+        try {
+            Sort sort = Sort.by(Sort.Order.desc("id"));
+            Pageable pageable = PageRequest.of(filter.getPageNumber()-1, filter.getPageSize(), sort);
+            Page<Product> page = productRepository.guestGetListProduct(filter.getShopCode(),
+                    filter.getTitle(), filter.getBrandId(), filter.getCategory(),
+                    filter.getShopCategoryId(), pageable);
+            PageData pageData = PageData.builder()
+                    .pageSize(filter.getPageSize())
+                    .pageNumber(filter.getPageNumber())
+                    .totalPage(page.getTotalPages())
+                    .totalAmount(page.getTotalElements())
+                    .data(page.stream().map(productMapper::entityToProductCard).collect(Collectors.toList()))
+                    .build();
+            return new ResponseBody(pageData, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+        } catch (Exception e){
+            e.printStackTrace();
+            log.error("get list product failed!");
+            throw new RequestNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
     public ResponseBody findProductById(Long id) {
         Product product = productRepository.findProductByIdIfAcceptedAndNotHidden(id);
         if(ObjectUtils.isEmpty(product)){

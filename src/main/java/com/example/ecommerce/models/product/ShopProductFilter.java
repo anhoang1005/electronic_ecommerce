@@ -10,9 +10,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class ShopProductFilter {
+    private String shopCode;
     private String title;
     private Long brandId;
     private String category;
+    private String shopCategoryId;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Integer rating;

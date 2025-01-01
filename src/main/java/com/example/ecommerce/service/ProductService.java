@@ -17,6 +17,7 @@ public interface ProductService {
     ResponseBody shopDeleteProduct(Long id);
     ResponseBody shopGetProductDetail(Long id);
 
+    ResponseBody guestGetListProduct(ShopProductFilter filter);
 
     ResponseBody findProductById(Long id);
     ResponseBody findProductHiddenById(Long id);

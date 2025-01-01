@@ -13,6 +13,10 @@ public interface GeminiService {
 
     ResponseBody chatWithGeminiTextWithPrompt(String prompt, String message);
 
+    ResponseBody chatWithGeminiTextWithPromptText(String promptText, String message);
+
+    ResponseBody getListPrompt();
+
     Prompt getByPromptName(String promptName);
 
     Prompt createPrompt(String promptName, String promptText);
@@ -22,4 +26,6 @@ public interface GeminiService {
     ResponseBody deletePrompt(String promptName);
 
     ResponseBody reviewProduct(Long productId);
+
+    ResponseBody aiGetReviewProduct(Long productId);
 }

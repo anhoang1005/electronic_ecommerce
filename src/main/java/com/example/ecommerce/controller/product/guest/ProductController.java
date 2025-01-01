@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller.product.guest;
 
+import com.example.ecommerce.models.product.ShopProductFilter;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -26,4 +27,10 @@ public class ProductController {
     public ResponseEntity<?> getDetail(@PathVariable("id") Long id){
         return ResponseEntity.ok(productService.getProductDetail(id));
     }
+
+    @PostMapping("/api/guest/product/get-shop-product")
+    public ResponseEntity<?> getShopProduct(@RequestBody ShopProductFilter filter){
+        return ResponseEntity.ok(productService.guestGetListProduct(filter));
+    }
+
 }

@@ -33,6 +33,11 @@ public class GeminiController {
         return new ResponseEntity<>(geminiService.chatWithGeminiTextWithPrompt(promptName, message), HttpStatus.OK);
     }
 
+    @GetMapping("/api/guest/gemini/get-prompt")
+    public ResponseEntity<?> createPromptAPI(){
+        return new ResponseEntity<>(geminiService.getListPrompt(), HttpStatus.OK);
+    }
+
     @PostMapping("/api/guest/gemini/create-prompt")
     public ResponseEntity<?> createPromptAPI(
             @RequestParam("prompt_name") String promptName,
@@ -54,9 +59,14 @@ public class GeminiController {
         return new ResponseEntity<>(geminiService.deletePrompt(promptName), HttpStatus.OK);
     }
 
-    @GetMapping("/api/guest/gemini/product")
+    @GetMapping("/api/guest/gemini/product-analysis")
     public ResponseEntity<?> reviewProductAPI(@RequestParam("product_id") Long productId){
         return new ResponseEntity<>(geminiService.reviewProduct(productId), HttpStatus.OK);
+    }
+
+    @GetMapping("/api/guest/gemini/product-review")
+    public ResponseEntity<?> aiReviewProductAPI(@RequestParam("product_id") Long productId){
+        return new ResponseEntity<>(geminiService.aiGetReviewProduct(productId), HttpStatus.OK);
     }
 
 }
