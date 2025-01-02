@@ -6,6 +6,7 @@ import com.example.ecommerce.models.product.card.ProductCard;
 import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
+import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.utils.GlobalUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@AllArgsConstructor
 public class ProductMapper {
+    private final ProductRepository productRepository;
 
     public static String handleGetImgProduct(Product product){
         String url = null;
@@ -40,7 +43,7 @@ public class ProductMapper {
         return shopCategoryIds;
     }
 
-    public static ProductDocument mapperProductToDocument(Product product) {
+    public ProductDocument mapperProductToDocument(Product product) {
         ProductDocument productDocument = new ProductDocument();
         productDocument.setId(product.getId());
         productDocument.setProductCode(product.getProductCode());

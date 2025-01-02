@@ -3,7 +3,10 @@ package com.example.ecommerce.repository;
 import com.example.ecommerce.entities.Attribute;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface AttributeRepository extends JpaRepository<Attribute,Long> {
@@ -13,4 +16,9 @@ public interface AttributeRepository extends JpaRepository<Attribute,Long> {
 
     @Query(value = "SELECT * from attributes  a where a.attribute_name COLLATE utf8mb4_unicode_ci = :name",nativeQuery = true)
     Attribute findAttributeByAttributeName(String name);
+
+    @Query(value = "SELECT * FROM attributes ORDER BY RAND() LIMIT :count", nativeQuery = true)
+    List<Attribute> findRandomAttributes(@Param("count") int count);
+
+
 }

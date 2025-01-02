@@ -67,6 +67,7 @@ public class FakeService {
     private final OrderProducer orderProducer;
     private final OrderMapper orderMapper;
     private final OrderItemProducer  orderItemProducer;
+    private final ProductMapper productMapper;
 
     //user - fake
     @Transactional
@@ -229,7 +230,7 @@ public class FakeService {
                             .thenAcceptAsync(product -> {
                                 if (product != null) {
                                     log.info("create product success");
-                                    productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+                                    productProducer.sendProductToQueue(productMapper.mapperProductToDocument(product));
                                 }
                             }, rabbitMqExecutor);
 

@@ -4,16 +4,19 @@ import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
 import com.example.ecommerce.entities.enums.CategoryType;
+import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
+import com.example.ecommerce.rabbit.ProductProducer;
+import com.example.ecommerce.rabbit.elastic.ProductDocument;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.AccountService;
-import com.example.ecommerce.service.ShopService;
 import com.example.ecommerce.utils.JsonConvert;
 import com.example.ecommerce.utils.RandomUtils;
 import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,12 +48,21 @@ public class FakePlusService {
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final CategoryProductRepository categoryProductRepository;
+    private final ShopCategoryProductRepository shopCategoryProductRepository;
+    private final ProductAttributeValueRepository productAttributeValueRepository;
+    private final ProductReviewRepository productReviewRepository;
+    private final ShopReviewRepository shopReviewRepository;
 
     private final AccountService accountService;
-    private final ShopService shopService;
+    private final ProductProducer productProducer;
+    private final ProductMapper productMapper;
 
     private final RandomUtils randomUtils;
     private final JsonConvert jsonConvert;
+
+    private final EntityManager entityManager;
 
     @Transactional
     public void createRootAccount(){
@@ -309,4 +324,351 @@ public class FakePlusService {
         log.info("Fake {} attribute in: " + ((System.nanoTime() - start)/1_000_000) + "ms", attributesData.size());
     }
 
+    @Transactional
+    public Product createProduct(Shop shop) {
+        List<String> imageUrls = new ArrayList<>();
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2011%20Pro/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2011%20Pro/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/Iphone%2011%20Pro%20max/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2012/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2012%20Pro/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2012%20Pro%20Max/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2013/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2013%20Pro/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2013%20Pro%20Max/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2015/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2015/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2015/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2015/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/7.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/IPhone/IPhone%2015/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20105%202%20SIM/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20105%204G%20Pro/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20110%204G%20Pro/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20110%204G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20215%204G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20C21%20Plus%203GB/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20C32%204GB/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20G22%204GB/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20G22%204GB/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20G22%204GB/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20G22%204GB/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20G22%204GB/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%205G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20T%204G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/6.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/7.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno7%20Z/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20Z/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20Z/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20Z/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20Z/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Oppo/OPPO%20Reno8%20Z/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Nokia/Nokia%20105%202%20SIM/6.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/6.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A23/7.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/6.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20A25%205G/7.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20S22%20Ultra/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/SamSung/Samsung%20Galaxy%20S22%20Ultra/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/6.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2012T%20Pro/7.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2013T%20Pro%205G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2013T%20Pro%205G/2.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2013T%20Pro%205G/3.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2013T%20Pro%205G/4.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%2013T%20Pro%205G/5.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%20POCO%20X6%20Pro%205G/1.jpg?raw=true");
+        imageUrls.add("https://github.com/HiepF5/Db_Ecommercer/blob/main/Xiaomi/Xiaomi%20POCO%20X6%20Pro%205G/2.jpg?raw=true");
+        try {
+            // Bước 1: Lấy các thông tin cơ bản cho sản phẩm
+            Category category = categoryRepository.findRandomCategory();
+            ShopCategory shopCategory = shopCategoryRepository.findRandomShopCategoriesByShop(shop.getId()).get(0);
+            Brand brand = brandRepository.findRandomBrand();
+
+            // Tạo breadcrumbs cho danh mục
+            List<CategoryBreadcrumb> breadcrumbs = new ArrayList<>();
+            breadcrumbs.add(CategoryBreadcrumb.builder()
+                    .id(category.getId())
+                    .category(category.getCategoryName())
+                    .build());
+            if (category.getCategoryLevel() > 0) {
+                while (category != null && category.getCategoryLevel() > 0) {
+                    Category parent = category.getParentCategory();
+                    if (parent != null) {
+                        breadcrumbs.add(CategoryBreadcrumb.builder()
+                                .id(parent.getId())
+                                .category(parent.getCategoryName())
+                                .build());
+                    }
+                    category = parent;
+                }
+                Collections.reverse(breadcrumbs);
+            }
+
+            // Tạo đối tượng sản phẩm mới
+            Product product = new Product();
+            product.setBreadcrumb(objectMapper.writeValueAsString(breadcrumbs));
+            String title = faker.lorem().sentence(random.nextInt(4, 8));
+            if (title.endsWith(".")) {
+                title = title.substring(0, title.length() - 1); // Xóa dấu chấm ở cuối
+            }
+            product.setTitle(title);
+            product.setDescription(faker.lorem().sentence(40));
+            product.setProductSlug(StringFormatUtils.convertToSlug(title));
+            product.setCurrency("VND");
+            product.setIsHidden(false);
+            product.setIsAccepted(random.nextBoolean());
+            product.setProductState(Product.ProductState.ACTIVE);
+            product.setCategory(category);
+            product.setBrandOfProduct(brand);
+            product.setProductCode("PID" + randomUtils.generateRandomString(15));
+            product.setShopOfProduct(shop);
+            product.setSoldCount(random.nextInt(10, 1000));
+            product.setRating(faker.number().randomDouble(1, 1, 5));
+
+            // Tạo sản phẩm hình ảnh
+            ProductImage image = new ProductImage();
+            image.setImageUrl(imageUrls.get(random.nextInt(0, imageUrls.size())));
+            image.setActive(true);
+            image.setIsMainImage(true);
+            image.setProductOfProductImage(product);
+            List<String> images = List.of(image).stream().map(ProductImage::getImageUrl).collect(Collectors.toList());
+            product.setListImageOfProduct(List.of(image));
+            product.setImageList(objectMapper.writeValueAsString(images));
+
+            // Bước 2: Lấy các thuộc tính và giá trị ngẫu nhiên
+            List<Attribute> attributeList = attributeRepository.findRandomAttributes(2);
+            Map<Attribute, List<AttributeValue>> mapAttribute = new HashMap<>();
+            for (Attribute attribute : attributeList) {
+                List<AttributeValue> attributeValues = attributeValueRepository
+                        .findRandomAttributesValue(attribute.getId(), 2); // 2 giá trị thuộc tính
+                mapAttribute.put(attribute, attributeValues);
+            }
+
+            // Bước 3: Tạo tất cả các biến thể sản phẩm
+            Set<String> pairedCombinations = new HashSet<>();
+            List<BigDecimal> prices = new ArrayList<>();
+
+            // Tạo một danh sách các danh sách các giá trị thuộc tính
+            List<List<AttributeValue>> attributeValueLists = new ArrayList<>();
+
+            // Lấy các giá trị của từng thuộc tính
+            for (Attribute attribute : attributeList) {
+                List<AttributeValue> attributeValues = mapAttribute.get(attribute);
+                attributeValueLists.add(attributeValues);
+            }
+
+            // Sử dụng một vòng lặp để kết hợp tất cả các giá trị của các thuộc tính
+            // Tạo tất cả các kết hợp của giá trị thuộc tính
+            for (int i = 0; i < attributeValueLists.get(0).size(); i++) {
+                for (int j = 0; j < attributeValueLists.get(1).size(); j++) {
+                    // Nếu bạn có 2 thuộc tính, bạn sẽ tạo các kết hợp của các giá trị tương ứng từ 2 danh sách thuộc tính
+                    AttributeValue value1 = attributeValueLists.get(0).get(i);
+                    AttributeValue value2 = attributeValueLists.get(1).get(j);
+
+                    String pair = value1.getId() + ":" + value2.getId(); // Kết hợp ID của các giá trị
+                    if (!pairedCombinations.contains(pair)) {
+                        pairedCombinations.add(pair);
+
+                        // Tạo một biến thể sản phẩm mới cho kết hợp này
+                        ProductVariant variant = new ProductVariant();
+                        long min = 50000;
+                        long max = 10000000;
+                        long randomValue = min + (long) (Math.random() * (max - min));
+                        randomValue = (randomValue / 1000) * 1000; // Làm tròn xuống 1000
+                        BigDecimal price = BigDecimal.valueOf(randomValue);
+                        variant.setPrice(price);
+                        prices.add(price);
+                        variant.setStockQuantity(faker.number().randomDigitNotZero());
+                        variant.setSku(faker.number().digits(10));
+                        variant.setHeight(10.0);
+                        variant.setWeight(1.0);
+                        variant.setLength(10.0);
+                        variant.setWidth(10.0);
+                        variant.setStatus(ProductVariant.Status.CON_HANG);
+                        variant.setProduct(product);
+                        product.getVariants().add(variant);
+
+                        // Thêm các giá trị thuộc tính vào biến thể
+                        VariantAttributeValue variantAttributeValue1 = new VariantAttributeValue();
+                        variantAttributeValue1.setAttribute(attributeList.get(0));
+                        variantAttributeValue1.setAttributeValue(value1);
+                        variantAttributeValue1.setVariant(variant);
+                        variant.getVariantAttributeValueList().add(variantAttributeValue1);
+                        VariantAttributeValue variantAttributeValue2 = new VariantAttributeValue();
+                        variantAttributeValue2.setAttribute(attributeList.get(1));
+                        variantAttributeValue2.setAttributeValue(value2);
+                        variantAttributeValue2.setVariant(variant);
+                        variant.getVariantAttributeValueList().add(variantAttributeValue2);
+
+                        ProductAttributeValue productAttributeValue1 = new ProductAttributeValue();
+                        productAttributeValue1.setAttribute(attributeList.get(0));
+                        productAttributeValue1.setAttributeValue(value1);
+                        productAttributeValue1.setProduct(product);
+                        product.getProductAttributeValues().add(productAttributeValue1);
+                        ProductAttributeValue productAttributeValue2 = new ProductAttributeValue();
+                        productAttributeValue2.setAttribute(attributeList.get(1));
+                        productAttributeValue2.setAttributeValue(value2);
+                        productAttributeValue2.setProduct(product);
+                        product.getProductAttributeValues().add(productAttributeValue2);
+
+                        String variantName = attributeList.get(0).getAttributeName() + ": " +  value1.getValue() +
+                                ", " + attributeList.get(1).getAttributeName() + ": " + value2.getValue();
+                        variant.setVariantSlug(StringFormatUtils.convertToSlug(variantName));
+                        variant.setProductVariation(variantName);
+                    }
+                }
+            }
+
+            // Bước 4: Xác định giá trị min và max của sản phẩm
+            List<BigDecimal> validPrices = prices.stream().filter(Objects::nonNull).collect(Collectors.toList());
+            product.setMinInitialPrice(validPrices.stream().min(BigDecimal::compareTo).orElse(null));
+            product.setMaxInitialPrice(validPrices.stream().max(BigDecimal::compareTo).orElse(null));
+
+            product.setVariations(jsonConvert.convertListObjectToJson(product.getVariants()));
+            // Lưu sản phẩm vào cơ sở dữ liệu
+            productRepository.save(product);
+
+            // Lưu thông tin danh mục cho sản phẩm
+            CategoryProduct categoryProduct = new CategoryProduct();
+            categoryProduct.setCategory(category);
+            categoryProduct.setProduct(product);
+            categoryProductRepository.save(categoryProduct);
+
+            // Lưu thông tin danh mục cửa hàng cho sản phẩm
+            ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();
+            shopCategoryProduct.setProduct(product);
+            shopCategoryProduct.setShopCategory(shopCategory);
+            product.getShopCategoryProducts().add(shopCategoryProduct);
+            shopCategoryProductRepository.save(shopCategoryProduct);
+            return product;
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating product", e);
+        }
+    }
+
+    @Transactional
+    public void fakeShopReview() {
+        log.info("Start fake shop review...");
+        long startTime = System.currentTimeMillis();
+        List<Shop> shops = shopRepository.findAll();
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        try {
+            for (Shop shop : shops) {
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
+                List<Users> users = usersRepository.findRandomUsers(random.nextInt(0, 30));
+                for (Users user : users) {
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                        ShopReview shopReview = new ShopReview();
+                        shopReview.setShopOfShopReview(shop);
+                        shopReview.setUsersOfShopReview(user);
+                        shopReview.setActive(true);
+                        shopReview.setRating(faker.number().numberBetween(1, 6));
+                        shopReview.setComment(faker.lorem().sentence(random.nextInt(1, 20)));
+                        boolean shopReply = faker.bool().bool();
+                        shopReview.setIsReply(shopReply);
+                        if (shopReply) {
+                            shopReview.setReply(faker.lorem().sentence(random.nextInt(1, 20)));
+                        }
+                        return shopReview;
+                    }, executorService).thenAcceptAsync(shopReviewRepository::save, executorService);
+                    futures.add(future);
+                }
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }
+        } finally {
+            executorService.shutdown();
+            log.info("End fake shop review in " + (System.currentTimeMillis() - startTime) + "ms");
+        }
+    }
+
+    @Transactional
+    public void fakeProductReview() {
+        log.info("Start fake product review...");
+        long startTime = System.currentTimeMillis();
+        List<Product> products = productRepository.findAll();
+        ExecutorService executorService = Executors.newFixedThreadPool(10);  // Thread pool để xử lý bất đồng bộ
+        try {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+            for (Product product : products) {
+                List<Users> users = usersRepository.findRandomUsers(random.nextInt(0, 30));
+                for (Users user : users) {
+                    // Lưu review vào cơ sở dữ liệu
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                        ProductReview productReview = new ProductReview();
+                        productReview.setProductOfProductReview(product);
+                        productReview.setUsersOfProductReview(user);
+                        productReview.setActive(true);
+                        productReview.setRating(faker.number().numberBetween(1, 5));
+                        productReview.setTextComment(faker.lorem().sentence(random.nextInt(1, 20)));
+                        productReview.setTag(faker.lorem().word() + ", " + faker.lorem().word() + ", " + faker.lorem().word());
+                        productReview.setImageComment(faker.internet().image());
+                        boolean shopReply = faker.bool().bool();
+                        productReview.setIsShopReply(shopReply);
+                        if (shopReply) {
+                            productReview.setShopReply(faker.lorem().sentence());
+                        } else {
+                            productReview.setShopReply(null);
+                        }
+                        return productReview;
+                    }, executorService)
+                            .thenAcceptAsync(productReviewRepository::save, executorService);
+                    futures.add(future);
+                }
+            }
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        } finally {
+            executorService.shutdown();
+            log.info("End fake product review in " + (System.currentTimeMillis() - startTime) + "ms");
+        }
+    }
+
+    @Transactional
+    public void generateAndInsertFakeProductData() {
+        List<Shop> shops = shopRepository.findAll();
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
+        try {
+            for (Shop shop : shops) {
+                int countProduct = 20;
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
+                for (int i = 0; i < countProduct; i++) {
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
+                            .thenAcceptAsync(product -> {
+                                if (product != null) {
+                                    productProducer.sendProductToQueue(productMapper.mapperProductToDocument(product));
+                                }
+                            }, rabbitMqExecutor);
+
+                    futures.add(future);
+                }
+
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }
+        } finally {
+            executorService.shutdown();
+            rabbitMqExecutor.shutdown();
+        }
+    }
 }

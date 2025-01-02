@@ -55,6 +55,9 @@ public class FakerController {
         fakePlusService.generateAndInsertFakeShopCategoryData();
         fakePlusService.generateAndInsertFakeBrand();
         fakePlusService.generateAndInsertFakeAttributeData();
+        fakePlusService.generateAndInsertFakeProductData();
+        fakePlusService.fakeShopReview();
+        fakePlusService.fakeProductReview();
         return ResponseEntity.ok("done");
     }
 

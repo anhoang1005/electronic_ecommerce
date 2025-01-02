@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller.external;
 
+import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.GeminiService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,13 @@ public class GeminiController {
     @GetMapping("/api/guest/gemini/get-prompt")
     public ResponseEntity<?> createPromptAPI(){
         return new ResponseEntity<>(geminiService.getListPrompt(), HttpStatus.OK);
+    }
+
+    @GetMapping("/api/guest/gemini/get-prompt-name")
+    public ResponseEntity<?> getPromptAPI(@RequestParam("prompt_name") String promptName){
+        ResponseBody responseBody = new ResponseBody(geminiService.getByPromptName(promptName), ResponseBody.Status.SUCCESS,
+                ResponseBody.Code.SUCCESS);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @PostMapping("/api/guest/gemini/create-prompt")

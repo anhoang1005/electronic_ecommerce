@@ -216,7 +216,7 @@ public class IProductService implements ProductService {
             ObjectMapper objectMapper = new ObjectMapper();
             product.setProductSpecifications(objectMapper.writeValueAsString(productAttributeValues));
             product = productRepository.save(product);
-            productProducer.sendProductToQueue(ProductMapper.mapperProductToDocument(product));
+            productProducer.sendProductToQueue(productMapper.mapperProductToDocument(product));
 
             for(Long id : dto.getShopCategoryIds()){
                 ShopCategoryProduct shopCategoryProduct = new ShopCategoryProduct();

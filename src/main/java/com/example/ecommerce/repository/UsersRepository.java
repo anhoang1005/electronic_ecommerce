@@ -19,6 +19,9 @@ import java.util.List;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
 
+    @Query(value = "SELECT * FROM users ORDER BY RAND() LIMIT :count", nativeQuery = true)
+    List<Users> findRandomUsers(@Param("count") int count);
+
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     default Users findAndUpdateReadNotify(String userCode, Long notifyId){
