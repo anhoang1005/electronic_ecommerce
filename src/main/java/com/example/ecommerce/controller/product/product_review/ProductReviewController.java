@@ -60,4 +60,9 @@ public class ProductReviewController {
                                                        @RequestParam("reply") String reply){
         return ResponseEntity.ok(previewService.shopOwnerReplyProductReview(reviewId, reply));
     }
+
+    @GetMapping("/api/all/product-review/check-buy/{productId}")
+    public ResponseEntity<?> checkUserBuyProduct(@PathVariable("productId") Long productId){
+        return ResponseEntity.ok(previewService.checkUserBuyProduct(productId));
+    }
 }

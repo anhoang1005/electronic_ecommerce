@@ -1,16 +1,13 @@
 package com.example.ecommerce.service.implement;
 
-import com.example.ecommerce.entities.Product;
-import com.example.ecommerce.entities.ProductReview;
-import com.example.ecommerce.entities.Users;
+import com.example.ecommerce.entities.*;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.mapper.product_review.ProductReviewMapper;
 import com.example.ecommerce.models.product_review.*;
 import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.repository.ProductRepository;
-import com.example.ecommerce.repository.ProductReviewRepository;
-import com.example.ecommerce.repository.UsersRepository;
+import com.example.ecommerce.payload.product.VariantCheck;
+import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
 import com.example.ecommerce.service.ProductReviewService;
 import com.example.ecommerce.utils.AuthenticationUtils;
@@ -38,6 +35,8 @@ public class IProductReviewService implements ProductReviewService {
     private final AuthenticationUtils authUtils;
     private final ProductReviewMapper productReviewMapper;
     private final FileService fileService;
+    private final OrderItemRepository orderItemRepository;
+    private final VariantRepository variantRepository;
 
 
     @Override
@@ -257,5 +256,36 @@ public class IProductReviewService implements ProductReviewService {
     @Override
     public ResponseBody customerLikeProductReview(Long reviewId, boolean like) {
         return null;
+    }
+
+    @Override
+    public ResponseBody checkUserBuyProduct(Long productId) {
+        try{
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Optional<OrdersItems> ordersItems = orderItemRepository
+                    .findOrderItemByUserIdAndProductId(userCode, productId, OrdersShop.Status.GH_THANH_CONG);
+            if(ordersItems.isPresent()){
+                OrdersItems item = ordersItems.get();
+                ProductVariant variant = variantRepository.findById(item.getVariantId())
+                        .orElseThrow(() -> new RequestNotFoundException("San pham khong ton tai"));
+                VariantCheck check = VariantCheck.builder()
+                        .result(true)
+                        .checkVariant(VariantCheck.Check.builder()
+                                .variantId(variant.getId())
+                                .variant(variant.getProductVariation())
+                                .build())
+                        .build();
+                return new ResponseBody(check, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+            } else {
+                VariantCheck check = VariantCheck.builder()
+                        .result(false)
+                        .checkVariant(null)
+                        .build();
+                return new ResponseBody(check, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
+            }
+        } catch (Exception e){
+            log.error("Check user buy product error! Error: {}", e.getMessage());
+            throw new RequestNotFoundException("ERROR");
+        }
     }
 }
