@@ -311,7 +311,7 @@ public class IGeminiService implements GeminiService {
                     "Dữ liệu về sản phẩm 1 là: " + productJson1 + " - " + reviewJson1 + "\n" +
                     "Dữ liệu về sản phẩm 2 là: " + productJson2 + " - " + reviewJson2;
             return chatWithGeminiTextWithPromptText(text, "");
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RequestNotFoundException("ERROR");
         }

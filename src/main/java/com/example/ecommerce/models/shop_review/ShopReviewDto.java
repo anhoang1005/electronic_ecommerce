@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ShopReviewDto {
     private Long id;
+    private String userCode;
+    private String username;
+    private String userAvatar;
     private Integer rating;
     private String comment;
     private Boolean isReply;
