@@ -35,4 +35,13 @@ public interface ShopReviewRepository extends JpaRepository<ShopReview, Long> {
             "and sr.usersOfShopReview.userCode = :userCode")
     Optional<ShopReview> ownerFindReviewByUsersCodeAndShopCode(@Param("shopCode") String shopCode,
                                                                      @Param("userCode") String userCode);
+
+    @Query("SELECT AVG(r.rating) FROM ShopReview r " +
+            "WHERE r.shopOfShopReview.shopCode = :shopCode")
+    Double averageRatingOfShop(@Param("shopCode") String shopCode);
+
+    @Query("SELECT COUNT(r) FROM ShopReview r " +
+            "WHERE r.shopOfShopReview.shopCode = :shopCode")
+    Long countReviewsOfShop(@Param("shopCode") String shopCode);
+
 }

@@ -4,6 +4,7 @@ import com.example.ecommerce.entities.Prompt;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.external.gemini.GeminiRequest;
 import com.example.ecommerce.models.external.gemini.GeminiResponse;
+import com.example.ecommerce.models.post.PostRequest;
 import com.example.ecommerce.models.product_review.ProductReviewFilter;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.ProductRepository;
@@ -264,6 +265,74 @@ public class IGeminiService implements GeminiService {
             ResponseBody responseBody = productReviewService.guestGetListReviewOfProduct(filter);
             String jsonString = objectMapper.writeValueAsString(responseBody.getData());
             return chatWithGeminiTextWithPromptText(text, jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
+
+    @Override
+    public ResponseBody aiCompareProduct(Long productId1, Long productId2) {
+        try {
+            ResponseBody product1 = productService.getProductDetail(productId1);
+            ResponseBody product2 = productService.getProductDetail(productId2);
+            String productJson1 = objectMapper.writeValueAsString(product1.getData());
+            String productJson2 = objectMapper.writeValueAsString(product2.getData());
+            ProductReviewFilter filter1 = ProductReviewFilter.builder()
+                    .productId(productId1)
+                    .rating(null)
+                    .sort(null)
+                    .pageNumber(1)
+                    .pageSize(20)
+                    .build();
+            ProductReviewFilter filter2 = ProductReviewFilter.builder()
+                    .productId(productId2)
+                    .rating(null)
+                    .sort(null)
+                    .pageNumber(1)
+                    .pageSize(20)
+                    .build();
+            ResponseBody review1 = productReviewService.guestGetListReviewOfProduct(filter1);
+            ResponseBody review2 = productReviewService.guestGetListReviewOfProduct(filter2);
+            String reviewJson1 = objectMapper.writeValueAsString(review1.getData());
+            String reviewJson2 = objectMapper.writeValueAsString(review2.getData());
+            String text = "Bạn là một AI phân tích dữ liệu chuyên sâu về sàn thương mại điện tử ElectroHub, có nhiệm vụ đánh giá và so sánh các sản phẩm điện tử dựa trên dữ liệu chi tiết từ thông số kỹ thuật và phản hồi của người dùng. Với dữ liệu đã được cung cấp, bạn sẽ thực hiện các nhiệm vụ sau:\n" +
+                    "\n" +
+                    "1. Phân tích và so sánh chi tiết các thông số kỹ thuật của hai sản phẩm, chỉ ra sự khác biệt nổi bật về hiệu năng, thiết kế, tính năng và giá trị sử dụng.\n" +
+                    "2. Đánh giá điểm số trung bình và sự phân bố điểm đánh giá (ví dụ: tỷ lệ 5 sao, 4 sao, v.v.) của từng sản phẩm.\n" +
+                    "3. So sánh tỷ lệ đánh giá tích cực (đánh giá tốt) và tiêu cực (đánh giá xấu) của hai sản phẩm, đồng thời chỉ ra nguyên nhân chính dẫn đến sự khác biệt này nếu có.\n" +
+                    "4. Đưa ra kết luận chi tiết, chỉ rõ sản phẩm nào có ưu điểm vượt trội, sản phẩm nào phù hợp hơn với các nhu cầu cụ thể của người dùng.\n" +
+                    "\n" +
+                    "Yêu cầu trình bày:\n" +
+                    "- Nội dung phân tích rõ ràng, mạch lạc và có cấu trúc hợp lý.\n" +
+                    "- Sử dụng không quá 700 ký tự, nhưng vẫn đảm bảo đầy đủ thông tin.\n" +
+                    "- Cung cấp thông tin liền mạch, không ngắt quãng, dễ hiểu.\n" +
+                    "\n" +
+                    "Dữ liệu về sản phẩm 1 là: " + productJson1 + " - " + reviewJson1 + "\n" +
+                    "Dữ liệu về sản phẩm 2 là: " + productJson2 + " - " + reviewJson2;
+            return chatWithGeminiTextWithPromptText(text, "");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RequestNotFoundException("ERROR");
+        }
+    }
+
+    @Override
+    public ResponseBody aiCheckPostCreate(PostRequest req) {
+        try {
+            String json = objectMapper.writeValueAsString(req);
+            String text = "Bạn là một AI chuyên kiểm tra nội dung dựa trên tiêu chuẩn cộng đồng của một nền tảng mạng xã hội. Với dữ liệu của bài đăng sau, hãy thực hiện các bước:\n" +
+                    "\n" +
+                    "Kiểm tra nội dung (content), thẻ hashtag (hashTag), vị trí (location), và vai trò của người đăng bài (postRole).\n" +
+                    "Kiểm tra xem bài viết có vi phạm các tiêu chuẩn cộng đồng sau đây hay không:\n" +
+                    "Nội dung có chứa ngôn từ gây thù hận, tục tĩu, bạo lực hoặc phân biệt đối xử.\n" +
+                    "Hashtag có chứa từ khóa phản cảm, không phù hợp hoặc vi phạm quy định.\n" +
+                    "Bài viết có thông tin sai lệch hoặc nội dung gây hiểu lầm.\n" +
+                    "Kết luận:\n" +
+                    "Nếu bài viết vi phạm tiêu chuẩn cộng đồng, chỉ trả về 1 chữ \"true\".\n" +
+                    "Nếu không vi phạm, trả về chỉ 1 chữ \"false\".\n" +
+                    "Nội dung bài đăng là : " + json;
+            return chatWithGeminiTextWithPromptText(text, "");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RequestNotFoundException("ERROR");

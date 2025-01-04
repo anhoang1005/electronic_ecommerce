@@ -28,4 +28,11 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
     Page<Users> getUserFollowShop(@Param("shopCode") String shopCode,
                                   Pageable pageable);
 
+    @Query("SELECT COUNT(u) FROM Shop s JOIN s.listUsersFollowShop u WHERE s.shopCode = :shopCode")
+    Long countFollowersByShopCode(@Param("shopCode") Long shopCode);
+
+    @Query("SELECT COUNT(p) FROM Shop s JOIN s.products p WHERE s.shopCode = :shopCode")
+    Long countProductsByShopCode(@Param("shopCode") String shopCode);
+
+
 }

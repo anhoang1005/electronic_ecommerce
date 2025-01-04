@@ -570,6 +570,65 @@ public class FakePlusService {
 
     @Transactional
     public void fakeShopReview() {
+        List<AbstractMap.SimpleEntry<String, Integer>> reviews = new ArrayList<>();
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop giao hàng rất nhanh, tôi rất hài lòng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ khách hàng không thân thiện, tôi sẽ không quay lại.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm đúng như mô tả, giao hàng đúng hạn.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giao diện website dễ sử dụng, tiện lợi.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop đóng gói sản phẩm rất cẩn thận, không bị hư hỏng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng sản phẩm không giống như mô tả, thất vọng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mình đã mua nhiều lần, luôn hài lòng với chất lượng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thời gian giao hàng rất chậm, hơn 1 tuần mới nhận được hàng.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá cả hợp lý, sẽ tiếp tục ủng hộ shop.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop luôn có những ưu đãi rất tốt, rất đáng mua.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị lỗi, shop không giải quyết nhanh chóng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giao dịch nhanh chóng, nhân viên hỗ trợ nhiệt tình.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop rất uy tín, tôi đã mua rất nhiều lần và không gặp vấn đề gì.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ khách hàng không phản hồi kịp thời, tôi khá thất vọng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm chất lượng, đúng như mô tả trên website.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop cần cải thiện chất lượng giao hàng, có vài lần hàng đến bị vỡ.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm giao không đúng màu như tôi yêu cầu.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá khá cao nhưng chất lượng rất tốt, xứng đáng với tiền.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop rất nhiệt tình, giao hàng nhanh chóng.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Đã mua rất nhiều lần, sản phẩm luôn tốt và giao đúng hạn.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop không gửi đủ đơn hàng, tôi phải liên hệ lại nhiều lần.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hàng quá chậm, nhân viên không hỗ trợ khi có sự cố.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Rất hài lòng với cách đóng gói, sản phẩm không bị hư hại.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop có nhiều sản phẩm chất lượng, giao hàng nhanh.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá cả hơi cao so với những nơi khác, nhưng chất lượng ổn.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop rất chuyên nghiệp, tôi sẽ tiếp tục ủng hộ.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm không như quảng cáo, tôi cảm thấy thất vọng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi đã mua sản phẩm ở shop này và rất hài lòng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thật sự rất tiếc khi shop không chú trọng vào dịch vụ sau bán hàng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop giao hàng cực kỳ nhanh, tôi nhận được trong vòng 2 ngày.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng sản phẩm rất tệ, tôi không khuyến khích mua.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mọi thứ đều ổn, nhưng giao hàng hơi lâu.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất thích shop này, sản phẩm chất lượng và dịch vụ tuyệt vời.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ khách hàng rất chậm và không hỗ trợ kịp thời.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm rất chất lượng, giá cả hợp lý.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop đóng gói sản phẩm rất tốt, không bị hư hại trong quá trình vận chuyển.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop có nhiều lựa chọn, rất dễ tìm kiếm sản phẩm.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất thất vọng về việc shop không hoàn tiền khi sản phẩm bị lỗi.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm đã đến nhanh chóng và đúng với mô tả, tôi hài lòng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá khá rẻ so với chất lượng sản phẩm.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị lỗi và shop không chấp nhận đổi trả.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mặc dù giao hàng chậm nhưng sản phẩm vẫn rất tốt.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hệ thống website khá dễ sử dụng, rất tiện lợi khi mua sắm.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop giao hàng đúng giờ, rất chuyên nghiệp.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mình không hài lòng về việc shop không phản hồi nhanh chóng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mọi thứ đều ổn, giao hàng nhanh và sản phẩm đúng như mô tả.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop cần cải thiện thêm về chính sách bảo hành, không rõ ràng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mặc dù giá hơi cao nhưng chất lượng rất tốt.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi thích cách shop xử lý khiếu nại, rất chuyên nghiệp.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mình cảm thấy không hài lòng với sự chậm trễ trong việc giao hàng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop cần phải cải thiện dịch vụ khách hàng, không thân thiện.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giao hàng đúng thời gian và sản phẩm rất chất lượng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có gì đặc biệt, sản phẩm giống như trên website.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất hài lòng về tất cả mọi thứ, từ dịch vụ đến sản phẩm.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop không có hỗ trợ trực tuyến, khá khó khăn khi cần giúp đỡ.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi sẽ tiếp tục mua hàng ở shop này vì sản phẩm rất tốt.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Shop giao hàng sai sản phẩm, tôi đã phải đợi thêm rất lâu.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm chất lượng tốt, tôi rất hài lòng.", 5));
         log.info("Start fake shop review...");
         long startTime = System.currentTimeMillis();
         List<Shop> shops = shopRepository.findAll();
@@ -584,8 +643,10 @@ public class FakePlusService {
                         shopReview.setShopOfShopReview(shop);
                         shopReview.setUsersOfShopReview(user);
                         shopReview.setActive(true);
-                        shopReview.setRating(faker.number().numberBetween(1, 6));
-                        shopReview.setComment(faker.lorem().sentence(random.nextInt(1, 20)));
+
+                        AbstractMap.SimpleEntry<String, Integer> review = reviews.get(random.nextInt(0, reviews.size()));
+                        shopReview.setRating(review.getValue());
+                        shopReview.setComment(review.getKey());
                         boolean shopReply = faker.bool().bool();
                         shopReview.setIsReply(shopReply);
                         if (shopReply) {
@@ -605,6 +666,115 @@ public class FakePlusService {
 
     @Transactional
     public void fakeProductReview() {
+        List<AbstractMap.SimpleEntry<String, Integer>> reviews = new ArrayList<>();
+
+        reviews.add(new AbstractMap.SimpleEntry<>("Thiết kế đẹp mắt, rất ấn tượng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng âm thanh rất tuyệt vời.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị lỗi sau một tuần sử dụng.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có gì đặc biệt, đúng như mong đợi.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dung lượng pin cực kỳ ấn tượng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Màn hình không sắc nét như quảng cáo.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất hài lòng với hiệu năng của sản phẩm.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá cả quá cao so với chất lượng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ bảo hành tốt, tôi rất hài lòng.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm dùng khá ổn, không có gì nổi bật.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thiết kế nhỏ gọn, dễ mang theo.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị nóng khi sử dụng lâu.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng hình ảnh rất đẹp và rõ ràng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Kết nối không ổn định, rất khó chịu.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hỗ trợ kỹ thuật nhanh chóng và tận tình.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm không đáng giá tiền.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất thích tính năng thông minh của nó.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Vỏ sản phẩm dễ bị trầy xước.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi không ngờ sản phẩm này lại tốt đến vậy!", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Âm lượng loa quá nhỏ, không phù hợp với nhu cầu của tôi.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giao diện người dùng rất thân thiện.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thời gian sạc quá lâu, không tiện dụng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mọi thứ đều ổn, không có gì để phàn nàn.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Cảm biến hoạt động chính xác và nhạy.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm không giống như mô tả trên website.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi sẽ giới thiệu sản phẩm này cho bạn bè.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Phần mềm đi kèm không thực sự hữu ích.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Khả năng chống nước rất tốt, tôi đã thử nghiệm.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hệ thống làm mát hoạt động không hiệu quả.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Nhận được sản phẩm đúng thời gian và như quảng cáo.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Độ bền của sản phẩm không cao, nhanh hỏng.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Màn hình lớn và rất sáng, dễ sử dụng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chức năng điều khiển từ xa không hoạt động.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ hỗ trợ khách hàng rất tốt.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm rất dễ sử dụng ngay cả với người lớn tuổi.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Máy bị treo khi chạy các ứng dụng nặng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng hoàn thiện rất cao cấp.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có hướng dẫn sử dụng đầy đủ.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm đáp ứng đầy đủ các nhu cầu của tôi.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Kết nối Bluetooth bị gián đoạn thường xuyên.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Giá cả hợp lý so với chất lượng.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Cáp sạc đi kèm quá ngắn, không tiện lợi.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất hài lòng với thiết kế và tính năng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có nút điều chỉnh âm lượng riêng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm chạy rất êm và không gây tiếng ồn.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất liệu vỏ ngoài nhìn không được chắc chắn.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hiệu suất pin kém, chỉ dùng được vài giờ.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Cảm ứng rất nhạy và chính xác.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Phần mềm thường xuyên bị lỗi, cần cải thiện.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi thấy sản phẩm này rất đáng tiền.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Nhiệt độ máy tăng quá nhanh khi sử dụng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Khả năng tương thích với các thiết bị khác rất tốt.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Đóng gói sản phẩm không cẩn thận.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hỗ trợ nhiều tính năng tiện ích.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm có quá nhiều tính năng không cần thiết.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất hài lòng với chất lượng tổng thể.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hệ thống âm thanh không đạt tiêu chuẩn.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm hoạt động rất ổn định trong thời gian dài.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có cải tiến gì so với phiên bản trước.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Rất phù hợp với nhu cầu của tôi.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi thất vọng về dịch vụ sau bán hàng.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Màn hình cảm ứng rất mượt mà.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm có một số tính năng khó sử dụng.", 3));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng build rất chắc chắn và bền.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có cập nhật phần mềm mới, rất bất tiện.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất yêu thích sản phẩm này!", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm không phù hợp với mong đợi của tôi.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dung lượng lưu trữ rất lớn, đủ để dùng.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thời gian giao hàng quá lâu.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi sẽ tiếp tục mua sản phẩm của hãng này.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Kết cấu sản phẩm không được như mong đợi.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chức năng tự động rất hữu ích.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất lượng âm thanh kém, không đáng giá.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bền và đáng tin cậy.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không có bất kỳ phụ kiện nào đi kèm.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hiệu năng tổng thể rất tốt, đáng mua.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ khách hàng rất chậm và không hữu ích.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Thiết kế hiện đại và rất bắt mắt.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị lỗi phần mềm khi sử dụng.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi cảm thấy hài lòng với sản phẩm này.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Chất liệu rẻ tiền, không xứng đáng với giá tiền.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm hoạt động rất tốt và bền bỉ.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Không thể kết nối với thiết bị khác, rất bất tiện.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi rất thích trải nghiệm với sản phẩm này.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dây sạc đi kèm chất lượng kém, dễ hỏng.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm này có nhiều cải tiến hơn phiên bản trước.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Cảm giác sử dụng không được thoải mái.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Mọi thứ đều tốt, tôi không có gì để phàn nàn.", 4));
+        reviews.add(new AbstractMap.SimpleEntry<>("Khả năng tương thích với các ứng dụng rất tốt.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm bị lỗi ngay từ khi mở hộp.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi hoàn toàn hài lòng với lựa chọn của mình.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Phần mềm chưa được tối ưu, cần cải thiện.", 2));
+        reviews.add(new AbstractMap.SimpleEntry<>("Sản phẩm đẹp và rất đáng mua.", 5));
+        reviews.add(new AbstractMap.SimpleEntry<>("Dịch vụ sau bán hàng cần được cải thiện.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Tôi sẽ không mua lại sản phẩm này.", 1));
+        reviews.add(new AbstractMap.SimpleEntry<>("Hiệu năng ổn định, không bị lag.", 4));
+        List<String> tags = List.of(
+                "Thiết kế đẹp", "Chất lượng âm thanh", "Dung lượng pin", "Hiệu năng cao",
+                "Màn hình sắc nét", "Kết nối Bluetooth", "Chống nước", "Tính năng thông minh",
+                "Thân thiện người dùng", "Độ bền cao", "Chất liệu cao cấp", "Giá cả hợp lý",
+                "Hỗ trợ kỹ thuật", "Phần mềm tối ưu", "Thời gian sạc nhanh", "Dung lượng lưu trữ",
+                "Giao diện trực quan", "Chống va đập", "Tương thích đa thiết bị", "Tính năng tự động",
+                "Hỗ trợ nhiều ngôn ngữ", "Sạc không dây", "Khả năng nâng cấp", "Hệ thống làm mát",
+                "Loa ngoài lớn", "Kích thước nhỏ gọn", "Dịch vụ bảo hành", "Phụ kiện đi kèm",
+                "Đóng gói an toàn", "Thiết kế hiện đại"
+        );
+
         log.info("Start fake product review...");
         long startTime = System.currentTimeMillis();
         List<Product> products = productRepository.findAll();
@@ -620,9 +790,11 @@ public class FakePlusService {
                         productReview.setProductOfProductReview(product);
                         productReview.setUsersOfProductReview(user);
                         productReview.setActive(true);
-                        productReview.setRating(faker.number().numberBetween(1, 5));
-                        productReview.setTextComment(faker.lorem().sentence(random.nextInt(1, 20)));
-                        productReview.setTag(faker.lorem().word() + ", " + faker.lorem().word() + ", " + faker.lorem().word());
+
+                        AbstractMap.SimpleEntry<String, Integer> review = reviews.get(random.nextInt(0, reviews.size()));
+                        productReview.setRating(review.getValue());
+                        productReview.setTextComment(review.getKey());
+                        productReview.setTag(tags.get(random.nextInt(0, tags.size())) + ", " + tags.get(random.nextInt(0, tags.size())));
                         productReview.setImageComment(faker.internet().image());
                         boolean shopReply = faker.bool().bool();
                         productReview.setIsShopReply(shopReply);
@@ -651,7 +823,7 @@ public class FakePlusService {
         ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
         try {
             for (Shop shop : shops) {
-                int countProduct = 20;
+                int countProduct = 10;
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < countProduct; i++) {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)

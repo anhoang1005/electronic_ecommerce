@@ -24,7 +24,7 @@ public class ProductDetail {
     private ProductCategory productCategory;
     private String shopCode;
     private Double rating;
-    private Integer countComments;
+    private Long countComments;
     private List<VariantDetail> productVariant;
     private Long favoritesCount;
     private Map<String, String> productAttribute;

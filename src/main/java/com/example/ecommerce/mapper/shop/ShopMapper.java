@@ -2,17 +2,32 @@ package com.example.ecommerce.mapper.shop;
 
 import com.example.ecommerce.entities.Shop;
 import com.example.ecommerce.models.shop.ShopDetailDto;
+import com.example.ecommerce.repository.ShopRepository;
+import com.example.ecommerce.repository.ShopReviewRepository;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class ShopMapper {
-    @Autowired
-    private DateTimeMapperUtils dateUtils;
+    private final DateTimeMapperUtils dateUtils;
+    private final ShopReviewRepository shopReviewRepository;
+    private final ShopRepository shopRepository;
 
     public ShopDetailDto entityToShopDetailDto(Shop shop) {
-
+        Double averageRating = shopReviewRepository.averageRatingOfShop(shop.getShopCode());
+        Double roundedRating = (averageRating != null)
+                ? Math.round(averageRating * 10.0) / 10.0
+                : 0.0; // Giá trị mặc định nếu là null
+        Long followCount = shopRepository.countFollowersByShopCode(shop.getId());
+        if (followCount == null) {
+            followCount = 0L;
+        }
+        Long productQuantity = shopRepository.countProductsByShopCode(shop.getShopCode());
+        if (productQuantity == null) {
+            productQuantity = 0L;
+        }
         return ShopDetailDto.builder()
                 .shopCode(shop.getShopCode())
                 .businessType(shop.getBusinessType())
@@ -27,9 +42,10 @@ public class ShopMapper {
                 .fullName(shop.getFullName())
                 .frontIdentityCard(shop.getFrontIdentityCard())
                 .backIdentityCard(shop.getBackIdentityCard())
-                .rating(shop.getRating())
-                .productQuantity(shop.getProductQuantity())
-                .followCount(shop.getFollowCount())
+                .rating(roundedRating)
+                .reviewCount(shopReviewRepository.countReviewsOfShop(shop.getShopCode()))
+                .productQuantity(productQuantity)
+                .followCount(followCount)
                 .waitingOrder(shop.getWaitingOrder())
                 .processOrder(shop.getProcessOrder())
                 .deliveringOrder(shop.getDeliveringOrder())

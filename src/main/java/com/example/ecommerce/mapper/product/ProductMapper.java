@@ -7,6 +7,7 @@ import com.example.ecommerce.models.product.detail.ProductDetail;
 import com.example.ecommerce.models.product.detail.VariantDetail;
 import com.example.ecommerce.payload.product.ProductResponse;
 import com.example.ecommerce.repository.ProductRepository;
+import com.example.ecommerce.repository.ProductReviewRepository;
 import com.example.ecommerce.utils.GlobalUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,12 +18,15 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
 public class ProductMapper {
     private final ProductRepository productRepository;
+    private final ProductReviewRepository productReviewRepository;
+    private final Random random = new Random();
 
     public static String handleGetImgProduct(Product product){
         String url = null;
@@ -102,6 +106,11 @@ public class ProductMapper {
         }
         Brand brand = product.getBrandOfProduct();
         Category category = product.getCategory();
+
+        Double averageRating = productReviewRepository.averageRatingOfProduct(product.getId());
+        Double roundedRating = (averageRating != null)
+                ? Math.round(averageRating * 10.0) / 10.0
+                : 0.0; // Giá trị mặc định nếu là null
         return ProductDetail.builder()
                 .productId(product.getId())
                 .title(product.getTitle())
@@ -111,11 +120,11 @@ public class ProductMapper {
                 .minPrice(product.getMinInitialPrice())
                 .maxPrice(product.getMaxInitialPrice())
                 .listImg(imageString)
-                .rating(4.6)
-                .countComments(1000)
+                .rating(roundedRating)
+                .countComments(productReviewRepository.countReviewsOfProduct(product.getId()))
                 .productVariant(product.getVariants().stream()
                         .map(this::entityToVariantDetail).collect(Collectors.toList()))
-                .favoritesCount(1000L)
+                .favoritesCount(random.nextLong(0,300))
                 .shopCode(product.getShopOfProduct().getShopCode())
                 .productBrand(ProductDetail.ProductBrand.builder()
                         .id(brand.getId()).brand(brand.getBrandName())
@@ -174,6 +183,10 @@ public class ProductMapper {
                 .filter(ProductImage::getIsMainImage)
                 .findFirst()
                 .orElse(null);
+        Double averageRating = productReviewRepository.averageRatingOfProduct(product.getId());
+        Double roundedRating = (averageRating != null)
+                ? Math.round(averageRating * 10.0) / 10.0
+                : 0.0; // Giá trị mặc định nếu là null
         return ProductCard.builder()
                 .productId(product.getId())
                 .imageUrl(image!=null ? image.getImageUrl() : null)
@@ -183,8 +196,8 @@ public class ProductMapper {
                 .minPrice(product.getMinInitialPrice())
                 .maxPrice(product.getMaxInitialPrice())
                 .breadcrumbs(product.getBreadcrumb()!=null ? product.getBreadcrumb() : null)
-                .rating(4.6)
-                .soldCount(product.getSoldCount()!=null ? product.getSoldCount() : null)
+                .rating(roundedRating)
+                .soldCount(product.getSoldCount()!=null ? product.getSoldCount() : 0)
                 .brand(product.getBrandOfProduct().getBrandName())
                 .category(product.getCategory().getCategoryName())
                 .build();

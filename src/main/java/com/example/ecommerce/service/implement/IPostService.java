@@ -11,6 +11,7 @@ import com.example.ecommerce.payload.PageData;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.FileService;
+import com.example.ecommerce.service.GeminiService;
 import com.example.ecommerce.service.PostService;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,9 +45,10 @@ public class IPostService implements PostService {
     private final FileService fileService;
     private final ObjectMapper objectMapper;
     private final PostReactionRepository postReactionRepository;
+    private final GeminiService geminiService;
 
     @Override
-    public ResponseBody userGetPostHome(String hashtag, int pageNumber, int pageSize) {
+    public ResponseBody guestGetPostHome(String hashtag, String myUserCode, int pageNumber, int pageSize) {
         try{
             PostHashTag postHashTag;
             if(hashtag!=null){
@@ -54,10 +56,11 @@ public class IPostService implements PostService {
             } else{
                 postHashTag = null;
             }
-            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize,
+                    Sort.by(Sort.Order.desc("createdAt")));
             Page<Post> page = postRepository.userGetPostHome(postHashTag, pageable);
             List<PostDto> listPost = page.stream()
-                    .map(postMapper::entityToPostDto)
+                    .map((post) -> postMapper.entityToPostDto(post, myUserCode))
                     .collect(Collectors.toList());
             PageData pageData = PageData.builder()
                     .data(listPost)
@@ -92,6 +95,12 @@ public class IPostService implements PostService {
     public ResponseBody userCreatePost(PostRequest req, List<MultipartFile> listFile) {
         try{
             String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            String check = geminiService.aiCheckPostCreate(req).getData().toString();
+            if(check.trim().equals("true")){
+                return new ResponseBody(null, ResponseBody.Status.SUCCESS,
+                        "Bài viết của bạn vi phạm tiêu chuẩn cộng đồng!",
+                        ResponseBody.Code.FORBIDDEN);
+            }
             Post post = new Post();
             if(req.getPostRole()==BaseRole.CHUCUAHANG){
                 Shop shop = shopRepository.findShopByShopCode(
@@ -136,7 +145,7 @@ public class IPostService implements PostService {
                 });
                 post.setMediaUrl(postMapper.convertToJson(listMedia));
             }
-            return new ResponseBody(postMapper.entityToPostDto(post),
+            return new ResponseBody(postMapper.entityToPostDto(post, userCode),
                     ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Create post error! Error: {}", e.getMessage());
@@ -192,7 +201,7 @@ public class IPostService implements PostService {
                 post.setMediaUrl(postMapper.convertToJson(listMedia));
             }
             post = postRepository.save(post);
-            return new ResponseBody(postMapper.entityToPostDto(post),
+            return new ResponseBody(postMapper.entityToPostDto(post, userCode),
                     ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e) {
             log.error("Update post error! Error: {}", e.getMessage());
@@ -241,7 +250,7 @@ public class IPostService implements PostService {
             sharedPost.setLocation(req.getLocation());
             sharedPost.setActive(true);
             sharedPost = postRepository.save(sharedPost);
-            return new ResponseBody(postMapper.entityToPostDto(sharedPost),
+            return new ResponseBody(postMapper.entityToPostDto(sharedPost, userCode),
                     ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
             log.error("Share post error! Error: {}", e.getMessage());
@@ -253,11 +262,11 @@ public class IPostService implements PostService {
     public ResponseBody userGetTheirListPost(String postHashtag, int pageNumber, int pageSize) {
         try{
             Long userId = authUtils.getUserFromAuthentication().getId();
-            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("createdAt")));
             PostHashTag hashTag = hashTagRepository.findByHashTagName(postHashtag);
             Page<Post> page = postRepository.userGetTheirPostOneHashTag(userId, hashTag, pageable);
             List<PostDto> listPost = page.stream()
-                    .map(postMapper::entityToPostDto)
+                    .map(post -> postMapper.entityToPostDto(post, authUtils.getUserFromAuthentication().getUserCode()))
                     .collect(Collectors.toList());
             PageData pageData = PageData.builder()
                     .data(listPost)
@@ -275,13 +284,14 @@ public class IPostService implements PostService {
     }
 
     @Override
-    public ResponseBody userGetUserPostOther(String userCode, String hashTag, int pageNumber, int pageSize) {
+    public ResponseBody guestGetUserPostOther(String userCodeOther, String hashTag, int pageNumber, int pageSize) {
         try{
-            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+            String myUserCode = authUtils.getUserFromAuthentication().getUserCode();
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Order.desc("createdAt")));
             PostHashTag postHashTag = hashTagRepository.findByHashTagName(hashTag);
-            Page<Post> page = postRepository.userGetUserPostOther(userCode, postHashTag, Post.Visibility.PUBLIC, pageable);
+            Page<Post> page = postRepository.userGetUserPostOther(userCodeOther, postHashTag, Post.Visibility.PUBLIC, pageable);
             List<PostDto> listPost = page.stream()
-                    .map(postMapper::entityToPostDto)
+                    .map(post -> postMapper.entityToPostDto(post, myUserCode))
                     .collect(Collectors.toList());
             PageData pageData = PageData.builder()
                     .data(listPost)
@@ -316,12 +326,11 @@ public class IPostService implements PostService {
     @Transactional
     public ResponseBody useReactionPost(Long postId, PostReaction.Reaction reaction) {
         try{
-            Long userId = authUtils.getUserFromAuthentication().getId();
-            Users users = usersRepository.findById(userId)
-                    .orElseThrow(()-> new RequestNotFoundException("ERROR"));
+            String userCode = authUtils.getUserFromAuthentication().getUserCode();
+            Users users = usersRepository.findUsersByUserCode(userCode);
             Post post = postRepository.findById(postId)
                     .orElseThrow(()-> new RequestNotFoundException("ERROR"));
-            PostReaction postReaction = postReactionRepository.findPostReactionByPostIdAndUserId(userId, postId);
+            PostReaction postReaction = postReactionRepository.findPostReactionByPostIdAndUserCode(userCode, postId);
             if(postReaction!=null){
                 if(reaction==PostReaction.Reaction.NONE){
                     postReactionRepository.delete(postReaction);

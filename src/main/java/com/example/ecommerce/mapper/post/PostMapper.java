@@ -9,6 +9,7 @@ import com.example.ecommerce.exceptions.request.RequestNotFoundException;
 import com.example.ecommerce.models.post.PostDto;
 import com.example.ecommerce.models.post.SharedPostDto;
 import com.example.ecommerce.repository.PostReactionRepository;
+import com.example.ecommerce.repository.PostRepository;
 import com.example.ecommerce.utils.AuthenticationUtils;
 import com.example.ecommerce.utils.DateTimeMapperUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,9 +26,9 @@ public class PostMapper {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeMapperUtils timeMapperUtils;
     private final PostReactionRepository reactionRepository;
-    private final AuthenticationUtils authUtils;
+    private final PostRepository postRepository;
 
-    public PostDto entityToPostDto(Post post){
+    public PostDto entityToPostDto(Post post, String userCode){
         PostDto dto = new PostDto();
         dto.setPostRole(post.getPostRole().toString());
         if(post.getPostRole()== BaseRole.CHUCUAHANG){
@@ -55,27 +56,27 @@ public class PostMapper {
 
         dto.setLocation(post.getLocation()!=null ? post.getLocation() : null);
         dto.setActive(post.getActive());
-        dto.setLikeCount(post.getLikeCount());
-        dto.setCommentCount(post.getCommentCount());
-        dto.setSharedCount(post.getSharedCount());
+        dto.setLikeCount(postRepository.countReactionsByPostId(post.getId()));
+        dto.setCommentCount(postRepository.countCommentsByPostId(post.getId()));
+        dto.setSharedCount(postRepository.countSharesByPostId(post.getId()));
         dto.setIsShared(post.getIsShared());
         dto.setVisibility(post.getVisibility());
-        dto.setCreatedAt(timeMapperUtils.localDateTimeToString(post.getCreatedAt()));
+        dto.setCreatedAt(timeMapperUtils.formatFacebookTime(post.getCreatedAt()));
         if(post.getIsShared()){
             dto.setSharedPost(entityToSharePostDto(post.getSharedPost()));
         } else{
             dto.setSharedPost(null);
         }
-        if(authUtils.getUserIdFromAuthentication()!=null){
-            PostReaction reaction = reactionRepository.findPostReactionByPostIdAndUserId(
-                    authUtils.getUserIdFromAuthentication(), post.getId());
+        if(userCode!=null){
+            PostReaction reaction = reactionRepository.findPostReactionByPostIdAndUserCode(
+                    userCode, post.getId());
             if(reaction!=null){
                 dto.setMyReaction(reaction.getReaction());
             } else {
                 dto.setMyReaction(PostReaction.Reaction.NONE);
             }
         } else {
-            dto.setMyReaction(PostReaction.Reaction.NONE);
+            dto.setMyReaction(null);
         }
         return dto;
     }
@@ -88,7 +89,7 @@ public class PostMapper {
                 convertFromJson(post.getMediaUrl()): null);
         dto.setHashTag(post.getHashtag() != null ? convertFromJson(post.getHashtag()) : null);
         dto.setSharedPostId(post.getId());
-        dto.setCreatedAt(timeMapperUtils.localDateTimeToString(post.getCreatedAt()));
+        dto.setCreatedAt(timeMapperUtils.formatFacebookTime(post.getCreatedAt()));
         if(post.getPostRole()==BaseRole.CHUCUAHANG){
             Shop shop = post.getShopOfPost();
             dto.setSharedPostAvatar(shop.getShopLogo());

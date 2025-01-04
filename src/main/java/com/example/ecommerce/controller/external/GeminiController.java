@@ -77,4 +77,9 @@ public class GeminiController {
         return new ResponseEntity<>(geminiService.aiGetReviewProduct(productId), HttpStatus.OK);
     }
 
+    @GetMapping("/api/guest/gemini/product-compare")
+    public ResponseEntity<?> aiCompareProductAPI(@RequestParam("product_id") Long productId1,
+                                                 @RequestParam("product_other") Long productId2){
+        return new ResponseEntity<>(geminiService.aiCompareProduct(productId1, productId2), HttpStatus.OK);
+    }
 }

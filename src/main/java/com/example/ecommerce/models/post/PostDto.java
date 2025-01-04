@@ -35,14 +35,14 @@ public class PostDto {
     private List<String> hashTag;
     @JsonProperty("active")
     private Boolean active;
-    @JsonProperty("shared_count")
-    private Integer sharedCount;
     @JsonProperty("my_reaction")
     private PostReaction.Reaction myReaction;
     @JsonProperty("like_count")
-    private Integer likeCount;
+    private Long likeCount;
     @JsonProperty("comment_count")
-    private Integer commentCount;
+    private Long commentCount;
+    @JsonProperty("shared_count")
+    private Long sharedCount;
     @JsonProperty("shared_post")
     private SharedPostDto sharedPost;
     @JsonProperty("created_at")

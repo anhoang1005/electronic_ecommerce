@@ -21,8 +21,9 @@ public class ShopDetailDto {
     private String frontIdentityCard;
     private String backIdentityCard;
     private Double rating;
-    private Integer productQuantity;
-    private Integer followCount;
+    private Long reviewCount;
+    private Long productQuantity;
+    private Long followCount;
     private Integer waitingOrder;
     private Integer processOrder;
     private Integer deliveringOrder;

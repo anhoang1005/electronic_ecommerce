@@ -2,10 +2,7 @@ package com.example.ecommerce.utils;
 
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -63,5 +60,32 @@ public class DateTimeMapperUtils {
         LocalDateTime leadtimeDate = LocalDateTime.ofInstant(Instant.ofEpochSecond(leadtime), ZoneId.systemDefault());
         leadtimeDate = leadtimeDate.plusDays(1);
         return leadtimeDate;
+    }
+
+    public String formatFacebookTime(LocalDateTime createdAt) {
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(createdAt, now);
+        if (duration.isNegative()) {
+            return "Thời gian không hợp lệ";
+        }
+        long seconds = duration.getSeconds();
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+        if (seconds < 60) {
+            return "Vừa xong";
+        } else if (minutes < 60) {
+            return minutes + " phút trước";
+        } else if (hours < 24) {
+            return hours + " giờ trước";
+        } else if (days < 3) {
+            return days + " ngày trước";
+        } else if (days < 365) {
+            DateTimeFormatter monthDayFormatter = DateTimeFormatter.ofPattern("d 'tháng' M");
+            return createdAt.format(monthDayFormatter) + " lúc " + createdAt.format(DateTimeFormatter.ofPattern("HH:mm"));
+        } else {
+            DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("'tháng' M 'năm' yyyy");
+            return createdAt.format(yearFormatter);
+        }
     }
 }

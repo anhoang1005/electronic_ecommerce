@@ -89,6 +89,11 @@ public class IShopReviewService implements ShopReviewService {
             if (shop == null || users == null) {
                 throw new RequestNotFoundException("ERROR");
             }
+            Optional<ShopReview> srOptional = shopReviewRepository
+                    .findShopReviewByUserCodeAndShopCode(userCode, req.getShopCode());
+            if(srOptional.isPresent()){
+                return new ResponseBody(null, ResponseBody.Status.SUCCESS, "REVIEW_EXISTED", ResponseBody.Code.SUCCESS);
+            }
             ShopReview review = new ShopReview();
             review.setShopOfShopReview(shop);
             review.setUsersOfShopReview(users);
@@ -105,6 +110,7 @@ public class IShopReviewService implements ShopReviewService {
                     ResponseBody.Status.SUCCESS,
                     ResponseBody.Code.SUCCESS);
         } catch (Exception e){
+            e.printStackTrace();
             log.error("Create shop review error! Error: {}", e.getMessage());
             throw new RequestNotFoundException("ERROR");
         }

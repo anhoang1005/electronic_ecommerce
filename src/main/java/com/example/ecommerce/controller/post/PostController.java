@@ -21,10 +21,11 @@ public class PostController {
     @GetMapping("/api/guest/post/new")
     public ResponseEntity<?> userCreateHashtag(
             @RequestParam(name = "hashTag", required = false) String hashTag,
+            @RequestParam(name = "my_user_code", required = false) String userCode,
             @RequestParam("page_number") int pageNumber,
             @RequestParam("page_size") int pageSize
     ){
-        return ResponseEntity.ok(postService.userGetPostHome(hashTag, pageNumber, pageSize));
+        return ResponseEntity.ok(postService.guestGetPostHome(hashTag, userCode, pageNumber, pageSize));
     }
 
     @PostMapping("/api/guest/hashtag")
@@ -74,11 +75,11 @@ public class PostController {
     }
 
     @GetMapping("/api/all/post/user-post")
-    public ResponseEntity<?> userSharedPostApi(@RequestParam("user_code") String userCode,
+    public ResponseEntity<?> userSharedPostApi(@RequestParam("user_code_other") String userCodeOther,
                                                @RequestParam(name = "hash_tag", required = false) String hashTag,
                                                @RequestParam("page_number") int pageNumber,
                                                @RequestParam("page_size") int pageSize){
-        return ResponseEntity.ok(postService.userGetUserPostOther(userCode, hashTag, pageNumber, pageSize));
+        return ResponseEntity.ok(postService.guestGetUserPostOther(userCodeOther, hashTag, pageNumber, pageSize));
     }
 
     @PutMapping("/api/admin/post/active")

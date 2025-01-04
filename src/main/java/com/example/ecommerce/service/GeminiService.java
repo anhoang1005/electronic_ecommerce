@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 
 import com.example.ecommerce.entities.Prompt;
+import com.example.ecommerce.models.post.PostRequest;
 import com.example.ecommerce.payload.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,4 +29,8 @@ public interface GeminiService {
     ResponseBody reviewProduct(Long productId);
 
     ResponseBody aiGetReviewProduct(Long productId);
+
+    ResponseBody aiCompareProduct(Long productId1, Long productId2);
+
+    ResponseBody aiCheckPostCreate(PostRequest req);
 }

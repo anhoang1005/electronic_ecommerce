@@ -40,7 +40,7 @@ public class PostCommentMapper {
         dto.setRole(comment.getCommentRole());
         dto.setMediaUrl(comment.getMediaUrl());
         dto.setContent(comment.getContent());
-        dto.setCreatedAt(timeUtils.localDateTimeToString(comment.getCreatedAt()));
+        dto.setCreatedAt(timeUtils.formatFacebookTime(comment.getCreatedAt()));
         if(children){
             dto.setChildren(getChildrenOfComment(comment));
         } else{

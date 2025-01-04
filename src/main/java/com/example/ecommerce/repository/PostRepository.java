@@ -49,4 +49,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         if(isAdd) post.setLikeCount(post.getLikeCount()+1);
         else  post.setLikeCount(post.getLikeCount()-1);
     }
+
+    @Query("SELECT COUNT(r) FROM Post p JOIN p.listReactionOfPost r WHERE p.id = :postId")
+    Long countReactionsByPostId(@Param("postId") Long postId);
+
+    @Query("SELECT COUNT(c) FROM Post p JOIN p.listPostCommentOfPost c WHERE p.id = :postId")
+    Long countCommentsByPostId(@Param("postId") Long postId);
+
+    @Query("SELECT COUNT(sp) FROM Post p JOIN p.listSharedPosts sp WHERE p.id = :postId")
+    Long countSharesByPostId(@Param("postId") Long postId);
+
 }

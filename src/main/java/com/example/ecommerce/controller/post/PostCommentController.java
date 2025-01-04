@@ -24,7 +24,7 @@ public class PostCommentController {
 
     @PostMapping("/api/all/post/create-comment")
     public ResponseEntity<?> userCreateCommentOfPost(@RequestParam("comment_json") String json,
-                                                  @RequestParam("file") MultipartFile file){
+                                                     @RequestParam(name = "file", required = false) MultipartFile file){
         try {
             PostCommentRequest req = objectMapper.readValue(json, PostCommentRequest.class);
             return ResponseEntity.ok(pcmService.userCreateComment(req, file));
@@ -36,7 +36,7 @@ public class PostCommentController {
 
     @PutMapping("/api/all/post/update-comment")
     public ResponseEntity<?> userUpdateCommentOfPost(@RequestParam("comment_json") String json,
-                                                  @RequestParam("file") MultipartFile file){
+                                                     @RequestParam(name = "file", required = false) MultipartFile file){
         try {
             PostCommentRequest req = objectMapper.readValue(json, PostCommentRequest.class);
             return ResponseEntity.ok(pcmService.userUpdateComment(req, file));

@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 public interface PostReactionRepository extends JpaRepository<PostReaction, Long> {
 
     @Query(value = "select r from PostReaction r " +
-            "where r.usersOfPostReaction.id = :userId " +
+            "where r.usersOfPostReaction.userCode = :userCode " +
             "and r.postOfReaction.id = :postId ")
-    PostReaction findPostReactionByPostIdAndUserId(@Param("userId") Long userId,
-                                         @Param("postId") Long postId);
+    PostReaction findPostReactionByPostIdAndUserCode(@Param("userCode") String userCode,
+                                                     @Param("postId") Long postId);
 
 
 }
