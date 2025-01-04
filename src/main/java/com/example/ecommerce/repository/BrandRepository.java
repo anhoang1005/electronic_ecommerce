@@ -10,5 +10,4 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
     Brand findBrandByBrandName(String name);
     @Query("SELECT b FROM Brand b ORDER BY FUNCTION('RAND') LIMIT 1")
     Brand findRandomBrand();
-
 }

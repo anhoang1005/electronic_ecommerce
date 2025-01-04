@@ -15,6 +15,7 @@ import java.util.Map;
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     private final JwtTokenUtils jwtTokenUtils;
     private final UsersRepository usersRepository;
+
     public JwtHandshakeInterceptor(JwtTokenUtils jwtTokenUtils, UsersRepository usersRepository) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.usersRepository = usersRepository;

@@ -1,10 +1,8 @@
 package com.example.ecommerce.controller.product.guest;
 
 import com.example.ecommerce.models.product.ShopProductFilter;
-import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +10,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    @GetMapping("/api/guest/product/{id}")
-    public ResponseBody getProduct(@PathVariable Long id){
-        return productService.findProductById(id);
+
+    @GetMapping("/api/guest/product/all-brand")
+    public ResponseEntity<?> getAllBrand(){
+        return ResponseEntity.ok(productService.guestGetAllBrand());
+    }
+
+    @GetMapping("/api/guest/product/category-parent")
+    public ResponseEntity<?> getAllCategoryParent(
+            @RequestParam(name = "category_id", required = false) Long categoryId){
+        return ResponseEntity.ok(productService.guestGetAllCategoryOfLevel(categoryId));
     }
 
     @GetMapping("/api/guest/product/get-list-product")
@@ -33,4 +38,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.guestGetListProduct(filter));
     }
 
+    @GetMapping("/api/guest/product/search")
+    public ResponseEntity<?> searchProduct(@RequestParam("keyword") String keyword){
+        return ResponseEntity.ok(productService.guestSearchProduct(keyword));
+    }
+
+    @PostMapping("/api/admin/product/accepted-dashboard")
+    public ResponseEntity<?> adminDashboardProduct(@RequestBody ShopProductFilter filter){
+        return ResponseEntity.ok(productService.adminGetListProductUnAccepted(filter));
+    }
+
+    @PutMapping("/api/admin/product/accepted")
+    public ResponseEntity<?> checkProduct(@RequestParam("product_id") Long id,
+                                          @RequestParam("is_accepted") boolean isAccepted){
+        return ResponseEntity.ok(productService.checkProduct(id, isAccepted));
+    }
 }

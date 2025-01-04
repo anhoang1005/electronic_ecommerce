@@ -1,6 +1,7 @@
 package com.example.ecommerce.controller.product.shop;
 
 import com.example.ecommerce.models.product.ProductDTO;
+import com.example.ecommerce.models.product.ShopProductFilter;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.implement.IProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,9 +49,10 @@ public class ProductShopController {
             return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
         }
     }
-    @GetMapping("/product/{id}")
-    public ResponseEntity<?> findProduct(@PathVariable Long id){
-        return ResponseEntity.ok(iProductService.findProductHiddenById(id));
+
+    @PostMapping("/product/shop-dashboard")
+    public ResponseEntity<?> ownerGetDashboard(@RequestBody ShopProductFilter filter){
+        return ResponseEntity.ok(iProductService.shopGetDashboard(filter));
     }
 
     @DeleteMapping("/product/{id}")

@@ -28,6 +28,7 @@ public class ProductDetail {
     private List<VariantDetail> productVariant;
     private Long favoritesCount;
     private Map<String, String> productAttribute;
+    private Boolean isAccepted;
 
     @Getter
     @Setter

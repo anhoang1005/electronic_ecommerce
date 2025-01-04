@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
@@ -49,5 +50,24 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
                                       @Param("shopCategoryId") String shopCategoryId,
                                       Pageable pageable);
 
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.brandOfProduct.id = ?1")
+    Long countProductByBrandId(Long brandId);
 
+
+    @Query("SELECT p FROM Product p JOIN p.productAttributeValues pav " +
+            "WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
+            "OR LOWER(pav.attributeValue.value) LIKE LOWER(CONCAT('%', :searchText, '%'))")
+    List<Product> searchByTitleOrAttributeValue(@Param("searchText") String searchText);
+
+    @Query("select p from Product p " +
+            "where (:shopCode is null or p.shopOfProduct.shopCode = :shopCode) " +
+            "and (:title is null or lower(p.title) like %:title%) " +
+            "and (:brandId is null or p.brandOfProduct.id = :brandId) " +
+            "and (:category is null or p.breadcrumb like %:category%) " +
+            "and p.isAccepted = false ")
+    Page<Product> findAdminDashboard(@Param("shopCode") String shopCode,
+                                     @Param("title") String title,
+                                     @Param("brandId") Long brandId,
+                                     @Param("category") String category,
+                                     Pageable pageable);
 }

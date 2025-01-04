@@ -13,17 +13,19 @@ public interface ProductService {
     //Shop
     ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles);
     ResponseBody shopGetDashboard(ShopProductFilter filter);
-    ResponseBody updateProduct(Long id, ProductUpdateDTO dto);
+    ResponseBody shopUpdateProduct(Long id, ProductUpdateDTO dto);
     ResponseBody shopDeleteProduct(Long id);
-    ResponseBody shopGetProductDetail(Long id);
 
+    //Admin
+    ResponseBody adminGetListProductUnAccepted(ShopProductFilter filter);
+    ResponseBody checkProduct(Long id, boolean isAccepted);
+
+    //Guest
     ResponseBody guestGetListProduct(ShopProductFilter filter);
-
-    ResponseBody findProductById(Long id);
-    ResponseBody findProductHiddenById(Long id);
-    ResponseBody checkProduct(Long id);
-
-
+    ResponseBody guestSearchProduct(String keyword);
+    ResponseBody guestGetAllBrand();
+    ResponseBody guestGetAllCategoryOfLevel(Long categoryId);
     ResponseBody getProductHome(int pageNumber, int pageSize);
     ResponseBody getProductDetail(Long productId);
+
 }

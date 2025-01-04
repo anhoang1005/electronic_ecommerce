@@ -132,8 +132,12 @@ public class IProductReviewService implements ProductReviewService {
                     }
                 }
             }
+            Double averageRating = productReviewRepository.findAverageRatingByProductId(filter.getProductId());
+            Double roundedRating = (averageRating != null)
+                    ? Math.round(averageRating * 10.0) / 10.0
+                    : 0.0; // Giá trị mặc định nếu là null
             ProductReviewRating reviewRating = ProductReviewRating.builder()
-                    .rating(productReviewRepository.findAverageRatingByProductId(filter.getProductId())) // Rating trung bình
+                    .rating(roundedRating) // Rating trung bình
                     .review_count(productReviewRepository.countByProductOfProductReview_Id(filter.getProductId())) // Tổng số review
                     .one_star_count(oneStarCount)
                     .two_star_count(twoStarCount)

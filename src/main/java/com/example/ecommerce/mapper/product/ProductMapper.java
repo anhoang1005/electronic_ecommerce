@@ -113,6 +113,7 @@ public class ProductMapper {
                 : 0.0; // Giá trị mặc định nếu là null
         return ProductDetail.builder()
                 .productId(product.getId())
+                .isAccepted(product.getIsAccepted())
                 .title(product.getTitle())
                 .productSlug(product.getProductSlug())
                 .description(product.getDescription())
