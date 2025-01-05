@@ -21,5 +21,6 @@ public class PostCommentDto {
     private String mediaUrl;
     private Integer lever;
     private String createdAt;
+    private Integer childrenCount;
     private List<PostCommentDto> children;
 }
