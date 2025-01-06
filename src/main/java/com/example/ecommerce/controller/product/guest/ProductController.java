@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller.product.guest;
 
+import com.example.ecommerce.models.product.ProductDTO;
 import com.example.ecommerce.models.product.ShopProductFilter;
 import com.example.ecommerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,10 @@ public class ProductController {
     public ResponseEntity<?> checkProduct(@RequestParam("product_id") Long id,
                                           @RequestParam("is_accepted") boolean isAccepted){
         return ResponseEntity.ok(productService.checkProduct(id, isAccepted));
+    }
+
+    @PostMapping("/api/guest/product/fate-create")
+    public ResponseEntity<?> fateProduct(@RequestBody ProductDTO dto){
+        return ResponseEntity.ok(productService.createFateProduct(dto));
     }
 }

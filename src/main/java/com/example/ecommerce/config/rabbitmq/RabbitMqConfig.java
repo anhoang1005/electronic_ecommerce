@@ -53,14 +53,22 @@ public class RabbitMqConfig {
     //Recommend
     @Value("${rabbitmq.exchange.recommend.name}")
     private String recommendExchangeName;
+
     @Value("${rabbitmq.queue.recommend}")
     private String recommendQueueName;
+    @Value("${rabbitmq.routing.recommend.key}")
+    private String recommendRoutingKey;
+
     @Value("${rabbitmq.queue.recommend.product}")
     private String recommendProductQueueName;
     @Value("${rabbitmq.routing.product.recommend.key}")
     private String productRecommendRoutingKey;
-    @Value("${rabbitmq.routing.recommend.key}")
-    private String recommendRoutingKey;
+
+    @Value("${rabbitmq.queue.recommend.user}")
+    private String recommendUserQueueName;
+    @Value("${rabbitmq.routing.user.recommend.key}")
+    private String userRecommendRoutingKey;
+
 
     //order
     @Bean public Queue orderQueue() {
@@ -88,6 +96,7 @@ public class RabbitMqConfig {
     public Binding itemBinding() {
         return BindingBuilder.bind(itemQueue()).to(itemExchange()).with(itemRoutingKey);
     }
+
     // Product
     @Bean
     public Queue productQueue() {
@@ -112,12 +121,14 @@ public class RabbitMqConfig {
     public Queue recommendQueue() {
         return new Queue(recommendQueueName, true);
     }
-
     @Bean
     public Queue recommendProductQueue() {
         return new Queue(recommendProductQueueName, true);
     }
-
+    @Bean
+    public Queue recommendUserQueue() {
+        return new Queue(recommendUserQueueName, true);
+    }
     @Bean
     public DirectExchange recommendExchange() {
         return new DirectExchange(recommendExchangeName, true, false);
@@ -130,13 +141,19 @@ public class RabbitMqConfig {
                 .to(recommendExchange())
                 .with(recommendRoutingKey);
     }
-
     @Bean
     public Binding productRecommendBinding() {
         return BindingBuilder
                 .bind(recommendProductQueue())
                 .to(recommendExchange())
                 .with(productRecommendRoutingKey);
+    }
+    @Bean
+    public Binding userRecommendBinding() {
+        return BindingBuilder
+                .bind(recommendUserQueue())
+                .to(recommendExchange())
+                .with(userRecommendRoutingKey);
     }
 
     // 3. Cấu hình MessageConverter với Jackson (cho JSON)
