@@ -37,11 +37,10 @@ public class UserAction implements Serializable {
     }
 
     public enum Action{
-        LIKE_PRODUCT,
         REVIEW_PRODUCT,
         VIEW_PRODUCT,
         ADD_CART_PRODUCT,
-        BUY_PRODUCT,
+
         VIEW_POST,
         COMMENT_POST,
         REACTION_POST,

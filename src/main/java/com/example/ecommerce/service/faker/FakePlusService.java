@@ -1,5 +1,6 @@
 package com.example.ecommerce.service.faker;
 
+import co.elastic.clients.util.Pair;
 import com.example.ecommerce.config.Constant;
 import com.example.ecommerce.entities.*;
 import com.example.ecommerce.entities.enums.BaseRole;
@@ -7,7 +8,7 @@ import com.example.ecommerce.entities.enums.CategoryType;
 import com.example.ecommerce.mapper.product.ProductMapper;
 import com.example.ecommerce.models.category.CategoryBreadcrumb;
 import com.example.ecommerce.rabbit.ProductProducer;
-import com.example.ecommerce.rabbit.elastic.ProductDocument;
+import com.example.ecommerce.rabbit.UserProducer;
 import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.AccountService;
 import com.example.ecommerce.utils.JsonConvert;
@@ -16,7 +17,6 @@ import com.example.ecommerce.utils.StringFormatUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,15 +57,14 @@ public class FakePlusService {
 
     private final AccountService accountService;
     private final ProductProducer productProducer;
+    private final UserProducer userProducer;
     private final ProductMapper productMapper;
 
     private final RandomUtils randomUtils;
     private final JsonConvert jsonConvert;
 
-    private final EntityManager entityManager;
-
     @Transactional
-    public void createRootAccount(){
+    public void createRootAccount() {
         long start = System.nanoTime();
         LocalDate dob = faker.date().birthday(18, 65).toInstant()
                 .atZone(ZoneId.systemDefault())
@@ -94,11 +93,12 @@ public class FakePlusService {
         users.setUsername("root");
         users.setEmail("root@gmail.com");
         usersRepository.save(users);
-        log.info("Fake root account in: " + ((System.nanoTime() - start)/1_000_000) + "ms");
+        //userProducer.sendUserToQueue(users);
+        log.info("Fake root account in: " + ((System.nanoTime() - start) / 1_000_000) + "ms");
     }
 
     @Transactional
-    public void createUserAccount(int count){
+    public void createUserAccount(int count) {
         long start = System.nanoTime();
         Optional<Roles> root = rolesRepository.findByRoleName(BaseRole.KHACHHANG.toString());
         List<Roles> roleEntityList = new ArrayList<>();
@@ -127,15 +127,16 @@ public class FakePlusService {
             users.setEmail(username + "@gmail.com");
             usersList.add(users);
         }
-        usersRepository.saveAll(usersList);
-        log.info("Fake {} client account in: " + ((System.nanoTime() - start)/1_000_000) + "ms", count);
+        List<Users> users = usersRepository.saveAll(usersList);
+        log.info("Fake {} client account in: " + ((System.nanoTime() - start) / 1_000_000) + "ms", count);
+        //userProducer.sendListUserToQueue(users);
     }
 
     @Transactional
-    public void generateAndInsertFakeShopDate(){
+    public void generateAndInsertFakeShopDate() {
         long start = System.nanoTime();
         List<Users> users = usersRepository.find100UserWithoutRoleId3();
-        for(int i = 0 ; i < 100 ;i++){
+        for (int i = 0; i < 100; i++) {
             Users user = users.get(i);
             String shopName = user.getUsername() + "shop";
             Shop shop = new Shop();
@@ -151,16 +152,16 @@ public class FakePlusService {
             shop.setIdentityCode(faker.idNumber().invalid());
             shop.setWardId("1B1507");
             shop.setDistrictId("1542");
-            shop.setProvinceId(String.valueOf(faker.number().numberBetween(0,1000)));
+            shop.setProvinceId(String.valueOf(faker.number().numberBetween(0, 1000)));
             shop.setUsersInShop(user);
             shopRepository.save(shop);
-            accountService.changeRoleUsers(user.getUserCode(),BaseRole.CHUCUAHANG.toString(),true);
+            accountService.changeRoleUsers(user.getUserCode(), BaseRole.CHUCUAHANG.toString(), true);
         }
-        log.info("Fake 100 shop in: " + ((System.nanoTime() - start)/1_000_000) + "ms");
+        log.info("Fake 100 shop in: " + ((System.nanoTime() - start) / 1_000_000) + "ms");
     }
 
     @Transactional
-    public void generateAndInsertFakeShopCategoryData(){
+    public void generateAndInsertFakeShopCategoryData() {
         long start = System.nanoTime();
         List<String> electronicsCategoryNames = Arrays.asList(
                 "Điện thoại di động", "Máy tính xách tay", "Máy tính để bàn",
@@ -171,9 +172,9 @@ public class FakePlusService {
                 "Thiết bị mạng và Wi-Fi", "Ổ cứng và thiết bị lưu trữ", "Màn hình máy tính"
         );
         List<Shop> shops = shopRepository.findAll();
-        for(Shop shop : shops){
+        for (Shop shop : shops) {
             List<ShopCategory> shopCategories = new ArrayList<>();
-            for(String categoryName : electronicsCategoryNames){
+            for (String categoryName : electronicsCategoryNames) {
                 ShopCategory shopCategory = new ShopCategory();
                 shopCategory.setShopOfCategory(shop);
                 shopCategory.setCategoryLevel(0);
@@ -186,28 +187,7 @@ public class FakePlusService {
             }
             shopCategoryRepository.saveAll(shopCategories);
         }
-        log.info("Fake {} category for {} shop in: " + ((System.nanoTime() - start)/1_000_000) + "ms", shops.size()*electronicsCategoryNames.size(), shops.size());
-    }
-
-    @Transactional
-    public void generateAndInsertFakeBrand(){
-        long start = System.nanoTime();
-        List<String> electronicsBrandNames = Arrays.asList(
-                "Samsung", "Apple", "Sony", "LG", "Xiaomi", "Huawei", "Asus", "Dell", "Acer", "Lenovo",
-                "HP", "Toshiba", "Canon", "Nikon", "Panasonic", "Sharp", "Bose", "JBL", "Sennheiser", "Beats", "Philips",
-                "Casio", "Razer", "Logitech", "Microsoft", "Intel", "AMD", "Seagate", "Western Digital", "Anker", "Epson"
-        );
-        List<Brand> brands = new ArrayList<>();
-        for(String brandName : electronicsBrandNames){
-            Brand brand = new Brand();
-            brand.setBrandName(brandName);
-            brand.setDescription(null);
-            brand.setActive(true);
-            brands.add(brand);
-        }
-        brandRepository.saveAll(brands);
-        log.info("Fake {} brand in: " + ((System.nanoTime() - start)/1_000_000) + "ms", electronicsBrandNames.size());
-
+        log.info("Fake {} category for {} shop in: " + ((System.nanoTime() - start) / 1_000_000) + "ms", shops.size() * electronicsCategoryNames.size(), shops.size());
     }
 
     @Transactional
@@ -321,7 +301,7 @@ public class FakePlusService {
                 throw new RuntimeException("Error while converting valueJson to JSON format", e);
             }
         }
-        log.info("Fake {} attribute in: " + ((System.nanoTime() - start)/1_000_000) + "ms", attributesData.size());
+        log.info("Fake {} attribute in: " + ((System.nanoTime() - start) / 1_000_000) + "ms", attributesData.size());
     }
 
     @Transactional
@@ -533,7 +513,7 @@ public class FakePlusService {
                         productAttributeValue2.setProduct(product);
                         product.getProductAttributeValues().add(productAttributeValue2);
 
-                        String variantName = attributeList.get(0).getAttributeName() + ": " +  value1.getValue() +
+                        String variantName = attributeList.get(0).getAttributeName() + ": " + value1.getValue() +
                                 ", " + attributeList.get(1).getAttributeName() + ": " + value2.getValue();
                         variant.setVariantSlug(StringFormatUtils.convertToSlug(variantName));
                         variant.setProductVariation(variantName);
@@ -813,34 +793,6 @@ public class FakePlusService {
         } finally {
             executorService.shutdown();
             log.info("End fake product review in " + (System.currentTimeMillis() - startTime) + "ms");
-        }
-    }
-
-    @Transactional
-    public void generateAndInsertFakeProductData() {
-        List<Shop> shops = shopRepository.findAll();
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        ExecutorService rabbitMqExecutor = Executors.newFixedThreadPool(10);
-        try {
-            for (Shop shop : shops) {
-                int countProduct = 10;
-                List<CompletableFuture<Void>> futures = new ArrayList<>();
-                for (int i = 0; i < countProduct; i++) {
-                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> createProduct(shop), executorService)
-                            .thenAcceptAsync(product -> {
-                                if (product != null) {
-                                    productProducer.sendProductToQueue(productMapper.mapperProductToDocument(product));
-                                }
-                            }, rabbitMqExecutor);
-
-                    futures.add(future);
-                }
-
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            }
-        } finally {
-            executorService.shutdown();
-            rabbitMqExecutor.shutdown();
         }
     }
 }

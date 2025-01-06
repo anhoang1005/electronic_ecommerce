@@ -25,21 +25,23 @@ public class ProductShopController {
 
     @PostMapping("/product")
     public ResponseEntity<?> createProduct(@RequestParam("dto") String jsonDto,
-                                           @RequestParam("files") List<MultipartFile> files) {
+                                           @RequestParam(name = "files", required = false) List<MultipartFile> files) {
         try {
             ProductDTO productDTO = objectMapper.readValue(jsonDto, ProductDTO.class);
-            for(int i = 0 ; i < productDTO.getVariantDTOS().size() ;i++){
-                String variantImageKey = "variantDTOS[" + i + "].productImage"; // Key trong form-data
-                MultipartFile variantImage = files.stream()
-                        .filter(file -> variantImageKey.equals(file.getName())) // Tìm ảnh tương ứng
-                        .findFirst()
-                        .orElse(null);
+            if(files!=null){
+                for(int i = 0 ; i < productDTO.getVariantDTOS().size() ;i++){
+                    String variantImageKey = "variantDTOS[" + i + "].productImage"; // Key trong form-data
+                    MultipartFile variantImage = files.stream()
+                            .filter(file -> variantImageKey.equals(file.getName())) // Tìm ảnh tương ứng
+                            .findFirst()
+                            .orElse(null);
 
-                if (variantImage != null) {
-                    productDTO.getVariantDTOS().get(i).setProductImage(variantImage);
-                    log.info("Received image for variant {}: {}", i, variantImage.getOriginalFilename());
-                } else {
-                    log.warn("No image received for variant {}", i);
+                    if (variantImage != null) {
+                        productDTO.getVariantDTOS().get(i).setProductImage(variantImage);
+                        log.info("Received image for variant {}: {}", i, variantImage.getOriginalFilename());
+                    } else {
+                        log.warn("No image received for variant {}", i);
+                    }
                 }
             }
             return ResponseEntity.ok(iProductService.createProduct(productDTO, files));

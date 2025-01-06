@@ -11,6 +11,7 @@ import java.util.List;
 public interface ProductService {
 
     //Shop
+    ResponseBody createFateProduct(ProductDTO dto);
     ResponseBody createProduct(ProductDTO dto, List<MultipartFile> multipartFiles);
     ResponseBody shopGetDashboard(ShopProductFilter filter);
     ResponseBody shopUpdateProduct(Long id, ProductUpdateDTO dto);

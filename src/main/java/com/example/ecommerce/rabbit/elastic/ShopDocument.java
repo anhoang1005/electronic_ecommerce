@@ -15,11 +15,9 @@ public class ShopDocument implements Serializable {
     private Integer rating;
     private State state;
 
-
     public enum Action{
         FOLLOW_SHOP,
         REVIEW_SHOP,
-
     }
 
     public enum State{

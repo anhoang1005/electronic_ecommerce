@@ -67,112 +67,112 @@ public class ImportProduct {
 
     public ResponseBody fakeShopCreateProduct(ProductDTO dto){
         try {
-            String shopCode = authenticationUtils.getUserFromAuthentication().getShopCode();
-            Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
-                    () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId()));
-            Brand brand = brandRepository.findById(dto.getBrandId()).orElseThrow(
-                    () -> new RequestNotFoundException("Brand not found"));
-            Shop shop = shopRepository.findShopByShopCode(shopCode);
-
-            Product product = new Product();
-            product.setTitle(dto.getTitle());
-            product.setDescription(dto.getDescription());
-            product.setProductState(Product.ProductState.PENDING);
-            product.setProductSlug(StringFormatUtils.convertToSlug(dto.getTitle()));
-            product.setCurrency(dto.getCurrency());
-            product.setIsHidden(dto.isHidden());
-            product.setCategory(category);
-            product.setBrandOfProduct(brand);
-            product.setShopOfProduct(shop);
-
-            List<String> image = Arrays.asList(dto.getImageList().trim().split("\\|"));
-            product.setImageList(objectMapper.writeValueAsString(image));
-            Map<String, Set<String>> productAttributeValues = new HashMap<>();
-
-            BigDecimal minPrice = dto.getVariantDTOS().stream().map(VariantDTO::getPrice).min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            BigDecimal maxPrice = dto.getVariantDTOS().stream().map(VariantDTO::getPrice).max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            product.setMaxInitialPrice(minPrice);
-            product.setMinInitialPrice(maxPrice);
-
-            //Tao bien the cho san pham
-            for(VariantDTO variantDTO : dto.getVariantDTOS()){
-                ProductVariant variant = new ProductVariant();
-                variant.setPrice(variantDTO.getPrice());
-                variant.setStockQuantity(variantDTO.getQuantity());
-                variant.setSku(variantDTO.getSku());
-                variant.setStatus(ProductVariant.Status.CON_HANG);
-                variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
-                variant.setHeight(variantDTO.getHeight());
-                variant.setWeight(variantDTO.getWeight());
-                variant.setLength(variantDTO.getLength());
-                variant.setWidth(variantDTO.getWidth());
-                variant.setStockQuantity(variantDTO.getStockQuantity());
-                StringBuilder stringBuilder = new StringBuilder();
-
-                for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()) {
-                    Attribute attribute = attributeRepository.
-                            findAttributeByAttributeName(attributeDTO.getName());
-                    if (ObjectUtils.isEmpty(attribute)) {
-                        attribute = new Attribute();
-                        attribute.setAttributeName(attributeDTO.getName());
-                        attribute.setValueJson("[]");
-                        attribute = attributeRepository.save(attribute);
-                    }
-
-                    AttributeValue attributeValue = attributeValueRepository
-                            .findAttributeValueByValueAndAttributeId(attribute.getId(),attributeDTO.getValue());
-                    if(ObjectUtils.isEmpty(attributeValue)){
-                        attributeValue = new AttributeValue();
-                        attributeValue.setAttribute(attribute);
-                        attributeValue.setValue(attributeDTO.getValue());
-                        attributeValue =  attributeValueRepository.save(attributeValue);
-                        try {
-                            List<String> valueJson = jsonConvert.convertValueJsonToList(attribute.getValueJson());
-                            if (valueJson == null) {
-                                valueJson = new ArrayList<>();
-                            }
-                            valueJson.add(attributeValue.getValue());
-                            attribute.setValueJson(jsonConvert.convertListObjectToJson(valueJson));
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    stringBuilder.append(attribute.getAttributeName().toLowerCase())
-                            .append("=")
-                            .append(attributeValue.getValue().toLowerCase())
-                            .append(";");
-                    VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
-                    variantAttributeValue.setAttributeValue(attributeValue);
-                    variantAttributeValue.setAttribute(attribute);
-                    variantAttributeValueRepository.save(variantAttributeValue);
-                    variant.getVariantAttributeValueList().add(variantAttributeValue);
-
-                    ProductAttributeValue productAttributeValue = new ProductAttributeValue();
-                    productAttributeValue.setAttribute(attribute);
-                    productAttributeValue.setAttributeValue(attributeValue);
-                    productAttributeValueRepository.save(productAttributeValue);
-                    product.getProductAttributeValues().add(productAttributeValue);
-                    if (productAttributeValues.containsKey(attribute.getAttributeName())) {
-                        productAttributeValues.get(attribute.getAttributeName()).add(attributeValue.getValue());
-                    } else {
-                        productAttributeValues.put(attribute.getAttributeName(), new HashSet<>(List.of(attributeValue.getValue())));
-                    }
-                }
-
-                if(stringBuilder.length() > 0) {
-                    stringBuilder.substring(0,stringBuilder.length()-1);
-                }
-                variant.setProductVariation(stringBuilder.toString());
-                variantRepository.save(variant);
-
-                //Tao gia tri attribute cua variant
-                for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
-                    variantAttributeValue.setVariant(variant);
-                    variantAttributeValueRepository.save(variantAttributeValue);
-                }
-                product.getVariants().add(variant);
-            }
+//            String shopCode = authenticationUtils.getUserFromAuthentication().getShopCode();
+//            Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
+//                    () -> new RequestNotFoundException("Category not found with id : " + dto.getCategoryId()));
+//            Brand brand = brandRepository.findById(dto.getBrandId()).orElseThrow(
+//                    () -> new RequestNotFoundException("Brand not found"));
+//            Shop shop = shopRepository.findShopByShopCode(shopCode);
+//
+//            Product product = new Product();
+//            product.setTitle(dto.getTitle());
+//            product.setDescription(dto.getDescription());
+//            product.setProductState(Product.ProductState.PENDING);
+//            product.setProductSlug(StringFormatUtils.convertToSlug(dto.getTitle()));
+//            product.setCurrency(dto.getCurrency());
+//            product.setIsHidden(dto.isHidden());
+//            product.setCategory(category);
+//            product.setBrandOfProduct(brand);
+//            product.setShopOfProduct(shop);
+//
+//            List<String> image = Arrays.asList(dto.getImageList().trim().split("\\|"));
+//            product.setImageList(objectMapper.writeValueAsString(image));
+//            Map<String, Set<String>> productAttributeValues = new HashMap<>();
+//
+//            BigDecimal minPrice = dto.getVariantDTOS().stream().map(VariantDTO::getPrice).min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+//            BigDecimal maxPrice = dto.getVariantDTOS().stream().map(VariantDTO::getPrice).max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+//            product.setMaxInitialPrice(minPrice);
+//            product.setMinInitialPrice(maxPrice);
+//
+//            //Tao bien the cho san pham
+//            for(VariantDTO variantDTO : dto.getVariantDTOS()){
+//                ProductVariant variant = new ProductVariant();
+//                variant.setPrice(variantDTO.getPrice());
+//                variant.setStockQuantity(variantDTO.getQuantity());
+//                variant.setSku(variantDTO.getSku());
+//                variant.setStatus(ProductVariant.Status.CON_HANG);
+//                variant.setVariantSlug(StringFormatUtils.convertToSlug(variantDTO.getSku()));
+//                variant.setHeight(variantDTO.getHeight());
+//                variant.setWeight(variantDTO.getWeight());
+//                variant.setLength(variantDTO.getLength());
+//                variant.setWidth(variantDTO.getWidth());
+//                variant.setStockQuantity(variantDTO.getStockQuantity());
+//                StringBuilder stringBuilder = new StringBuilder();
+//
+//                for(AttributeDTO attributeDTO : variantDTO.getAttributeDTOList()) {
+//                    Attribute attribute = attributeRepository.
+//                            findAttributeByAttributeName(attributeDTO.getName());
+//                    if (ObjectUtils.isEmpty(attribute)) {
+//                        attribute = new Attribute();
+//                        attribute.setAttributeName(attributeDTO.getName());
+//                        attribute.setValueJson("[]");
+//                        attribute = attributeRepository.save(attribute);
+//                    }
+//
+//                    AttributeValue attributeValue = attributeValueRepository
+//                            .findAttributeValueByValueAndAttributeId(attribute.getId(),attributeDTO.getValue());
+//                    if(ObjectUtils.isEmpty(attributeValue)){
+//                        attributeValue = new AttributeValue();
+//                        attributeValue.setAttribute(attribute);
+//                        attributeValue.setValue(attributeDTO.getValue());
+//                        attributeValue =  attributeValueRepository.save(attributeValue);
+//                        try {
+//                            List<String> valueJson = jsonConvert.convertValueJsonToList(attribute.getValueJson());
+//                            if (valueJson == null) {
+//                                valueJson = new ArrayList<>();
+//                            }
+//                            valueJson.add(attributeValue.getValue());
+//                            attribute.setValueJson(jsonConvert.convertListObjectToJson(valueJson));
+//                        } catch (JsonProcessingException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    }
+//
+//                    stringBuilder.append(attribute.getAttributeName().toLowerCase())
+//                            .append("=")
+//                            .append(attributeValue.getValue().toLowerCase())
+//                            .append(";");
+//                    VariantAttributeValue variantAttributeValue = new VariantAttributeValue();
+//                    variantAttributeValue.setAttributeValue(attributeValue);
+//                    variantAttributeValue.setAttribute(attribute);
+//                    variantAttributeValueRepository.save(variantAttributeValue);
+//                    variant.getVariantAttributeValueList().add(variantAttributeValue);
+//
+//                    ProductAttributeValue productAttributeValue = new ProductAttributeValue();
+//                    productAttributeValue.setAttribute(attribute);
+//                    productAttributeValue.setAttributeValue(attributeValue);
+//                    productAttributeValueRepository.save(productAttributeValue);
+//                    product.getProductAttributeValues().add(productAttributeValue);
+//                    if (productAttributeValues.containsKey(attribute.getAttributeName())) {
+//                        productAttributeValues.get(attribute.getAttributeName()).add(attributeValue.getValue());
+//                    } else {
+//                        productAttributeValues.put(attribute.getAttributeName(), new HashSet<>(List.of(attributeValue.getValue())));
+//                    }
+//                }
+//
+//                if(stringBuilder.length() > 0) {
+//                    stringBuilder.substring(0,stringBuilder.length()-1);
+//                }
+//                variant.setProductVariation(stringBuilder.toString());
+//                variantRepository.save(variant);
+//
+//                //Tao gia tri attribute cua variant
+//                for(VariantAttributeValue variantAttributeValue : variant.getVariantAttributeValueList()){
+//                    variantAttributeValue.setVariant(variant);
+//                    variantAttributeValueRepository.save(variantAttributeValue);
+//                }
+//                product.getVariants().add(variant);
+//            }
             return new ResponseBody("", ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e) {
             log.error("Error: " + e.getMessage());

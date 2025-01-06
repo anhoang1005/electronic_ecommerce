@@ -2,6 +2,7 @@ package com.example.ecommerce.controller.faker;
 
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.faker.FakePlusService;
+import com.example.ecommerce.service.faker.FakeProductService;
 import com.example.ecommerce.service.faker.FakeService;
 import com.example.ecommerce.service.imports.ImportProduct;
 import com.example.ecommerce.service.imports.ImportService;
@@ -19,6 +20,7 @@ public class FakerController {
     private final ImportService importService;
     private final FakePlusService fakePlusService;
     private final ImportProduct importProduct;
+    private final FakeProductService fakeProductService;
 
     @PostMapping("/brands")
     public String fakerBrand(){
@@ -49,13 +51,15 @@ public class FakerController {
     @GetMapping("/plus")
     public ResponseEntity<String> test(@RequestParam("file") MultipartFile file){
         fakePlusService.createRootAccount();
-        fakePlusService.createUserAccount(300);
+        fakePlusService.createUserAccount(150);
         fakePlusService.generateAndInsertFakeShopDate();
         importService.importCategoriesFromExcel(file);
         fakePlusService.generateAndInsertFakeShopCategoryData();
-        fakePlusService.generateAndInsertFakeBrand();
         fakePlusService.generateAndInsertFakeAttributeData();
-        fakePlusService.generateAndInsertFakeProductData();
+
+        fakeProductService.generateAndInsertFakeBrand();
+        fakeProductService.generateAndInsertFakeProductData();
+
         fakePlusService.fakeShopReview();
         fakePlusService.fakeProductReview();
         return ResponseEntity.ok("done");
