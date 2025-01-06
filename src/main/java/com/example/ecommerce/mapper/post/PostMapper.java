@@ -46,6 +46,7 @@ public class PostMapper {
             Users users = post.getUsersOfPost();
             dto.setPostAvatar(users.getImageUrl());
             dto.setPostName(users.getUsername());
+            dto.setUserCode(users.getUserCode());
         }
         dto.setId(post.getId());
 

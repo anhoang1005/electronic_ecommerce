@@ -40,7 +40,7 @@ public class PostCommentMapper {
         dto.setRole(comment.getCommentRole());
         dto.setMediaUrl(comment.getMediaUrl());
         dto.setContent(comment.getContent());
-        dto.setChildrenCount(comment.getListPostCommentChildren().size());
+        dto.setChildrenCount(comment.getListPostCommentChildren() != null ? comment.getListPostCommentChildren().size() : 0);
         dto.setCreatedAt(timeUtils.formatFacebookTime(comment.getCreatedAt()));
         if(children){
             dto.setChildren(getChildrenOfComment(comment));

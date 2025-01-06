@@ -23,6 +23,8 @@ public class PostDto {
     private String postAvatar;
     @JsonProperty("post_name")
     private String postName;
+    @JsonProperty("user_code")
+    private String userCode;
     @JsonProperty("content")
     private String content;
     @JsonProperty("visibility")
