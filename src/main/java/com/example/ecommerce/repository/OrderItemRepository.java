@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +23,6 @@ public interface OrderItemRepository extends JpaRepository<OrdersItems,Long> {
                                                             @Param("productId") Long productId,
                                                             @Param("status") OrdersShop.Status status);
 
+    @Query("SELECT o from OrdersItems o where YEAR(o.modifiedAt) = :year")
+    List<OrdersItems> findOrdersItemsByYear(@Param("year")int year);
 }

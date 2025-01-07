@@ -41,7 +41,7 @@ public class FakerController {
     }
     @PostMapping("/orders")
     public String fakeOder(){
-//       fakeService.generateAndInsertOrders();
+       fakeService.generateAndInsertOrders();
         fakeService.sendOrderShopToElasticSearch();
         fakeService.sendOrderItemShopToElasticsearch();
         return "done";

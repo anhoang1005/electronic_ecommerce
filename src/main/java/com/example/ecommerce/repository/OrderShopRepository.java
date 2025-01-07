@@ -52,4 +52,7 @@ public interface OrderShopRepository extends JpaRepository<OrdersShop, Long> {
                                       @Param("endDate") LocalDateTime endDate,
                                       Pageable pageable);
 
+
+    @Query("SELECT so FROM OrdersShop so WHERE YEAR(so.modifiedAt) = :year")
+    List<OrdersShop> findOrdersByModifyYear(@Param("year") int year);
 }
