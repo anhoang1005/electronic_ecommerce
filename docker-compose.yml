@@ -46,19 +46,19 @@ services:
 #      - app-network
 
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
-  mailpit:
-    image: axllent/mailpit
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - app-network
+#  redis:
+#    image: redis:latest
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - app-network
+#  mailpit:
+#    image: axllent/mailpit
+#    ports:
+#      - "1025:1025"
+#      - "8025:8025"
+#    networks:
+#      - app-network
   rabbitmq:
     image: rabbitmq:3-management
     ports:
