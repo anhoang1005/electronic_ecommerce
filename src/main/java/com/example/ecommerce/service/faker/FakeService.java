@@ -251,8 +251,8 @@ public class FakeService {
         ExecutorService itemExecutorService = Executors.newFixedThreadPool(threadPoolSize);
 
         try{
-            List<OrdersItems> ordersItemsList = orderItemRepository.findAll();
-
+//            List<OrdersItems> ordersItemsList = orderItemRepository.findAll();
+            List<OrdersItems> ordersItemsList = orderItemRepository.findOrdersItemsByYear(2025);
             for(OrdersItems ordersItems : ordersItemsList){
                 itemExecutorService.submit(() -> {
                     try{
@@ -284,8 +284,8 @@ public class FakeService {
         ExecutorService orderExecutorService = Executors.newFixedThreadPool(threadPoolSize);
 
         try {
-            List<OrdersShop> ordersShopList = orderShopRepository.findAll();
-
+//            List<OrdersShop> ordersShopList = orderShopRepository.findAll();
+            List<OrdersShop> ordersShopList = orderShopRepository.findOrdersByModifyYear(2025);
             for (OrdersShop shop : ordersShopList) {
                 Hibernate.initialize(shop.getListOrdersItemsOfOrdersShop());
             }
@@ -458,8 +458,8 @@ public class FakeService {
 
     @Transactional
     public void generateAndInsertOrders() {
-        for(int month = 1; month <= 12; month++) {
-            for(int i = 0; i < 100; i++) {
+        for(int month = 1; month <= 1; month++) {
+            for(int i = 0; i < 200; i++) {
                 // get 1 buyer random
                 Users buyer = usersRepository.findUsersById(random.nextLong(99) + 1);
                 for(int orderStt = 1; orderStt <= random.nextInt(10) + 1; orderStt++) {
@@ -648,7 +648,7 @@ public class FakeService {
         return new BigDecimal(randomValue).setScale(2, RoundingMode.HALF_UP);
     }
     private LocalDateTime generateRandomDateInMonth(int month) {
-        int day = random.nextInt(28) + 1; // Giả sử mỗi tháng có 28 ngày để tránh lỗi ngày không hợp lệ
-        return LocalDateTime.of(2024, month, day, random.nextInt(24), random.nextInt(60), random.nextInt(60));
+        int day = random.nextInt(28) + 1;
+        return LocalDateTime.of(2025, month, day, random.nextInt(24), random.nextInt(60), random.nextInt(60));
     }
 }
