@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller.external;
 
+import com.example.ecommerce.models.external.gemini.GeminiDto;
 import com.example.ecommerce.payload.ResponseBody;
 import com.example.ecommerce.service.GeminiService;
 import lombok.AllArgsConstructor;
@@ -29,9 +30,8 @@ public class GeminiController {
 
     @GetMapping("/api/guest/gemini/prompt-text")
     public ResponseEntity<?> chatWithGeminiPromptAPI(
-            @RequestParam(name = "prompt_name", required = false) String promptName,
-            @RequestParam("message") String message){
-        return new ResponseEntity<>(geminiService.chatWithGeminiTextWithPrompt(promptName, message), HttpStatus.OK);
+            @RequestBody GeminiDto dto){
+        return new ResponseEntity<>(geminiService.chatWithGeminiTextWithPrompt(dto), HttpStatus.OK);
     }
 
     @GetMapping("/api/guest/gemini/get-prompt")

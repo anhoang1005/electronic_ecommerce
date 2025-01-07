@@ -2,6 +2,7 @@ package com.example.ecommerce.service.implement;
 
 import com.example.ecommerce.entities.Prompt;
 import com.example.ecommerce.exceptions.request.RequestNotFoundException;
+import com.example.ecommerce.models.external.gemini.GeminiDto;
 import com.example.ecommerce.models.external.gemini.GeminiRequest;
 import com.example.ecommerce.models.external.gemini.GeminiResponse;
 import com.example.ecommerce.models.post.PostRequest;
@@ -125,15 +126,15 @@ public class IGeminiService implements GeminiService {
     }
 
     @Override
-    public ResponseBody chatWithGeminiTextWithPrompt(String prompt, String message) {
+    public ResponseBody chatWithGeminiTextWithPrompt(GeminiDto dto) {
         try {
             String result;
-            if (prompt != null) {
-                Prompt promptText = promptRepository.findPromptByPromptName(prompt)
+            if (dto.getPromptName() != null) {
+                Prompt promptText = promptRepository.findPromptByPromptName(dto.getPromptName())
                         .orElseThrow(() -> new RequestNotFoundException("ERROR"));
-                result = promptText.getPromptText() + message;
+                result = promptText.getPromptText() + dto.getMessage();
             } else {
-                result = message;
+                result = dto.getMessage();
             }
             GeminiRequest req = new GeminiRequest();
             req.setGeminiData(result, null, null);

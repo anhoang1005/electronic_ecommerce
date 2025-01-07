@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 
 import com.example.ecommerce.entities.Prompt;
+import com.example.ecommerce.models.external.gemini.GeminiDto;
 import com.example.ecommerce.models.post.PostRequest;
 import com.example.ecommerce.payload.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +13,7 @@ public interface GeminiService {
 
     ResponseBody chatWithGeminiImage(String message, MultipartFile file);
 
-    ResponseBody chatWithGeminiTextWithPrompt(String prompt, String message);
+    ResponseBody chatWithGeminiTextWithPrompt(GeminiDto dto);
 
     ResponseBody chatWithGeminiTextWithPromptText(String promptText, String message);
 
