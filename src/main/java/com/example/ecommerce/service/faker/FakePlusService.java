@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,7 +94,7 @@ public class FakePlusService {
         users.setUsername("root");
         users.setEmail("root@gmail.com");
         usersRepository.save(users);
-        //userProducer.sendUserToQueue(users);
+        userProducer.sendUserToQueue(users);
         log.info("Fake root account in: " + ((System.nanoTime() - start) / 1_000_000) + "ms");
     }
 
@@ -129,7 +130,7 @@ public class FakePlusService {
         }
         List<Users> users = usersRepository.saveAll(usersList);
         log.info("Fake {} client account in: " + ((System.nanoTime() - start) / 1_000_000) + "ms", count);
-        //userProducer.sendListUserToQueue(users);
+        userProducer.sendListUserToQueue(users);
     }
 
     @Transactional

@@ -52,7 +52,7 @@ public class JwtData {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("role")
+    @JsonProperty("list_role")
     private List<String> role;
 
     @JsonProperty("issued_at")

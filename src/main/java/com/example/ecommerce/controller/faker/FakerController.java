@@ -1,9 +1,6 @@
 package com.example.ecommerce.controller.faker;
 
-import com.example.ecommerce.payload.ResponseBody;
-import com.example.ecommerce.service.faker.FakePlusService;
-import com.example.ecommerce.service.faker.FakeProductService;
-import com.example.ecommerce.service.faker.FakeService;
+import com.example.ecommerce.service.faker.*;
 import com.example.ecommerce.service.imports.ImportProduct;
 import com.example.ecommerce.service.imports.ImportService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +18,8 @@ public class FakerController {
     private final FakePlusService fakePlusService;
     private final ImportProduct importProduct;
     private final FakeProductService fakeProductService;
+    private final FakeVoucherService fakeVoucherService;
+    private final FakerOrderService fakerOrderService;
 
     @PostMapping("/brands")
     public String fakerBrand(){
@@ -59,6 +58,11 @@ public class FakerController {
 
         fakeProductService.generateAndInsertFakeBrand();
         fakeProductService.generateAndInsertFakeProductData();
+
+        fakeVoucherService.generateAndInsertFakeVoucherData();
+        fakeVoucherService.generateAndInsertFakeShopVoucherData();
+
+//        fakerOrderService.fakeOrder();
 
         fakePlusService.fakeShopReview();
         fakePlusService.fakeProductReview();

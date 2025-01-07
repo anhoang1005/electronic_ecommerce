@@ -60,7 +60,7 @@ public class ProductMapper {
         productDocument.setProductState(product.getProductState());
 
         productDocument.setProductUrl(handleGetImgProduct(product));
-        productDocument.setShopCategoryIds(handleGetListShopCategories(product));
+        productDocument.setShopCategoryIds(handleGetListShopCategories(product)!=null ? handleGetListShopCategories(product) : null);
 
         productDocument.setIsDeleted(product.getIsDeleted());
         productDocument.setIsAccepted(product.getIsAccepted());

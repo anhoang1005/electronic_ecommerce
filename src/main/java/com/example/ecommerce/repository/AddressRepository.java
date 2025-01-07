@@ -20,4 +20,9 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
             "and a.usersEntityInAddress.userCode = :userCode")
     Address findAddressByIdAndUserCode(@Param("addressId") Long addressId,
                                         @Param("userCode") String userCode);
+
+    @Query(value = "select a.id from Address a " +
+            "where a.usersEntityInAddress.userCode = :userCode " +
+            "and a.isDefault = true ")
+    Long findDefaultAddress(@Param("userCode") String userCode);
 }

@@ -74,6 +74,7 @@ public class ICartService implements CartService {
             });
             return new ResponseBody(cartItemsDto, ResponseBody.Status.SUCCESS, ResponseBody.Code.SUCCESS);
         } catch (Exception e){
+            e.printStackTrace();
             log.error("get item to cart failed! " + e.getMessage());
             throw new RequestNotFoundException("ERROR");
         }
