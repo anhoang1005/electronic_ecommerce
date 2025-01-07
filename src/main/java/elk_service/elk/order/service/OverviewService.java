@@ -83,7 +83,7 @@ public class OverviewService {
 
         TermsAggregationBuilder statusAgg = AggregationBuilders
                 .terms("by_status")
-                .field("status.keyword");
+                .field("status");
 
         monthlyAgg.subAggregation(statusAgg);
         searchSourceBuilder.aggregation(monthlyAgg);
@@ -137,18 +137,15 @@ public class OverviewService {
 
     public MonthlyRevenueOverview getMonthlyRevenueOverview(Long shopId) {
         String indexName = "order-shop-document";
-        LocalDate startOfPreviousMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        LocalDate now = LocalDate.now();
-
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         // Build query
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("shopId", shopId))
-                .must(QueryBuilders.termQuery("status.keyword", "GH_THANH_CONG"))
+                .must(QueryBuilders.termQuery("status", "GH_THANH_CONG"))
                 .must(QueryBuilders.rangeQuery("updatedAt")
-                        .gte(startOfPreviousMonth.toString())
-                        .lte(now.toString()));
+                        .gte("now/M")
+                        .lte("now"));
 
         searchSourceBuilder.query(boolQueryBuilder);
 
@@ -180,6 +177,7 @@ public class OverviewService {
                 return createEmptyResponse();
             }
 
+
             Histogram.Bucket currentMonth = buckets.get(buckets.size() - 1);
             Histogram.Bucket previousMonth = buckets.get(buckets.size() - 2);
 
@@ -192,6 +190,17 @@ public class OverviewService {
             double currentRevenue = totalAmount - totalDiscount;
             double currentProfit = currentRevenue - currentCost;
 
+            if (buckets.size() < 2) {
+                // Trả về dữ liệu tháng hiện tại, không có phần trăm thay đổi
+                return MonthlyRevenueOverview.builder()
+                        .totalRevenue(BigDecimal.valueOf(currentRevenue))
+                        .totalCost(BigDecimal.valueOf(currentCost))
+                        .totalProfit(BigDecimal.valueOf(currentProfit))
+                        .revenuePercentageChange("N/A")
+                        .costPercentageChange("N/A")
+                        .profitPercentageChange("N/A")
+                        .build();
+            }
 
             // Get previous month values
             double previousAmount = ((ParsedSum) previousMonth.getAggregations().get("total_amount")).getValue();
@@ -373,7 +382,7 @@ public class OverviewService {
         searchSourceBuilder.query(boolQueryBuilder);
 
         TermsAggregationBuilder paymentMethodAgg = AggregationBuilders.terms("payment_method")
-                .field("paymentMethod.keyword")
+                .field("paymentMethod")
                 .size(10)
                 .order(BucketOrder.count(false));
 
@@ -517,15 +526,15 @@ public class OverviewService {
         searchSourceBuilder.query(boolQuery);
 
         TermsAggregationBuilder orderStatusAgg = AggregationBuilders.terms("statuses")
-                .field("status.keyword")
+                .field("status")
                 .size(100)
                 .order(BucketOrder.count(false));
 
-        orderStatusAgg.subAggregation(AggregationBuilders.count("total_orders").field("status.keyword"));
+        orderStatusAgg.subAggregation(AggregationBuilders.count("total_orders").field("status"));
 
         searchSourceBuilder.aggregation(orderStatusAgg);
 
-        searchSourceBuilder.aggregation(AggregationBuilders.count("overall_total_orders").field("status.keyword"));
+        searchSourceBuilder.aggregation(AggregationBuilders.count("overall_total_orders").field("status"));
 
         searchRequest.source(searchSourceBuilder);
 
@@ -581,7 +590,7 @@ public class OverviewService {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("shopId", shopId))
-                .must(QueryBuilders.termQuery("status.keyword", "GH_THANH_CONG"))
+                .must(QueryBuilders.termQuery("status", "GH_THANH_CONG"))
                 .must(QueryBuilders.rangeQuery("updatedAt")
                         .gte("now/M")
                         .lte("now"));
@@ -614,6 +623,7 @@ public class OverviewService {
             return orderShopFeeOverview;
         }
     }
+
 
     //helper function
     private MonthlyRevenueOverview createEmptyResponse() {
