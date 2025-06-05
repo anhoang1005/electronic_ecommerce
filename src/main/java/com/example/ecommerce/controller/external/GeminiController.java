@@ -28,7 +28,7 @@ public class GeminiController {
         return new ResponseEntity<>(geminiService.chatWithGeminiImage(message, file), HttpStatus.OK);
     }
 
-    @GetMapping("/api/guest/gemini/prompt-text")
+    @PostMapping("/api/guest/gemini/prompt-text")
     public ResponseEntity<?> chatWithGeminiPromptAPI(
             @RequestBody GeminiDto dto){
         return new ResponseEntity<>(geminiService.chatWithGeminiTextWithPrompt(dto), HttpStatus.OK);
