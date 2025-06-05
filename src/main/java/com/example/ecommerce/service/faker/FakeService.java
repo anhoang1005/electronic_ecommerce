@@ -279,6 +279,15 @@ public class FakeService {
         }
     }
     @Transactional
+    public void sendProductToElasticsearch(){
+        List<Product> productList = productRepository.findAll();
+        for(Product product : productList){
+            productProducer.sendProductToQueue(productMapper.mapperProductToDocument(product));
+            log.info("send product success : {}", product.getId());
+
+        }
+    }
+    @Transactional
     public void sendOrderShopToElasticSearch() {
         int threadPoolSize = 10;
         ExecutorService orderExecutorService = Executors.newFixedThreadPool(threadPoolSize);

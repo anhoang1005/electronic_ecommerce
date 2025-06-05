@@ -29,14 +29,15 @@ public class FakerController {
 
     @PostMapping("/products")
     public String fakeProduct(@RequestParam("file") MultipartFile file){
-        fakeService.createRootAccount();
-        fakeService.generateAndInsertFakeUserData();
-        importService.importCategoriesFromExcel(file);
-        fakeService.generateAndInsertFakeShopDate();
-        fakeService.generateAndInsertFakeShopCategoryData();
-        fakeService.generateAndInsertFakeAttributeData();
-        fakeService.generateAndInsertFakeBrand();
-        fakeService.generateAndInsertFakeProductData();
+//        fakeService.createRootAccount();
+//        fakeService.generateAndInsertFakeUserData();
+//        importService.importCategoriesFromExcel(file);
+//        fakeService.generateAndInsertFakeShopDate();
+//        fakeService.generateAndInsertFakeShopCategoryData();
+//        fakeService.generateAndInsertFakeAttributeData();
+//        fakeService.generateAndInsertFakeBrand();
+//        fakeService.generateAndInsertFakeProductData();
+        fakeService.sendProductToElasticsearch();
         return "done";
     }
     @PostMapping("/orders")
